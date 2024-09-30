@@ -1,0 +1,17 @@
+//
+// Color Type Change
+//
+
+@use 'sass:color';
+
+@function hex-to-rgb($color) {
+	@return color.red($color), color.green($color), color.blue($color);
+}
+
+@function rgba-to-rgb($rgba, $background: #fff) {
+	@return color.mix(
+		rgb(color.red($rgba), color.green($rgba), color.blue($rgba)),
+		$background,
+		alpha($rgba) * 100%
+	);
+}
