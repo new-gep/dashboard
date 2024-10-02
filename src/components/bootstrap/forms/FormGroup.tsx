@@ -19,6 +19,7 @@ interface IFormGroupProps extends HTMLAttributes<HTMLElement> {
 	isColForLabel?: boolean;
 	formText?: ReactNode;
 }
+
 const FormGroup: FC<IFormGroupProps> = ({
 	children,
 	tag,
@@ -45,22 +46,23 @@ const FormGroup: FC<IFormGroupProps> = ({
 		</Label>
 	);
 
-	const CHILDREN =
-		id && !Array.isArray(children)
-			? cloneElement(children, {
-					id,
-					size: size || children?.props.size,
-					placeholder: isFloating ? label : children.props.placeholder,
-					'aria-describedby': formText ? `${id}-text` : null,
-				})
-			: children;
+	const CHILDREN = id && !Array.isArray(children)
+		? cloneElement(children, {
+			id,
+			size: size || children?.props.size,
+			placeholder: isFloating ? label : children.props.placeholder,
+			'aria-describedby': formText ? `${id}-text` : null,
+			mask: children?.props.mask || undefined, // Passa a máscara se estiver usando InputMask
+			alwaysShowMask: children?.props.alwaysShowMask || false, // Caso esteja configurado no InputMask
+		})
+		: children;
 
 	const FORM_TEXT = formText && <FormText id={`${id}-text`}>{formText}</FormText>;
+
 	return (
 		<TagWrapper
 			tag={tag}
 			className={classNames({ 'form-floating': isFloating, row: isColForLabel }, className)}
-			// eslint-disable-next-line react/jsx-props-no-spreading
 			{...props}>
 			{label && !isFloating && LABEL}
 
@@ -79,6 +81,7 @@ const FormGroup: FC<IFormGroupProps> = ({
 		</TagWrapper>
 	);
 };
+
 FormGroup.propTypes = {
 	// @ts-ignore
 	children: PropTypes.node.isRequired,
@@ -96,6 +99,7 @@ FormGroup.propTypes = {
 	// eslint-disable-next-line react/require-default-props
 	formText: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
+
 FormGroup.defaultProps = {
 	className: undefined,
 	labelClassName: undefined,

@@ -1,15 +1,14 @@
 import React, { FC, useCallback, useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import AuthSingUp from '../../../function/AuthSingUp';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { useFormik } from 'formik';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
-// import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
@@ -17,8 +16,9 @@ import Spinner from '../../../components/bootstrap/Spinner';
 import Alert, { AlertHeading } from '../../../components/bootstrap/Alert';
 import Logo from '../../../assets/logo/logo.png'
 import Icon from '../../../components/icon/Icon';
-
-
+import Cnpj from '../../../api/find/Cnpj';
+import Company from '../../../api/create/Company';
+import User from '../../../api/find/User';
 interface ILoginHeaderProps {
 	isNewUser?: boolean;
 }
@@ -46,12 +46,21 @@ interface ILoginProps {
 	isSignUp?: boolean;
 };
 
-interface registerProps {
-	cnpj:  string,
-    name:  string,
+interface SingUpProps {
+	cnpj : string,
+	municipal_registration:string,
+	state_registration:string,
+	email: string,
+    name : string,
     phone: string,
-    user:  string,
+    user : string,
     password: string;
+	hasType : boolean;
+};
+
+interface SingInProps {
+    user:  string,
+	password:string
 };
 
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
@@ -70,7 +79,21 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isRegisterInvalid , setIsRegisterInvalid ] = useState<boolean>(false)
 	const [textInvalid , setTextInvalid ] = useState<string | false>(false)
 
-	const [datesRegister, setDatesRegister] = useState<registerProps | null>(null);
+	const [datesSingUp, setDatesSingUp] = useState<SingUpProps>({
+		cnpj : "",
+		name : "",
+		email: "",
+		phone: "",
+		user : "",
+		password: "",
+		state_registration:"",
+		municipal_registration:"",
+		hasType : false
+	});
+	const [datesSingIn, setDatesSingIn] = useState<SingInProps>({
+		user:"",
+		password:""
+	});
 
 
 	const navigate = useNavigate();
@@ -84,48 +107,29 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		return getUserDataWithUsername(username).password === password;
 	};
 
-	const formik = useFormik({
-		enableReinitialize: true,
-		initialValues: {
-			loginUsername: USERS.JOHN.username,
-			loginPassword: USERS.JOHN.password,
-			cnpj: '',
-			name: '',
-			surname: '',
-			user: '',
-			password: '',
-		},
-		validate: (values) => {
-			const errors: { loginUsername?: string; loginPassword?: string } = {};
-
-			if (!values.loginUsername) {
-				errors.loginUsername = 'Required';
-			}
-
-			if (!values.loginPassword) {
-				errors.loginPassword = 'Required';
-			}
-
-			return errors;
-		},
-		validateOnChange: false,
-		onSubmit: (values) => {
-			if (usernameCheck(values.loginUsername)) {
-				if (passwordCheck(values.loginUsername, values.loginPassword)) {
-					if (setUser) {
-						setUser(values.loginUsername);
-					}
-
-					handleOnClick();
-				} else {
-					formik.setFieldError('loginPassword', 'Username and password do not match.');
-				}
-			}
-		},
-	});
-
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const handleContinue = () => {
+
+	const handleSingIn = async () => {
+
+		const response = await User(datesSingIn)
+		switch (response.status) {
+			case 200:
+				if(response.token){
+					return
+				}
+				setSignInPassword(true)
+				break;
+			default:
+				setIsAccessInvalid(true);
+				setTimeout(() => {	
+					setIsAccessInvalid(false);
+				}, 5000);
+				break;
+		}
+		console.log(response)
+		return
+		
+		
 		setIsLoading(true);
 		setTextInvalid('Nome Incorreto')
 		setIsRegisterInvalid(true);
@@ -133,19 +137,95 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			setIsLoading(false);
 			setIsRegisterInvalid(false);
 		}, 5000);
-
 		// setTimeout(() => {
 		// 	if (
 		// 		!Object.keys(USERS).find(
-		// 			(f) => USERS[f].username.toString() === formik.values.loginUsername,
+		// 			(f) => USERS[f].username.toString() === values.loginUsername,
 		// 		)
 		// 	) {
-		// 		formik.setFieldError('loginUsername', 'No such user found in the system.');
+		// 		setFieldError('loginUsername', 'No such user found in the system.');
 		// 	} else {
 		// 		setSignInPassword(true);
 		// 	}
 		// 	setIsLoading(false);
 		// }, 1000);
+	};
+
+	const handleSingUp = async (e:any) => {
+		try{
+			e.preventDefault();
+			setIsLoading(true)
+			const checkUp =  AuthSingUp(datesSingUp);
+			if(!checkUp.isValid){
+				const errorMessages = Object.values(checkUp.errors).join('\n'); 
+				setTextInvalid(errorMessages); 
+				setIsRegisterInvalid(true);
+				setTimeout(() => {	
+					setIsRegisterInvalid(false);
+				}, 5000);
+				return
+			};
+			const company = await Cnpj(datesSingUp.cnpj)
+			switch (company.status) {
+				case 400:
+					setTextInvalid('CNPJ não encontrado.'); 
+					setIsRegisterInvalid(true);
+					setTimeout(() => {	
+						setIsRegisterInvalid(false);
+					}, 5000);
+					break;
+			
+				default:
+					break;
+			};
+			const paramsCreateAccount = {
+				CNPJ: datesSingUp.cnpj,
+				type_account: isCompany ? 'company' : 'client',
+				user: datesSingUp.user,
+				email : datesSingUp.email,
+				password: datesSingUp.password,
+				company_name: company.company.name,
+				state_registration:datesSingUp.state_registration,
+				municipal_registration:datesSingUp.municipal_registration,
+				responsible:datesSingUp.name,
+				phone:datesSingUp.phone,
+				zip_code:company.address.zip,
+				city:company.address.city,
+				street:company.address.street,
+				uf:company.address.state,
+				district:company.address.district,
+				number:company.address.number
+			};
+			let response = await Company(paramsCreateAccount);
+			
+			switch (response.status) {
+				case 409:
+					setTextInvalid(response.message); 
+					setIsRegisterInvalid(true);
+					setTimeout(() => {	
+						setIsRegisterInvalid(false);
+					}, 5000);
+					return;
+				case 500:
+					setTextInvalid(response.message); 
+					setIsRegisterInvalid(true);
+					setTimeout(() => {	
+						setIsRegisterInvalid(false);
+					}, 5000);
+					return;
+				default:
+					break;
+			};
+		}catch(e){
+			setTextInvalid('Algo deu errado, tente novamente.'); 
+			setIsRegisterInvalid(true);
+			setTimeout(() => {	
+				setIsRegisterInvalid(false);
+			}, 5000);
+		}finally{
+			setIsLoading(false)
+		}
+		
 	};
 
 	const handleMouseEnterAccountClient = () => {
@@ -157,6 +237,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	};
 
 	const handleSelectAccount = (type:string) =>{
+		setDatesSingUp((prevState: SingUpProps) => ({
+			...prevState,
+			hasType: true
+		}));
 		switch (type) {
 			case 'client':
 				setIsClient(true)
@@ -166,7 +250,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				setIsCompany(true)
 				setIsClient(false)	
 				break;
-		}
+		};
 	};
 
 	return (
@@ -205,7 +289,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 							>
 								Registro incompleto
 							</AlertHeading>
-							<p>{textInvalid}</p>
+							<p style={{ whiteSpace: 'pre-line' }}>{textInvalid}</p>
 						</Alert>
 					</div>
 				}
@@ -266,23 +350,70 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										</div>
 									</div>
 								</Alert> */}
-								<form className='row g-4' onSubmit={formik.handleSubmit}>
+								<div className='row g-4'>
 									{singUpStatus ? (
-										<>
+										<form className='row g-4' onSubmit={(e)=>handleSingUp(e)}>
 											<div className='col-12'>
 												<FormGroup
-													id='signup-cnpj'
 													isFloating
-													label='CNPJ'>
-													<Input type='email' autoComplete='email' required />
+													label='CNPJ'
+												>
+													<Input mask="99.999.999/9999-99" placeholder='' value={datesSingUp.cnpj} required 
+														onChange={(e: any) => {
+															const rawCnpj = e.target.value.replace(/[^\d]/g, ''); // Remove tudo que não é número
+															setDatesSingUp((prevState: SingUpProps) => ({
+																...prevState,
+																cnpj: rawCnpj,
+															}));
+														}}
+													/>
 												</FormGroup>
 											</div>
 											<div className='col-12'>
 												<FormGroup
-													id='signup-name'
+													isFloating
+													label='Inscrição Estadual'
+												>
+													<Input placeholder='' value={datesSingUp.state_registration} required 
+														onChange={(e: any) => {
+															const rawState = e.target.value.replace(/[^\d]/g, ''); // Remove tudo que não é número
+															setDatesSingUp((prevState: SingUpProps) => ({
+																...prevState,
+																state_registration: rawState,
+															}));
+														}}
+													/>
+												</FormGroup>
+											</div>
+											<div className='col-12'>
+												<FormGroup
+													isFloating
+													label='Inscrição Municipal'
+												>
+													<Input placeholder='' value={datesSingUp.municipal_registration} required 
+														onChange={(e: any) => {
+															const rawMunicipal = e.target.value.replace(/[^\d]/g, ''); // Remove tudo que não é número
+															setDatesSingUp((prevState: SingUpProps) => ({
+																...prevState,
+																municipal_registration: rawMunicipal,
+															}));
+														}}
+													/>
+												</FormGroup>
+											</div>
+											<div className='col-12'>
+												<FormGroup
 													isFloating
 													label='Seu nome'>
-													<Input autoComplete='given-name' required />
+													<Input className='text-capitalize' value={datesSingUp.name} placeholder='' required 
+														onChange={
+															(e:any)=>
+																setDatesSingUp((prevState: SingUpProps) => ({
+																...prevState,
+																name: e.target.value,
+															}))
+														}
+													/>
 												</FormGroup>
 											</div>
 											<div className='col-12'>
@@ -290,7 +421,30 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													id='signup-phone'
 													isFloating
 													label='Seu celular'>
-													<Input autoComplete='family-name' required />
+													<Input mask="(99) 9 9999-9999" autoComplete='family-name' value={datesSingUp.phone} required 
+														onChange={(e: any) => {
+															const rawPhone = e.target.value.replace(/[^\d]/g, ''); // Remove tudo que não é número
+															setDatesSingUp((prevState: SingUpProps) => ({
+																...prevState,
+																phone: rawPhone,
+															}));
+														}}
+													/>
+												</FormGroup>
+											</div>
+											<div className='col-12'>
+												<FormGroup
+													isFloating
+													label='Seu email'>
+													<Input value={datesSingUp.email} placeholder='' required 
+														onChange={
+															(e:any)=>
+																setDatesSingUp((prevState: SingUpProps) => ({
+																...prevState,
+																email: e.target.value,
+															}))
+														}
+													/>
 												</FormGroup>
 											</div>
 											<div className='col-12'>
@@ -301,7 +455,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<Input
 														type='text'
 														autoComplete='text'
+														className='text-lowercase'
+														value={datesSingUp.user}
 														required
+														onChange={
+															(e:any)=>
+																setDatesSingUp((prevState: SingUpProps) => ({
+																...prevState,
+																user: e.target.value,
+															}))
+														}
 													/>
 												</FormGroup>
 											</div>
@@ -311,9 +474,17 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													isFloating
 													label='Senha'>
 													<Input
+														value={datesSingUp?.password}
 														type='password'
 														autoComplete='password'
 														required
+														onChange={
+															(e:any)=>
+																setDatesSingUp((prevState: SingUpProps) => ({
+																...prevState,
+																password: e.target.value,
+															}))
+														}
 													/>
 												</FormGroup>
 											</div>
@@ -375,14 +546,17 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												<Button
 													color='warning'
 													className='w-100 py-3'
-													type={ 'submit' }
-													onClick={handleOnClick}
+													type={ 'submit' }	
 													>
+													{isLoading && (
+														<Spinner isSmall inButton isGrow />
+													)}
 													Cadastrar
 												</Button>
 											</div>
-										</>
+										</form>
 									) : (
+										// up
 										<>
 											<div className='col-12'>
 												<FormGroup
@@ -394,22 +568,19 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													})}>
 													<Input
 														autoComplete='username'
-														value={formik.values.loginUsername}
-														isTouched={formik.touched.loginUsername}
-														invalidFeedback={
-															formik.errors.loginUsername
+														value={datesSingIn.user}
+														onChange={
+															(e:any)=>
+																setDatesSingIn((prevState: SingInProps) => ({
+																...prevState,
+																user: e.target.value,
+															}))
 														}
-														isValid={formik.isValid}
-														onChange={formik.handleChange}
-														onBlur={formik.handleBlur}
-														onFocus={() => {
-															formik.setErrors({});
-														}}
 													/>
 												</FormGroup>
 												{signInPassword && (
 													<div className='text-center h4 mb-3 fw-bold'>
-														Oi, {formik.values.loginUsername}.
+														Oi, {datesSingIn.user}.
 													</div>
 												)}
 												<FormGroup
@@ -422,15 +593,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<Input
 														type='password'
 														autoComplete='current-password'
-														value={formik.values.loginPassword}
-														isTouched={formik.touched.loginPassword}
-														invalidFeedback={
-															formik.errors.loginPassword
+														value={datesSingIn.password}
+														onChange={
+															(e:any)=>
+																setDatesSingIn((prevState: SingInProps) => ({
+																...prevState,
+																password: e.target.value,
+															}))
 														}
-														validFeedback='Looks good!'
-														isValid={formik.isValid}
-														onChange={formik.handleChange}
-														onBlur={formik.handleBlur}
 													/>
 												</FormGroup>
 											</div>
@@ -439,8 +609,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<Button
 														color='warning'
 														className='w-100 py-3'
-														isDisable={!formik.values.loginUsername}
-														onClick={handleContinue}>
+														onClick={handleSingIn}>
 														{isLoading && (
 															<Spinner isSmall inButton isGrow />
 														)}
@@ -450,7 +619,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<Button
 														color='warning'
 														className='w-100 py-3'
-														onClick={formik.handleSubmit}>
+														onClick={handleSingIn}>
 														Login
 													</Button>
 												)}
@@ -493,7 +662,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										</>
 									)} */}
 									{/* END :: Social Login */}
-								</form>
+								</div>
 							</CardBody>
 						</Card>
 						<div className='text-center'>

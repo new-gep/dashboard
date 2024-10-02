@@ -182,7 +182,7 @@ const Input = forwardRef<HTMLInputElement, IInputProps>(
 			return (
 				<>
 					{/* eslint-disable-next-line react/jsx-props-no-spreading */} {/* @ts-ignore */}
-					<InputMask ref={ref} {...PROPS} {...MASK_PROPS} />
+					<InputMask maskChar="" ref={ref} {...PROPS} {...MASK_PROPS} />
 					{LIST}
 					{VALIDATION}
 				</>
