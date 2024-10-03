@@ -13,12 +13,11 @@ import Icon from '../../components/icon/Icon';
 import useNavigationItemHandle from '../../hooks/useNavigationItemHandle';
 import AuthContext from '../../contexts/authContext';
 import ThemeContext from '../../contexts/themeContext';
-
+import Mask from '../../function/Mask';
 const User = () => {
 	const { width } = useWindowSize();
 	const { setAsideStatus } = useContext(ThemeContext);
-	const { userData, setUser } = useContext(AuthContext);
-
+	const { userData, setToken } = useContext(AuthContext);
 	const navigate = useNavigate();
 	const handleItem = useNavigationItemHandle();
 	const { darkModeStatus, setDarkModeStatus } = useDarkMode();
@@ -35,31 +34,32 @@ const User = () => {
 				onClick={() => setCollapseStatus(!collapseStatus)}>
 				<div className='user-avatar'>
 					<img
-						srcSet={userData?.srcSet}
-						src={userData?.src}
+						// srcSet={userData?.srcSet}
+						// src={userData?.src}
 						alt='Avatar'
 						width={128}
 						height={128}
 					/>
 				</div>
 				<div className='user-info'>
-					<div className='user-name d-flex align-items-center'>
-						{`${userData?.name} ${userData?.surname}`}
+					<div className='user-name d-flex align-items-center text-capitalize'>
+						{ userData.name && `${Mask('firstName',userData.name)}`}
 						<Icon icon='Verified' className='ms-1' color='info' />
 					</div>
-					<div className='user-sub-title'>{userData?.position}</div>
+					{/* <div className='user-sub-title'>{userData?.position}</div> */}
 				</div>
 			</div>
 			<DropdownMenu>
 				<DropdownItem>
 					<Button
 						icon='AccountBox'
-						onClick={() =>
-							navigate(
-								`../${demoPagesMenu.appointment.subMenu.employeeID.path}/${userData?.id}`,
-							)
-						}>
-						Profile
+						// onClick={() =>
+						// 	navigate(
+						// 		`../${demoPagesMenu.appointment.subMenu.employeeID.path}/${userData?.id}`,
+						// 	)
+						// }
+						>
+						Perfil
 					</Button>
 				</DropdownItem>
 				<DropdownItem>
@@ -80,7 +80,7 @@ const User = () => {
 							className='navigation-item cursor-pointer'
 							onClick={() =>
 								navigate(
-									`../${demoPagesMenu.appointment.subMenu.employeeID.path}/${userData?.id}`,
+									// `../${demoPagesMenu.appointment.subMenu.employeeID.path}/${userData?.id}`,
 									// @ts-ignore
 									handleItem(),
 								)
@@ -89,7 +89,7 @@ const User = () => {
 								<span className='navigation-link-info'>
 									<Icon icon='AccountBox' className='navigation-icon' />
 									<span className='navigation-text'>
-										{t('menu:Profile') as ReactNode}
+										{t('menu:Perfil') as ReactNode}
 									</span>
 								</span>
 							</span>
@@ -110,8 +110,8 @@ const User = () => {
 									/>
 									<span className='navigation-text'>
 										{darkModeStatus
-											? (t('menu:DarkMode') as ReactNode)
-											: (t('menu:LightMode') as ReactNode)}
+											? (t('Modo Escuro') as ReactNode)
+											: (t('Modo Claro') as ReactNode)}
 									</span>
 								</span>
 							</span>
@@ -125,19 +125,20 @@ const User = () => {
 							role='presentation'
 							className='navigation-item cursor-pointer'
 							onClick={() => {
-								if (setUser) {
-									setUser('');
+								if (setToken) {
+									setToken('');
 								}
 								if (width < Number(process.env.REACT_APP_MOBILE_BREAKPOINT_SIZE)) {
 									setAsideStatus(false);
 								}
 								navigate(`../${demoPagesMenu.login.path}`);
-							}}>
+							}}
+							>
 							<span className='navigation-link navigation-link-pill'>
 								<span className='navigation-link-info'>
 									<Icon icon='Logout' className='navigation-icon' />
 									<span className='navigation-text'>
-										{t('menu:Logout') as ReactNode}
+										{t('menu:Sair') as ReactNode}
 									</span>
 								</span>
 							</span>

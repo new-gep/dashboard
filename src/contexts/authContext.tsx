@@ -1,43 +1,83 @@
 import React, { createContext, FC, ReactNode, useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
-import { getUserDataWithUsername, IUserProps } from '../common/data/userDummyData';
 
 export interface IAuthContextProps {
-	user: string;
-	setUser?(...args: unknown[]): unknown;
-	userData: Partial<IUserProps>;
+	token: string;
+	setToken: (token: string) => void;
+	isAuthenticated: boolean;
+	userData: any;
 }
+
 const AuthContext = createContext<IAuthContextProps>({} as IAuthContextProps);
 
 interface IAuthContextProviderProps {
 	children: ReactNode;
 }
-export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children }) => {
-	const [user, setUser] = useState<string>(localStorage.getItem('gep_authUsername') || '');
-	const [userData, setUserData] = useState<Partial<IUserProps>>({});
 
-	useEffect(() => {
-		localStorage.setItem('gep_authUsername', user);
-	}, [user]);
-
-	useEffect(() => {
-		if (user !== '') {
-			setUserData(getUserDataWithUsername(user));
+// Função para verificar o token na API
+const verifyTokenWithAPI = async (token: string) => {
+	try {
+		const response = await axios.get(`${process.env.REACT_APP_API}user/verifyToken/${token}`);
+		
+		if (response.status === 200) {
+			return response.data; // Retorna os dados do usuário se o token for válido
 		} else {
-			setUserData({});
+			return null; // Token inválido
 		}
-	}, [user]);
+	} catch (error) {
+		console.error('Erro ao verificar token:', error);
+		return null; // Em caso de erro na verificação
+	}
+};
 
+export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children }) => {
+	// Gerencia o estado do token
+	const [token, setToken] = useState<string>(localStorage.getItem('gep_authToken') || '');
+	const [userData, setUserData] = useState<any>({});
+	const isAuthenticated = !!token; // Verifica se o token existe para validar o login
+
+	// Efeito para salvar o token no localStorage quando ele muda
+	useEffect(() => {
+		if (token) {
+			localStorage.setItem('gep_authToken', token);
+		} else {
+			localStorage.removeItem('gep_authToken');
+		}
+	}, [token]);
+
+	// Efeito para buscar os dados do usuário na API quando o token é definido
+	useEffect(() => {
+		const fetchUserData = async () => {
+			if (token !== '') {
+				const userData = await verifyTokenWithAPI(token);
+				if (userData) {
+					setUserData(userData.dates); // Define os dados do usuário se o token for válido
+				} else {
+					setUserData({});
+					setToken(''); // Limpa o token se for inválido
+				}
+			} else {
+				setUserData({});
+			}
+		};
+		fetchUserData();
+	}, [token]);
+
+	// Memoize para evitar re-renderizações desnecessárias
 	const value = useMemo(
 		() => ({
-			user,
-			setUser,
+			token,
+			setToken,
+			isAuthenticated,
 			userData,
 		}),
-		[user, userData],
+		[token, isAuthenticated, userData],
 	);
+
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
 AuthContextProvider.propTypes = {
 	children: PropTypes.node.isRequired,
 };

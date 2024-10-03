@@ -19,6 +19,7 @@ import Icon from '../../../components/icon/Icon';
 import Cnpj from '../../../api/find/Cnpj';
 import Company from '../../../api/create/Company';
 import User from '../../../api/find/User';
+import Mask from '../../../function/Mask';
 interface ILoginHeaderProps {
 	isNewUser?: boolean;
 }
@@ -60,11 +61,12 @@ interface SingUpProps {
 
 interface SingInProps {
     user:  string,
-	password:string
+	password:string,
+	name:string
 };
 
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
-	const { setUser } = useContext(AuthContext);
+	const { setToken } = useContext(AuthContext);
 
 	const { darkModeStatus } = useDarkMode();
 
@@ -92,20 +94,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	});
 	const [datesSingIn, setDatesSingIn] = useState<SingInProps>({
 		user:"",
+		name:"",
 		password:""
 	});
 
 
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
-
-	const usernameCheck = (username: string) => {
-		return !!getUserDataWithUsername(username);
-	};
-
-	const passwordCheck = (username: string, password: string) => {
-		return getUserDataWithUsername(username).password === password;
-	};
 
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -115,8 +110,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		switch (response.status) {
 			case 200:
 				if(response.token){
+					setToken(response.token);
+					handleOnClick();
 					return
-				}
+				};
+				setDatesSingIn((prevState: SingInProps) => ({
+					...prevState,
+					name: response.name
+				}))
 				setSignInPassword(true)
 				break;
 			default:
@@ -125,30 +126,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					setIsAccessInvalid(false);
 				}, 5000);
 				break;
-		}
-		console.log(response)
+		};
 		return
-		
-		
-		setIsLoading(true);
-		setTextInvalid('Nome Incorreto')
-		setIsRegisterInvalid(true);
-		setTimeout(() => {
-			setIsLoading(false);
-			setIsRegisterInvalid(false);
-		}, 5000);
-		// setTimeout(() => {
-		// 	if (
-		// 		!Object.keys(USERS).find(
-		// 			(f) => USERS[f].username.toString() === values.loginUsername,
-		// 		)
-		// 	) {
-		// 		setFieldError('loginUsername', 'No such user found in the system.');
-		// 	} else {
-		// 		setSignInPassword(true);
-		// 	}
-		// 	setIsLoading(false);
-		// }, 1000);
 	};
 
 	const handleSingUp = async (e:any) => {
@@ -476,7 +455,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<Input
 														value={datesSingUp?.password}
 														type='password'
-														autoComplete='password'
+														autoComplete='Senha'
 														required
 														onChange={
 															(e:any)=>
@@ -579,14 +558,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													/>
 												</FormGroup>
 												{signInPassword && (
-													<div className='text-center h4 mb-3 fw-bold'>
-														Oi, {datesSingIn.user}.
+													<div className='text-center h4 mb-3 fw-bold text-capitalize'>
+														Oi, {Mask('firstName',datesSingIn.name)}.
 													</div>
 												)}
 												<FormGroup
 													id='loginPassword'
 													isFloating
-													label='Password'
+													label='Senha'
 													className={classNames({
 														'd-none': !signInPassword,
 													})}>

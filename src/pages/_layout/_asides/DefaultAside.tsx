@@ -41,22 +41,22 @@ const DefaultAside = () => {
 					<>
 						<Navigation menu={dashboardPagesMenu} id='aside-dashboard' />
 						<NavigationLine />
-						<Navigation menu={demoPagesMenu} id='aside-demo-pages' />
-						<NavigationLine />
-						<Navigation menu={pageLayoutTypesPagesMenu} id='aside-menu' />
+						{/* <Navigation  menu={demoPagesMenu} id='aside-demo-pages' />
+						<NavigationLine /> */}
+						{/* <Navigation menu={pageLayoutTypesPagesMenu} id='aside-menu' /> */}
 					</>
 				)}
 
-				{doc && (
+				{/* {doc && (
 					<>
 						<Navigation menu={gettingStartedPagesMenu} id='aside-docMenu' />
 						<NavigationLine />
 						<Navigation menu={componentPagesMenu} id='aside-componentsMenu' />
 						<NavigationLine />
 					</>
-				)}
+				)} */}
 
-				{asideStatus && doc && (
+				{/* {asideStatus && doc && (
 					<Card className='m-3 '>
 						<CardBody className='pt-0'>
 							<img srcSet={HandWebp} src={Hand} alt='Hand' width={130} height={130} />
@@ -79,10 +79,10 @@ const DefaultAside = () => {
 							</Button>
 						</CardBody>
 					</Card>
-				)}
+				)} */}
 			</AsideBody>
 			<AsideFoot>
-				<nav aria-label='aside-bottom-menu'>
+				{/* <nav aria-label='aside-bottom-menu'>
 					<div className='navigation'>
 						<div
 							role='presentation'
@@ -116,8 +116,10 @@ const DefaultAside = () => {
 							</span>
 						</div>
 					</div>
-				</nav>
-				<User />
+				</nav> */}
+				<div className='mt-2'>
+					<User />
+				</div>
 			</AsideFoot>
 		</Aside>
 	);

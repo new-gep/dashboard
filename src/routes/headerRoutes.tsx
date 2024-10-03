@@ -39,7 +39,7 @@ const headers: RouteProps[] = [
 	},
 	{ path: demoPagesMenu.pricingTable.path, element: <DashboardHeader /> },
 	{
-		path: dashboardPagesMenu.dashboardBooking.path,
+		// path: dashboardPagesMenu.dashboardBooking.path,
 		element: <DashboardBookingHeader />,
 	},
 	{
@@ -103,7 +103,7 @@ const headers: RouteProps[] = [
 		element: <ProfilePageHeader />,
 	},
 	{
-		path: dashboardPagesMenu.summary.path,
+		// path: dashboardPagesMenu.summary.path,
 		element: <SummaryHeader />,
 	},
 	{

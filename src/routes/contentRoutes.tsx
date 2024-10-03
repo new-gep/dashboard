@@ -198,11 +198,11 @@ const presentation: RouteProps[] = [
 		element: <LANDING.DASHBOARD />,
 	},
 	{
-		path: dashboardPagesMenu.dashboardBooking.path,
+		// path: dashboardPagesMenu.dashboardBooking.path,
 		element: <LANDING.DASHBOARD_BOOKING />,
 	},
 	{
-		path: dashboardPagesMenu.summary.path,
+		// path: dashboardPagesMenu.summary.path,
 		element: <LANDING.SUMMARY />,
 	},
 

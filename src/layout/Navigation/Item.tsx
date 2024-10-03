@@ -85,7 +85,7 @@ const Item: FC<IItemProps> = ({
 		<>
 			<span className='navigation-link-info'>
 				{icon && <Icon className='navigation-icon' icon={icon} />}
-				{title && <span className='navigation-text'>{t(title) as ReactNode}</span>}
+				{title && <span className='navigation-text' >{t(title) as ReactNode}</span>}
 			</span>
 			{(!!children || !!notification) && (
 				<span className='navigation-link-extra'>
@@ -102,7 +102,7 @@ const Item: FC<IItemProps> = ({
 							)}
 						/>
 					)}
-					{!!children && <Icon className='navigation-arrow' icon='ChevronRight' />}
+					{!!children && <Icon className='navigation-arrow'  icon='ChevronRight' />}
 				</span>
 			)}
 		</>

@@ -30,16 +30,17 @@ const PageWrapper = forwardRef<HTMLDivElement, IPageWrapperProps>(
 				.setAttribute('content', description || process.env.REACT_APP_META_DESC || '');
 		});
 
-		const { user } = useContext(AuthContext);
+		// Acessando o token e o estado de autenticação do AuthContext
+		const { token, isAuthenticated } = useContext(AuthContext);
 
 		const navigate = useNavigate();
+		
 		useEffect(() => {
-			if (isProtected && user === '') {
-				navigate(`../${demoPagesMenu.login.path}`);
+			// Verifica se a página é protegida e se o usuário não está autenticado (token inválido)
+			if (isProtected && !isAuthenticated) {
+				navigate(`../${demoPagesMenu.login.path}`); // Redireciona para a página de login se o token for inválido
 			}
-			return () => {};
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, []);
+		}, [isProtected, isAuthenticated, navigate]);
 
 		return (
 			<div ref={ref} className={classNames('page-wrapper', 'container-fluid', className)}>
@@ -48,7 +49,9 @@ const PageWrapper = forwardRef<HTMLDivElement, IPageWrapperProps>(
 		);
 	},
 );
+
 PageWrapper.displayName = 'PageWrapper';
+
 PageWrapper.propTypes = {
 	isProtected: PropTypes.bool,
 	title: PropTypes.string,
@@ -57,6 +60,7 @@ PageWrapper.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+
 PageWrapper.defaultProps = {
 	isProtected: true,
 	title: undefined,
