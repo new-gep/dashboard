@@ -14,6 +14,8 @@ import useNavigationItemHandle from '../../hooks/useNavigationItemHandle';
 import AuthContext from '../../contexts/authContext';
 import ThemeContext from '../../contexts/themeContext';
 import Mask from '../../function/Mask';
+import UserOne from '../../assets/img/10067026.webp'
+import UserTwo from '../../assets/img/3187499.webp'
 const User = () => {
 	const { width } = useWindowSize();
 	const { setAsideStatus } = useContext(ThemeContext);
@@ -35,7 +37,7 @@ const User = () => {
 				<div className='user-avatar'>
 					<img
 						// srcSet={userData?.srcSet}
-						// src={userData?.src}
+						src={UserTwo}
 						alt='Avatar'
 						width={128}
 						height={128}

@@ -7,8 +7,8 @@ const ProductListHeader = () => {
 	return (
 		<Header>
 			<HeaderLeft>
-				<img src={Company1} alt='Company' height={24} />
-				<span>Products</span>
+				LOGO EMPRESA 
+				<span>Vagas</span>
 			</HeaderLeft>
 			<CommonHeaderRight />
 		</Header>

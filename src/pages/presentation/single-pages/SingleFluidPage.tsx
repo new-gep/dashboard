@@ -350,7 +350,7 @@ const SingleFluidPage = () => {
 												color={darkModeStatus ? 'light' : 'dark'}
 												onClick={() =>
 													navigate(
-														`../${demoPagesMenu.sales.subMenu.productsGrid.path}`,
+														`../${demoPagesMenu.sales.subMenu.vaga.path}`,
 													)
 												}>
 												Click

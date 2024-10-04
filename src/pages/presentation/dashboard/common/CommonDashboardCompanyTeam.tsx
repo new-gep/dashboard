@@ -11,10 +11,10 @@ import Card, {
 import Button from '../../../../components/bootstrap/Button';
 import Avatar, { AvatarGroup } from '../../../../components/Avatar';
 import USERS from '../../../../common/data/userDummyData';
-import { demoPagesMenu } from '../../../../menu';
 import useDarkMode from '../../../../hooks/useDarkMode';
+import { demoPagesMenu } from '../../../../menu';
 
-const CommonDashboardDesignTeam = () => {
+const CommonDashboardClientsTeam = () => {
 	const { darkModeStatus } = useDarkMode();
 
 	const navigate = useNavigate();
@@ -28,10 +28,10 @@ const CommonDashboardDesignTeam = () => {
 			<CardHeader className='bg-transparent'>
 				<CardLabel>
 					<CardTitle tag='div' className='h5'>
-						Collaborator Connect
+						Company Connect
 					</CardTitle>
 					<CardSubTitle tag='div' className='h6 text-muted'>
-						Seus colaboradores 
+						Empresa filial 
 					</CardSubTitle>
 				</CardLabel>
 				<CardActions>
@@ -47,6 +47,25 @@ const CommonDashboardDesignTeam = () => {
 			<CardBody>
 				<AvatarGroup>
 					<Avatar
+						srcSet={USERS.GRACE.srcSet}
+						src={USERS.GRACE.src}
+						userName={`${USERS.GRACE.name} ${USERS.GRACE.surname}`}
+						color={USERS.GRACE.color}
+					/>
+					<Avatar
+						srcSet={USERS.SAM.srcSet}
+						src={USERS.SAM.src}
+						userName={`${USERS.SAM.name} ${USERS.SAM.surname}`}
+						color={USERS.SAM.color}
+					/>
+					<Avatar
+						srcSet={USERS.CHLOE.srcSet}
+						src={USERS.CHLOE.src}
+						userName={`${USERS.CHLOE.name} ${USERS.CHLOE.surname}`}
+						color={USERS.CHLOE.color}
+					/>
+
+					<Avatar
 						srcSet={USERS.JANE.srcSet}
 						src={USERS.JANE.src}
 						userName={`${USERS.JANE.name} ${USERS.JANE.surname}`}
@@ -57,12 +76,6 @@ const CommonDashboardDesignTeam = () => {
 						src={USERS.JOHN.src}
 						userName={`${USERS.JOHN.name} ${USERS.JOHN.surname}`}
 						color={USERS.JOHN.color}
-					/>
-					<Avatar
-						srcSet={USERS.ELLA.srcSet}
-						src={USERS.ELLA.src}
-						userName={`${USERS.ELLA.name} ${USERS.ELLA.surname}`}
-						color={USERS.ELLA.color}
 					/>
 					<Avatar
 						srcSet={USERS.RYAN.srcSet}
@@ -76,4 +89,4 @@ const CommonDashboardDesignTeam = () => {
 	);
 };
 
-export default CommonDashboardDesignTeam;
+export default CommonDashboardClientsTeam;

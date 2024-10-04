@@ -78,7 +78,7 @@ const validate = (values: IValues) => {
 	return errors;
 };
 
-type TTabs = 'Summary' | 'Comments' | 'Edit';
+type TTabs = 'Detalhes' | 'Candidatos' | 'Editar';
 interface ITabs {
 	[key: string]: TTabs;
 }
@@ -127,9 +127,9 @@ const ProductViewPage = () => {
 	};
 
 	const TABS: ITabs = {
-		SUMMARY: 'Summary',
-		COMMENTS: 'Comments',
-		EDIT: 'Edit',
+		SUMMARY: 'Detalhes',
+		COMMENTS: 'Candidatos',
+		EDIT: 'Editar',
 	};
 	const [activeTab, setActiveTab] = useState(TABS.SUMMARY);
 
@@ -178,7 +178,7 @@ const ProductViewPage = () => {
 			<SubHeader>
 				<SubHeaderLeft>
 					<Button color='info' isLink icon='ArrowBack' onClick={() => navigate(-1)}>
-						Back to List
+						Voltar
 					</Button>
 					<SubheaderSeparator />
 					<Avatar
@@ -190,7 +190,7 @@ const ProductViewPage = () => {
 					<span>
 						<strong>{`${USERS.RYAN.name} ${USERS.RYAN.surname}`}</strong>
 					</span>
-					<span className='text-muted'>Owner</span>
+					<span className='text-muted'>Criador</span>
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<span className='text-muted fst-italic me-2'>Last update:</span>
@@ -219,7 +219,7 @@ const ProductViewPage = () => {
 									</div>
 									<div className='col-12'>
 										<Button
-											icon='Chat'
+											icon='People'
 											color='info'
 											className='w-100 p-3'
 											isLight={activeTab !== TABS.COMMENTS}
@@ -246,7 +246,7 @@ const ProductViewPage = () => {
 										color='danger'
 										isLight
 										className='w-100 p-3'>
-										Delete
+										Deletar
 									</Button>
 								</CardFooterLeft>
 							</CardFooter>
@@ -264,10 +264,10 @@ const ProductViewPage = () => {
 									<CardHeader>
 										<CardLabel icon='Summarize' iconColor='info'>
 											<CardTitle tag='div' className='h5'>
-												Summary
+												Detalhes
 											</CardTitle>
 											<CardSubTitle tag='div' className='h6'>
-												Product Information
+												Informações da Vaga
 											</CardSubTitle>
 										</CardLabel>
 									</CardHeader>
@@ -282,14 +282,14 @@ const ProductViewPage = () => {
 													}-primary rounded-2`}>
 													<CardHeader className='bg-transparent'>
 														<CardLabel>
-															<CardTitle>Price</CardTitle>
+															<CardTitle>Salario</CardTitle>
 														</CardLabel>
 													</CardHeader>
 													<CardBody>
 														<div className='d-flex align-items-center pb-3'>
 															<div className='flex-shrink-0'>
 																<Icon
-																	icon='ConfirmationNumber'
+																	icon='Savings'
 																	size='4x'
 																	color='primary'
 																/>
@@ -297,9 +297,6 @@ const ProductViewPage = () => {
 															<div className='flex-grow-1 ms-3'>
 																<div className='fw-bold fs-3 mb-0'>
 																	{priceFormat(data.price)}
-																</div>
-																<div className='text-muted'>
-																	<b>Quantity: </b> {data.stock}
 																</div>
 															</div>
 														</div>
@@ -312,25 +309,31 @@ const ProductViewPage = () => {
 													shadow='sm'
 													className={`bg-l${
 														darkModeStatus ? 'o25' : '25'
-													}-warning bg-l${
+													}-secondary bg-l${
 														darkModeStatus ? 'o50' : '10'
-													}-warning-hover transition-base rounded-2`}>
+													}-secondary:hover transition-base rounded-2`}>
 													<CardHeader className='bg-transparent'>
 														<CardLabel>
 															<CardTitle tag='h4' className='h5'>
-																Sales
+																Contrato
 															</CardTitle>
 														</CardLabel>
 													</CardHeader>
-													<CardBody className='py-0'>
-														<Chart
-															className='mx-n4'
-															series={data.series}
-															options={chartOptions}
-															type={chartOptions.chart?.type}
-															height={chartOptions.chart?.height}
-															width={chartOptions.chart?.width}
-														/>
+													<CardBody>
+														<div className='d-flex align-items-center pb-3'>
+															<div className='flex-shrink-0'>
+																<Icon
+																	icon='Construction'
+																	size='4x'
+																	color='secondary'
+																/>
+															</div>
+															<div className='flex-grow-1 ms-3'>
+																<div className='fw-bold fs-3 mb-0'>
+																	CLT
+																</div>
+															</div>
+														</div>
 													</CardBody>
 												</Card>
 											</div>
@@ -343,14 +346,14 @@ const ProductViewPage = () => {
 													}-success rounded-2`}>
 													<CardHeader className='bg-transparent'>
 														<CardLabel>
-															<CardTitle>Category</CardTitle>
+															<CardTitle>Carga Horária</CardTitle>
 														</CardLabel>
 													</CardHeader>
 													<CardBody>
 														<div className='d-flex align-items-center pb-3'>
 															<div className='flex-shrink-0'>
 																<Icon
-																	icon='Category'
+																	icon='Schedule'
 																	size='4x'
 																	color='success'
 																/>
@@ -373,14 +376,14 @@ const ProductViewPage = () => {
 													}-info rounded-2`}>
 													<CardHeader className='bg-transparent'>
 														<CardLabel>
-															<CardTitle>Compatible</CardTitle>
+															<CardTitle>Jornada de Trabalho</CardTitle>
 														</CardLabel>
 													</CardHeader>
 													<CardBody>
 														<div className='d-flex align-items-center pb-3'>
 															<div className='flex-shrink-0'>
 																<Icon
-																	icon='Extension'
+																	icon='DirectionsRun'
 																	size='4x'
 																	color='info'
 																/>
@@ -471,12 +474,12 @@ const ProductViewPage = () => {
 							{activeTab === TABS.COMMENTS && (
 								<>
 									<CardHeader>
-										<CardLabel icon='Chat' iconColor='info'>
+										<CardLabel icon='People' iconColor='info'>
 											<CardTitle tag='div' className='h5'>
-												Comments
+												Candidatos
 											</CardTitle>
 											<CardSubTitle tag='div' className='h6'>
-												Product Reviews
+												Colaboradores Inscritos
 											</CardSubTitle>
 										</CardLabel>
 									</CardHeader>

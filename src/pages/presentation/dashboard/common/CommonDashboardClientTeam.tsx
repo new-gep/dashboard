@@ -14,7 +14,7 @@ import USERS from '../../../../common/data/userDummyData';
 import useDarkMode from '../../../../hooks/useDarkMode';
 import { demoPagesMenu } from '../../../../menu';
 
-const CommonDashboardMarketingTeam = () => {
+const CommonDashboardClientsTeam = () => {
 	const { darkModeStatus } = useDarkMode();
 
 	const navigate = useNavigate();
@@ -28,10 +28,10 @@ const CommonDashboardMarketingTeam = () => {
 			<CardHeader className='bg-transparent'>
 				<CardLabel>
 					<CardTitle tag='div' className='h5'>
-						Marketing Team
+						Client Connect
 					</CardTitle>
 					<CardSubTitle tag='div' className='h6 text-muted'>
-						There is a meeting at 12 o'clock.
+						Empresas filiais conectadas
 					</CardSubTitle>
 				</CardLabel>
 				<CardActions>
@@ -89,4 +89,4 @@ const CommonDashboardMarketingTeam = () => {
 	);
 };
 
-export default CommonDashboardMarketingTeam;
+export default CommonDashboardClientsTeam;

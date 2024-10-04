@@ -341,7 +341,7 @@ const presentation: RouteProps[] = [
 		element: <APP.SALES.PRODUCTS />,
 	},
 	{
-		path: demoPagesMenu.sales.subMenu.productsGrid.path,
+		path: demoPagesMenu.sales.subMenu.vaga.path,
 		element: <APP.SALES.PRODUCTS_GRID />,
 	},
 	{

@@ -8,7 +8,7 @@ import SubHeader, {
 	SubheaderSeparator,
 } from '../../../layout/SubHeader/SubHeader';
 import Button from '../../../components/bootstrap/Button';
-import CommonGridProductItem from '../../_common/CommonGridProductItem';
+import CommonGridJobItem from '../../_common/CommonGridJobItem';
 import tableData from '../../../common/data/dummyProductData';
 import OffCanvas, {
 	OffCanvasBody,
@@ -122,20 +122,19 @@ const ProductsGridPage = () => {
 	}, [editItem]);
 
 	return (
-		<PageWrapper title={demoPagesMenu.sales.subMenu.productsGrid.text}>
+		<PageWrapper title={demoPagesMenu.sales.subMenu.vaga.text}>
 			<SubHeader>
 				<SubHeaderLeft>
 					<Breadcrumb
 						list={[
-							{ title: demoPagesMenu.sales.text, to: demoPagesMenu.sales.path },
 							{
-								title: demoPagesMenu.sales.subMenu.productsGrid.text,
-								to: demoPagesMenu.sales.subMenu.productsGrid.path,
+								title: demoPagesMenu.sales.subMenu.vaga.text,
+								to: demoPagesMenu.sales.subMenu.vaga.path,
 							},
 						]}
 					/>
 					<SubheaderSeparator />
-					<span className='text-muted'>{data.length} items</span>
+					<span className='text-muted'>{data.length} vagas abertas</span>
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<Button
@@ -151,11 +150,11 @@ const ProductsGridPage = () => {
 				</SubHeaderRight>
 			</SubHeader>
 			<Page>
-				<div className='display-4 fw-bold py-3'>All Products</div>
+				<div className='display-4 fw-bold py-3'>Todas Vagas em Aberto</div>
 				<div className='row'>
 					{data.map((item) => (
 						<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
-							<CommonGridProductItem
+							<CommonGridJobItem
 								id={item.id}
 								name={item.name}
 								category={item.category}

@@ -146,7 +146,7 @@ const TableRow: FC<ITableRowProps> = ({
 	);
 };
 
-const CommonDashboardTopSeller = () => {
+const CommonDashboardJob = () => {
 	const TOP_SELLER_FILTER = {
 		DAY: 'day',
 		WEEK: 'week',
@@ -168,12 +168,12 @@ const CommonDashboardTopSeller = () => {
 	return (
 		<Card stretch>
 			<CardHeader>
-				<CardLabel icon='Storefront' iconColor='info'>
+				<CardLabel icon='Work' iconColor='info'>
 					<CardTitle tag='div' className='h5'>
-						Top Seller
+						Vagas Abertas
 					</CardTitle>
 				</CardLabel>
-				<CardActions>
+				{/* <CardActions>
 					<Dropdown isButtonGroup>
 						<Button color='success' isLight icon='WaterfallChart'>
 							{(topSellerFilter === TOP_SELLER_FILTER.DAY &&
@@ -216,7 +216,7 @@ const CommonDashboardTopSeller = () => {
 						download>
 						Export
 					</Button>
-				</CardActions>
+				</CardActions> */}
 			</CardHeader>
 			<CardBody className='table-responsive'>
 				<table className='table table-modern table-hover'>
@@ -301,4 +301,4 @@ const CommonDashboardTopSeller = () => {
 	);
 };
 
-export default CommonDashboardTopSeller;
+export default CommonDashboardJob;

@@ -176,8 +176,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				number:company.address.number
 			};
 			let response = await Company(paramsCreateAccount);
-			
 			switch (response.status) {
+				case 201:
+					setToken(response.token);
+					handleOnClick();
+					return
 				case 409:
 					setTextInvalid(response.message); 
 					setIsRegisterInvalid(true);
@@ -193,7 +196,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					}, 5000);
 					return;
 				default:
-					break;
+					setTextInvalid('Algo deu errado, tente novamente!'); 
+					setIsRegisterInvalid(true);
+					setTimeout(() => {	
+						setIsRegisterInvalid(false);
+					}, 5000);
+					return;
 			};
 		}catch(e){
 			setTextInvalid('Algo deu errado, tente novamente.'); 

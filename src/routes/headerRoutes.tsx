@@ -123,7 +123,7 @@ const headers: RouteProps[] = [
 		element: <ProductListHeader />,
 	},
 	{
-		path: demoPagesMenu.sales.subMenu.productsGrid.path,
+		path: demoPagesMenu.sales.subMenu.vaga.path,
 		element: <ProductListHeader />,
 	},
 	{

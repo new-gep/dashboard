@@ -38,6 +38,12 @@ export const dashboardPagesMenu = {
 		icon: 'Home',
 		subMenu: null,
 	},
+	vaga: {
+		id: 'Vaga',
+		text: 'Vaga',
+		path: 'sales/grid',
+		icon: 'Work',
+	},
 	// dashboardProject: {
 	// 	id: 'dashboardProject',
 	// 	text: 'Dashboard Projects',
@@ -251,14 +257,14 @@ export const demoPagesMenu = {
 		subMenu: {
 			dashboard: dashboardPagesMenu.dashboard,
 			salesList: {
-				id: 'products',
+				id: 'Teste',
 				text: 'Sales List',
 				path: 'sales/sales-list',
 				icon: 'FactCheck',
 			},
-			productsGrid: {
-				id: 'productsGrid',
-				text: 'Products Grid',
+			vaga: {
+				id: 'vaga',
+				text: 'Vaga',
 				path: 'sales/grid',
 				icon: 'CalendarViewMonth',
 			},

@@ -16,7 +16,7 @@ import CommonAvatarTeam from '../../../common/other/CommonAvatarTeam';
 
 import CommonDashboardAlert from './common/CommonDashboardAlert';
 import CommonDashboardUserCard from './common/CommonDashboardUserCard';
-import CommonDashboardMarketingTeam from './common/CommonDashboardMarketingTeam';
+import CommonDashboardClientTeam from './common/CommonDashboardClientTeam';
 import CommonDashboardDesignTeam from './common/CommonDashboardDesignTeam';
 import CommonDashboardIncome from './common/CommonDashboardIncome';
 import CommonDashboardRecentActivities from './common/CommonDashboardRecentActivities';
@@ -24,7 +24,7 @@ import CommonDashboardUserIssue from './common/CommonDashboardUserIssue';
 import CommonDashboardSalesByStore from './common/CommonDashboardSalesByStore';
 import CommonDashboardWaitingAnswer from './common/CommonDashboardWaitingAnswer';
 import CommonMyWallet from '../../_common/CommonMyWallet';
-import CommonDashboardTopSeller from './common/CommonDashboardTopSeller';
+import CommonDashboardJob from './common/CommonDashboardJob';
 import ThemeContext from '../../../contexts/themeContext';
 
 const DashboardPage = () => {
@@ -33,16 +33,16 @@ const DashboardPage = () => {
 	 * Tour Start
 	 */
 	const { setIsOpen } = useTour();
-	useEffect(() => {
-		if (localStorage.getItem('tourModalStarted') !== 'shown' && !mobileDesign) {
-			setTimeout(() => {
-				setIsOpen(true);
-				localStorage.setItem('tourModalStarted', 'shown');
-			}, 7000);
-		}
-		return () => {};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	// useEffect(() => {
+	// 	if (localStorage.getItem('tourModalStarted') !== 'shown' && !mobileDesign) {
+	// 		setTimeout(() => {
+	// 			setIsOpen(true);
+	// 			localStorage.setItem('tourModalStarted', 'shown');
+	// 		}, 7000);
+	// 	}
+	// 	return () => {};
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, []);
 
 	const { themeStatus } = useDarkMode();
 
@@ -50,7 +50,7 @@ const DashboardPage = () => {
 
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.dashboard.text}>
-			<SubHeader>
+			{/* <SubHeader>
 				<SubHeaderLeft>
 					<span className='h4 mb-0 fw-bold'>Overview</span>
 					<SubheaderSeparator />
@@ -70,24 +70,24 @@ const DashboardPage = () => {
 						<strong></strong> Team
 					</CommonAvatarTeam>
 				</SubHeaderRight>
-			</SubHeader>
+			</SubHeader> */}
 			<Page container='fluid'>
 				<div className='row'>
-					<div className='col-12'>
+					{/* <div className='col-12'>
 						<CommonDashboardAlert />
-					</div>
+					</div> */}
 
 					<div className='col-xl-4'>
 						<CommonDashboardUserCard />
 					</div>
 					<div className='col-xl-4'>
-						<CommonDashboardMarketingTeam />
+						<CommonDashboardClientTeam />
 					</div>
 					<div className='col-xl-4'>
 						<CommonDashboardDesignTeam />
 					</div>
 
-					<div className='col-xxl-6'>
+					{/* <div className='col-xxl-6'>
 						<CommonDashboardIncome activeTab={activeTab} />
 					</div>
 					<div className='col-xxl-3'>
@@ -95,21 +95,21 @@ const DashboardPage = () => {
 					</div>
 					<div className='col-xxl-3'>
 						<CommonDashboardUserIssue />
-					</div>
+					</div> 
 
 					<div className='col-xxl-8'>
 						<CommonDashboardSalesByStore />
-					</div>
-
+					</div> 
+					
 					<div className='col-xxl-4 col-xl-6'>
 						<CommonDashboardWaitingAnswer />
 					</div>
 
 					<div className='col-xxl-4 col-xl-6'>
 						<CommonMyWallet />
-					</div>
+					</div>  */}
 					<div className='col-xxl-8'>
-						<CommonDashboardTopSeller />
+						<CommonDashboardJob />
 					</div>
 				</div>
 			</Page>
