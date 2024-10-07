@@ -1,6 +1,7 @@
-import React, { createContext, FC, ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
 export interface IAuthContextProps {
 	token: string;
@@ -32,6 +33,10 @@ const verifyTokenWithAPI = async (token: string) => {
 };
 
 export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children }) => {
+	const navigate = useNavigate();
+	const handleLogin = useCallback(() => 
+		navigate('/auth-pages/login'), [navigate]
+	);
 	// Gerencia o estado do token
 	const [token, setToken] = useState<string>(localStorage.getItem('gep_authToken') || '');
 	const [userData, setUserData] = useState<any>({});
@@ -49,16 +54,36 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 	// Efeito para buscar os dados do usuário na API quando o token é definido
 	useEffect(() => {
 		const fetchUserData = async () => {
-			if (token !== '') {
-				const userData = await verifyTokenWithAPI(token);
-				if (userData) {
-					setUserData(userData.dates); // Define os dados do usuário se o token for válido
+			try{
+				if (token !== '') {
+					const userData = await verifyTokenWithAPI(token);
+					switch (userData.status) {
+						case 400:
+							setUserData({});
+							setToken('')
+							localStorage.removeItem('gep_authToken');
+							handleLogin()
+							break;
+						case 200:
+							setUserData(userData.dates);
+							break;
+						default:
+							localStorage.removeItem('gep_authToken');
+							setUserData({});
+							setToken(''); // Limpa o token se for inválido
+							handleLogin()
+							break;
+					}
 				} else {
 					setUserData({});
-					setToken(''); // Limpa o token se for inválido
+					console.log('go login 2')
+					handleLogin()
 				}
-			} else {
+			}catch(e){
+				console.log('erro Context:', e)
 				setUserData({});
+				setToken(''); // Limpa o token se for inválido
+				handleLogin()
 			}
 		};
 		fetchUserData();

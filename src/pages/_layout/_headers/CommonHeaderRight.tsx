@@ -67,28 +67,6 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 		<HeaderRight>
 			<div className='row g-3'>
 				{beforeChildren}
-				{/* Tour Modal */}
-				{localStorage.getItem('tourModalStarted') === 'shown' && (
-					<div className='col-auto position-relative'>
-						<Popovers trigger='hover' desc='Start the "Facit" tour'>
-							<Button
-								// eslint-disable-next-line react/jsx-props-no-spreading
-								{...styledBtn}
-								icon='Tour'
-								onClick={() => setIsOpen(true)}
-								aria-label='Start the "Facit" tour'
-							/>
-						</Popovers>
-						<Icon
-							icon='Circle'
-							className={classNames(
-								'position-absolute start-65',
-								'text-danger',
-								'animate__animated animate__heartBeat animate__infinite animate__slower',
-							)}
-						/>
-					</div>
-				)}
 
 				{/* Dark Mode */}
 				<div className='col-auto'>

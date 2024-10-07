@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
@@ -27,62 +27,56 @@ import PlaceholderImage from '../../../components/extras/PlaceholderImage';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import { demoPagesMenu } from '../../../menu';
 import Breadcrumb from '../../../components/bootstrap/Breadcrumb';
-import { AbstractPicture } from '../../../constants/abstract';
-import Select from '../../../components/bootstrap/forms/Select';
-import Option from '../../../components/bootstrap/Option';
-import Textarea from '../../../components/bootstrap/forms/Textarea';
-import AuthContext from '../../../contexts/authContext';
-
+import Icon from '../../../components/icon/Icon';
 interface IValues {
-	function: string;
-	salary  : any;
-	time    : any;
-	journey : string;
-	contract: string
-	benefits: string;
-	details : string;
-	obligations : string;
-};
+	name: string;
+	price: number;
+	stock: number;
+	category: string;
+	image?: string | null;
+}
 const validate = (values: IValues) => {
-	const errors: any = {};
-	console.log(values)
-	// Campos obrigatórios
-	if (!values.function) {
-		errors.function = 'Função é obrigatória';
-	}
-	if (!values.salary) {
-		errors.salary = 'Salário é obrigatório';
-	}
-	if (!values.time) {
+	const errors = {
+		name: '',
+		price: '',
+		stock: '',
+		category: '',
+	};
 
-		errors.time = 'Horas semanais são obrigatórias';
-	} else if (values.time.length < 1) {
-
-        errors.time = 'Horário mínimo é 1 digito';
-	} else if (values.time.length > 3) {
-
-        errors.time = 'Horário máximo é 3 digitos';
-    }
-	if (!values.journey) {
-		errors.journey = 'Jornada é obrigatória';
-	}
-	if (!values.contract) {
-		errors.contract = 'Contrato é obrigatório';
+	if (!values.name) {
+		errors.name = 'Required';
+	} else if (values.name.length < 3) {
+		errors.name = 'Must be 3 characters or more';
+	} else if (values.name.length > 20) {
+		errors.name = 'Must be 20 characters or less';
 	}
 
-	// Não validamos os campos opcionais (benefits, details, obligations)
+	if (!values.price) {
+		errors.price = 'Required';
+	} else if (values.price < 0) {
+		errors.price = 'Price should not be 0';
+	}
+
+	if (!values.stock) {
+		errors.stock = 'Required';
+	}
+
+	if (!values.category) {
+		errors.category = 'Required';
+	} else if (values.category.length < 3) {
+		errors.category = 'Must be 3 characters or more';
+	} else if (values.category.length > 20) {
+		errors.category = 'Must be 20 characters or less';
+	}
 
 	return errors;
 };
 
-
-const ProductsGridPage = () => {
-	const { userData } = useContext(AuthContext);
+const JobGridPage = () => {
 	const [data, setData] = useState(tableData);
-	const [editItem,  setEditItem] = useState<IValues | null>(null);
+	const [editItem, setEditItem] = useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = useState<boolean>(false);
-	const [imageFile, setImageFile] = useState<any>(null);
-	const [nameImage, setNameImage] = useState<string>('');
+	const [imageFile, setImageFile] = useState<any | null>(null);
 
 	const handleImageChange = (e: any) => {
 		setImageFile(null);
@@ -92,71 +86,52 @@ const ProductsGridPage = () => {
 		  setImageFile(imageUrl); // Atualiza o estado com a URL da imagem
 		}
 	};
-
-	const getRandomImage = () => {
-		const keys = Object.keys(AbstractPicture) as Array<keyof typeof AbstractPicture>; // Defina o tipo correto das chaves
-		const randomKey = keys[Math.floor(Math.random() * keys.length)]; // Escolhe uma chave aleatória
-		console.log(randomKey)
-		setNameImage(randomKey)
-		return AbstractPicture[randomKey]; // Retorna a imagem correspondente à chave aleatória
-	};
 	  
 	function handleRemove(id: number) {
 		const newData = data.filter((item) => item.id !== id);
 		setData(newData);
 	};
 
-	// function handleEdit(id: number) {
-	// 	const newData = data.filter((item) => item.id === id);
-	// 	setEditItem(newData[0]);
-	// };
+	function handleEdit(id: number) {
+		const newData = data.filter((item) => item.id === id);
+		setEditItem(newData[0]);
+	};
 
 	const formik = useFormik({
 		initialValues: {
-			function: '',
-			salary  : '',
-			time    : '',
-			journey : '',
-			contract: '',
-			benefits: '',
-			details : '',
-			obligations : '',
-			image: ''
+			name: '',
+			price: 0,
+			stock: 0,
+			category: '',
 		},
 		validate,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		onSubmit: (values) => {
-			values.image = nameImage
-			const job = values
-			console.log(userData)
-			// setEditPanel(false);
+			setEditPanel(false);
 		},
 	});
-	  
-
-	// useEffect(() => {
-	// 	if (editItem) {
-	// 		formik.setValues({
-	// 			name: editItem.name,
-	// 			price: editItem.price,
-	// 			stock: editItem.stock,
-	// 			category: editItem.category,
-	// 		});
-	// 	}
-	// 	return () => {
-	// 		formik.setValues({
-	// 			name: '',
-	// 			price: 0,
-	// 			stock: 0,
-	// 			category: '',
-	// 		});
-	// 	};
-	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	// }, [editItem]);
 
 	useEffect(() => {
-		setImageFile(getRandomImage()); // Define uma imagem aleatória ao carregar o componente
-	  }, []);
+		if (editItem) {
+			formik.setValues({
+				name: editItem.name,
+				price: editItem.price,
+				stock: editItem.stock,
+				category: editItem.category,
+			});
+		}
+		return () => {
+			formik.setValues({
+				name: '',
+				price: 0,
+				stock: 0,
+				category: '',
+			});
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [editItem]);
+
+
 
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.vaga.text}>
@@ -201,7 +176,7 @@ const ProductsGridPage = () => {
 								price={item.price}
 								editAction={() => {
 									setEditPanel(true);
-									// handleEdit(item.id);
+									handleEdit(item.id);
 								}}
 								deleteAction={() => handleRemove(item.id)}
 							/>
@@ -219,8 +194,8 @@ const ProductsGridPage = () => {
 				onSubmit={formik.handleSubmit}>
 				<OffCanvasHeader setOpen={setEditPanel}>
 					<OffCanvasTitle id='edit-panel'>
-						{editItem?.function || 'Nova Vaga'}{' '}
-						{editItem?.function ? (
+						{editItem?.name || 'Nova Vaga'}{' '}
+						{editItem?.name ? (
 							<Badge color='primary' isLight>
 								Edit
 							</Badge>
@@ -235,7 +210,7 @@ const ProductsGridPage = () => {
 					<Card>
 						<CardHeader>
 							<CardLabel icon='Photo' iconColor='info'>
-								<CardTitle>Imagem da Vaga <p className='fs-6 fw-semibold'>(aleatório)</p> </CardTitle>
+								<CardTitle>Imagem da Vaga</CardTitle>
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
@@ -258,7 +233,7 @@ const ProductsGridPage = () => {
 									)}
 								</div>
 								<div className='col-12'>
-									{/* <div className='row g-4'>
+									<div className='row g-4'>
 										<div className='col-12'>
 											<Input type='file' accept="image/*" autoComplete='photo' 
 												onChange={(e)=>handleImageChange(e)}
@@ -278,7 +253,7 @@ const ProductsGridPage = () => {
 												</Button>
 											)}
 										</div>
-									</div> */}
+									</div>
 								</div>
 							</div>
 						</CardBody>
@@ -293,115 +268,34 @@ const ProductsGridPage = () => {
 						<CardBody>
 							<div className='row g-4'>
 								<div className='col-12'>
-									<FormGroup id='function' label='Função' isFloating>
+									<FormGroup id='name' label='Name' isFloating>
 										<Input
-											placeholder='Função'
+											placeholder='Name'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.function}
+											value={formik.values.name}
 											isValid={formik.isValid}
-											isTouched={formik.touched.function}
-											invalidFeedback={formik.errors.function}
-											validFeedback='Ótimo!'
+											isTouched={formik.touched.name}
+											invalidFeedback={formik.errors.name}
+											validFeedback='Looks good!'
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
-									<FormGroup id='salary' label='Salario' isFloating>
-										<Input									
-											component='NumberFormat'
-											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											isTouched={formik.touched.salary}
-											invalidFeedback={formik.errors.salary}
-											validFeedback='Ótimo!'
-											// @ts-ignore
-											thousandSeparator
-										/>
-									</FormGroup>
-								</div>
-								<div className='col-12'>
-									<FormGroup id='time' label='Horas semanais' isFloating>
+									<FormGroup id='price' label='Price' isFloating>
 										<Input
-											max={2}
-											min={1}
-											placeholder='Horas semanais'
-											component='NumberFormat'
+											placeholder='Price'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.time}
+											value={formik.values.price}
 											isValid={formik.isValid}
-											isTouched={formik.touched.time}
-											invalidFeedback={formik.errors.time}
-											validFeedback='Ótimo!'
+											isTouched={formik.touched.price}
+											invalidFeedback={formik.errors.price}
+											validFeedback='Looks good!'
 										/>
 									</FormGroup>
-
 								</div>
 								<div className='col-12'>
-									<FormGroup id='journey'>
-										<Select
-											className='form-select fw-medium'
-											required={true} 
-											ariaLabel={''}
-											placeholder={'Jornada'}	
-											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
-											value={formik.values.journey}
-											isValid={formik.isValid}
-											isTouched={formik.touched.journey}
-											invalidFeedback={formik.errors.journey}
-											validFeedback='Ótimo!'								
-										>
-											<option value={'5x2'}>5x2</option>
-											<option value={'6x1'}>6x1</option>
-										</Select>
-									</FormGroup>
-								</div>
-								<div className='col-12'>
-									<FormGroup id='contract'>
-										<Select 
-											className='form-select fw-medium'
-											required={true} 
-											ariaLabel={'Contratação'}
-											placeholder={'Contratação'}	
-											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
-											value={formik.values.contract}
-											isValid={formik.isValid}
-											isTouched={formik.touched.contract}
-											invalidFeedback={formik.errors.contract}
-											validFeedback='Ótimo!'	
-										>
-											<Option value={ 'clt' }>CLT</Option>
-											<Option value={ 'pj' }>PJ </Option>
-											<Option value={ 'contract' }>Contrato</Option>
-										</Select>
-									</FormGroup>
-								</div>								
-								<div className='col-12'>
-									<FormGroup id='salary' label='Obrigações (opcional)' isFloating>
-										<Textarea>
-
-										</Textarea>
-									</FormGroup>
-								</div>
-								<div className='col-12'>
-									<FormGroup id='salary' label='Benefícios (opcional)' isFloating>
-										<Textarea>
-
-										</Textarea>
-									</FormGroup>
-								</div>
-								<div className='col-12'>
-									<FormGroup id='salary' label='Detalhes (opcional)' isFloating>
-										<Textarea>
-
-										</Textarea>
-									</FormGroup>
-								</div>
-								{/* <div className='col-12'>
 									<FormGroup id='stock' label='Stock' isFloating>
 										<Input
 											placeholder='Stock'
@@ -428,7 +322,7 @@ const ProductsGridPage = () => {
 											validFeedback='Looks good!'
 										/>
 									</FormGroup>
-								</div> */}
+								</div>
 							</div>
 						</CardBody>
 					</Card>
@@ -439,7 +333,7 @@ const ProductsGridPage = () => {
 						icon='Save'
 						type='submit'
 						isDisable={!formik.isValid && !!formik.submitCount}>
-						Criar
+						Save
 					</Button>
 				</div>
 			</OffCanvas>
@@ -447,4 +341,4 @@ const ProductsGridPage = () => {
 	);
 };
 
-export default ProductsGridPage;
+export default JobGridPage;

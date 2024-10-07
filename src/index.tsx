@@ -10,15 +10,16 @@ import { AuthContextProvider } from './contexts/authContext';
 import './i18n';
 
 const children = (
-	<AuthContextProvider>
-		<ThemeContextProvider>
-			<Router>
-				<React.StrictMode>
-					<App />
-				</React.StrictMode>
-			</Router>
-		</ThemeContextProvider>
-	</AuthContextProvider>
+	
+	<Router>
+		<AuthContextProvider>
+			<ThemeContextProvider>
+					<React.StrictMode>
+						<App />
+					</React.StrictMode>
+			</ThemeContextProvider>
+		</AuthContextProvider>
+	</Router>
 );
 
 const container = document.getElementById('root');
