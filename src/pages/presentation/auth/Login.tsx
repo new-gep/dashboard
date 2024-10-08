@@ -16,9 +16,9 @@ import Spinner from '../../../components/bootstrap/Spinner';
 import Alert, { AlertHeading } from '../../../components/bootstrap/Alert';
 import Logo from '../../../assets/logo/logo.png'
 import Icon from '../../../components/icon/Icon';
-import Cnpj from '../../../api/find/Cnpj';
-import Company from '../../../api/create/Company';
-import User from '../../../api/find/User';
+import Cnpj from '../../../api/get/Cnpj';
+import Company from '../../../api/post/Company';
+import User from '../../../api/get/User';
 import Mask from '../../../function/Mask';
 interface ILoginHeaderProps {
 	isNewUser?: boolean;

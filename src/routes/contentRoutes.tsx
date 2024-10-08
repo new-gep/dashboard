@@ -57,7 +57,7 @@ const APP = {
 	SALES: {
 		TRANSACTIONS: lazy(() => import('../pages/presentation/sales/TransActionsPage')),
 		PRODUCTS: lazy(() => import('../pages/presentation/sales/SalesListPage')),
-		PRODUCTS_GRID: lazy(() => import('../pages/presentation/sales/ProductsGridPage')),
+		PRODUCTS_GRID: lazy(() => import('../pages/presentation/sales/JobGridPage')),
 		PRODUCTS_VIEW: lazy(() => import('../pages/presentation/sales/ProductViewPage')),
 	},
 	APPOINTMENT: {

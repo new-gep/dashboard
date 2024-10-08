@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
@@ -27,56 +27,120 @@ import PlaceholderImage from '../../../components/extras/PlaceholderImage';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import { demoPagesMenu } from '../../../menu';
 import Breadcrumb from '../../../components/bootstrap/Breadcrumb';
-import Icon from '../../../components/icon/Icon';
+import { AbstractPicture } from '../../../constants/abstract';
+import Select from '../../../components/bootstrap/forms/Select';
+import Option from '../../../components/bootstrap/Option';
+import Textarea from '../../../components/bootstrap/forms/Textarea';
+import AuthContext from '../../../contexts/authContext';
+import Job from '../../../api/post/Job';
+import Mask from '../../../function/Mask';
+import Toasts from '../../../components/bootstrap/Toasts';
+import Job_Open from '../../../api/get/Job_Open';
+import Job_One from '../../../api/get/Job_One';
+import JobUpdate from '../../../api/patch/Job';
+import { toast } from 'react-toastify';
+type AbstractPictureKeys = keyof typeof AbstractPicture;
 interface IValues {
-	name: string;
-	price: number;
-	stock: number;
-	category: string;
-	image?: string | null;
-}
+	image   :any;
+	function: string;
+	salary  : any;
+	time    : any;
+	journey : string;
+	contract: string
+	benefits: string;
+	details : string;
+	obligations : string;
+};
+
+interface Ijob {
+	user_create ?: any;
+	image:string;
+	function: string;
+	salary  : any;
+	time    : any;
+	journey : string;
+	contract: string
+	benefits: string;
+	details : string;
+	obligations : string;
+	CNPJ_company?: string;
+};
+
+interface IjobUpdate {
+	image:string;
+	function: string;
+	salary  : any;
+	time    : any;
+	contract: string
+	benefits: string;
+	details : string;
+	obligations : string;
+	user_update ?:string;
+};
+
 const validate = (values: IValues) => {
-	const errors = {
-		name: '',
-		price: '',
-		stock: '',
-		category: '',
-	};
+	const errors: any = {};
+	// Campos obrigatórios
 
-	if (!values.name) {
-		errors.name = 'Required';
-	} else if (values.name.length < 3) {
-		errors.name = 'Must be 3 characters or more';
-	} else if (values.name.length > 20) {
-		errors.name = 'Must be 20 characters or less';
+	if (!values.function) {
+		errors.function = 'Função é obrigatória';
+	}
+	if (!values.salary || values.salary <= 0) {
+		errors.salary = 'Salário é obrigatório';
+	}
+	if (!values.time || values.time <= 0) {
+
+		errors.time = 'Horas semanais são obrigatórias';
+	} else if (values.time.length < 1) {
+
+        errors.time = 'Horário mínimo é 1 digito';
+	} else if (values.time.length > 3) {
+
+        errors.time = 'Horário máximo é 3 digitos';
+    }
+	if (!values.journey) {
+		errors.journey = 'Jornada é obrigatória';
+	}
+	if (!values.contract) {
+		errors.contract = 'Contrato é obrigatório';
 	}
 
-	if (!values.price) {
-		errors.price = 'Required';
-	} else if (values.price < 0) {
-		errors.price = 'Price should not be 0';
-	}
-
-	if (!values.stock) {
-		errors.stock = 'Required';
-	}
-
-	if (!values.category) {
-		errors.category = 'Required';
-	} else if (values.category.length < 3) {
-		errors.category = 'Must be 3 characters or more';
-	} else if (values.category.length > 20) {
-		errors.category = 'Must be 20 characters or less';
-	}
+	// Não validamos os campos opcionais (benefits, details, obligations)
 
 	return errors;
 };
 
-const JobGridPage = () => {
-	const [data, setData] = useState(tableData);
-	const [editItem, setEditItem] = useState<IValues | null>(null);
+const ProductsGridPage = () => {
+	const { userData } = useContext(AuthContext);
+	const [data, setData] = useState<any>(null);
+	const [editItem,  setEditItem] = useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = useState<boolean>(false);
-	const [imageFile, setImageFile] = useState<any | null>(null);
+	const [imageFile, setImageFile] = useState<any>(null);
+	const [nameImage, setNameImage] = useState<AbstractPictureKeys>('ballSplit');
+	const [rebuild, setRebuild] = useState<number>(1);
+	const formik = useFormik({
+		initialValues: {
+			function: '',
+			salary  : '',
+			time    : '',
+			journey : '',
+			contract: '',
+			benefits: '',
+			details : '',
+			obligations : '',
+			image: ''
+		},
+		validate,
+		onSubmit: (values, { resetForm }) => {  
+			values.image = nameImage;
+			const job = values;
+			createJob(job);
+			if(!editItem){
+				resetForm();
+			}
+			// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
+		},
+	});
 
 	const handleImageChange = (e: any) => {
 		setImageFile(null);
@@ -86,52 +150,205 @@ const JobGridPage = () => {
 		  setImageFile(imageUrl); // Atualiza o estado com a URL da imagem
 		}
 	};
+
+	const getRandomImage = () => {
+		const keys = Object.keys(AbstractPicture) as Array<keyof typeof AbstractPicture>; // Defina o tipo correto das chaves
+		const randomKey = keys[Math.floor(Math.random() * keys.length)]; // Escolhe uma chave aleatória
+		console.log(randomKey)
+		setNameImage(randomKey)
+		return AbstractPicture[randomKey]; // Retorna a imagem correspondente à chave aleatória
+	};
+
+	const createJob = async (job:Ijob) => {
+		job.user_create  = userData.id;
+		job.CNPJ_company = userData.cnpj;
+		job.time = JSON.stringify({
+			time: job.time,
+			journey: job.journey
+		})
+		if(editItem){
+			console.log('edit true')
+			const update:IjobUpdate = job;
+			update.user_update = userData.id;
+			update.time = JSON.stringify({
+				time: job.time,
+				journey: job.journey
+			})
+			const response = await JobUpdate(update, data.id);
+			console.log(response)
+			switch(response.status){
+				case 200:
+					setRebuild(rebuild + 1)
+					toast(
+						<Toasts
+							icon={ 'Work' }
+							iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={ 'Successo'}
+						>
+							Vaga editada com sucesso! 
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 3000 // Examples: 1000, 3000, ...
+						}
+					)
+					setEditPanel(false);
+					break;
+				case 404:
+					toast(
+						<Toasts
+							icon={ 'Work' }
+							iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={ 'Erro'}
+						>
+							Algo deu errado, tente novamente! 
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 3000 // Examples: 1000, 3000, ...
+						}
+					)
+					break
+				case 500:
+					toast(
+						<Toasts
+							icon={ 'Work' }
+							iconColor={ 'warning' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={ 'Erro'}
+						>
+							Erro interno, tente novamente! 
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 3000 // Examples: 1000, 3000, ...
+						}
+					)
+					break;
+				default:
+					toast(
+						<Toasts
+							icon={ 'Work' }
+							iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={ 'Erro Desconhecido'}
+							
+							>
+							Algo deu errado, tente novamente! 
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 3000 // Examples: 1000, 3000, ...
+						}
+					)
+					break;
+			}
+		}else{
+			console.log('edit false')
+			const response = await Job(job);
+			switch (response.status) {
+				case 201:
+					setRebuild(rebuild + 1)
+					toast(
+						<Toasts
+							icon={ 'Work' }
+							iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={ 'Successo'}
+							
+							>
+							Vaga criada com sucesso! 
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 3000 // Examples: 1000, 3000, ...
+						}
+					)
+					setEditPanel(false);
+					break;
+				case 500:
+					toast(
+						<Toasts
+							icon={ 'Work' }
+							iconColor={ 'warning' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={ 'Erro'}
+							
+							>
+							Algo deu errado, tente novamente! 
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 3000 // Examples: 1000, 3000, ...
+						}
+					)
+					break;
+			
+				default:
+					toast(
+						<Toasts
+							icon={ 'Work' }
+							iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={ 'Erro Desconhecido'}
+							
+							>
+							Algo deu errado, tente novamente! 
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 3000 // Examples: 1000, 3000, ...
+						}
+					)
+					break;
+			};
+		};
+	};
 	  
-	function handleRemove(id: number) {
-		const newData = data.filter((item) => item.id !== id);
-		setData(newData);
+	const handleRemove = (id: number) => {
+		console.log('delete job')
 	};
 
-	function handleEdit(id: number) {
-		const newData = data.filter((item) => item.id === id);
-		setEditItem(newData[0]);
+	const handleEdit = async (id: string) => {
+		let response = await Job_One(id);
+		setEditItem(response.job)
 	};
 
-	const formik = useFormik({
-		initialValues: {
-			name: '',
-			price: 0,
-			stock: 0,
-			category: '',
-		},
-		validate,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		onSubmit: (values) => {
-			setEditPanel(false);
-		},
-	});
+	useEffect(()=>{
+
+	},[])
 
 	useEffect(() => {
 		if (editItem) {
 			formik.setValues({
-				name: editItem.name,
-				price: editItem.price,
-				stock: editItem.stock,
-				category: editItem.category,
+			function: editItem.function,
+			salary  : editItem.salary,
+			time    : editItem.time.time,
+			journey : editItem.time.journey,
+			contract: editItem.contract,
+			benefits: editItem.benefits,
+			details : editItem.details,
+			obligations : editItem.obligations,
+			image: editItem.image
 			});
+			setNameImage(editItem.image)
 		}
-		return () => {
-			formik.setValues({
-				name: '',
-				price: 0,
-				stock: 0,
-				category: '',
-			});
-		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [editItem]);
 
+	useEffect(() => {
+		setImageFile(getRandomImage());
+		if(userData.cnpj){
+			const fetchData = async () => {
+				const response = await Job_Open(userData.cnpj)
+				switch (response.status) {
+					case 200:
+						setData(response.job)
+						break;
+					default:
 
+						break;
+				}
+			};
+			fetchData();
+
+		}
+	}, [userData, rebuild]);
+	  
 
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.vaga.text}>
@@ -146,7 +363,7 @@ const JobGridPage = () => {
 						]}
 					/>
 					<SubheaderSeparator />
-					<span className='text-muted'>{data.length} vagas abertas</span>
+					{data && <span className='text-muted'>{data.length} vagas abertas</span>}
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<Button
@@ -164,24 +381,24 @@ const JobGridPage = () => {
 			<Page>
 				<div className='display-4 fw-bold py-3'>Todas Vagas em Aberto</div>
 				<div className='row'>
-					{data.map((item) => (
-						<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
-							<CommonGridJobItem
-								id={item.id}
-								name={item.name}
-								category={item.category}
-								img={item.image}
-								color={item.color}
-								series={item.series}
-								price={item.price}
-								editAction={() => {
-									setEditPanel(true);
-									handleEdit(item.id);
-								}}
-								deleteAction={() => handleRemove(item.id)}
-							/>
-						</div>
-					))}
+					{data && data.length > 0 &&
+					
+						data.map((item:any) => (
+							<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
+								<CommonGridJobItem
+									id={item.id}
+									image={item.image}
+									title_job={item.function}
+									candidates={item.candidates}
+									editAction={() => {
+										setEditPanel(true);
+										handleEdit(item.id);
+									} }
+									deleteAction={() => handleRemove(item.id)}								
+								/>
+							</div>
+						))
+					}
 				</div>
 			</Page>
 
@@ -194,8 +411,8 @@ const JobGridPage = () => {
 				onSubmit={formik.handleSubmit}>
 				<OffCanvasHeader setOpen={setEditPanel}>
 					<OffCanvasTitle id='edit-panel'>
-						{editItem?.name || 'Nova Vaga'}{' '}
-						{editItem?.name ? (
+						{editItem?.function || 'Nova Vaga'}{' '}
+						{editItem?.function ? (
 							<Badge color='primary' isLight>
 								Edit
 							</Badge>
@@ -210,13 +427,21 @@ const JobGridPage = () => {
 					<Card>
 						<CardHeader>
 							<CardLabel icon='Photo' iconColor='info'>
-								<CardTitle>Imagem da Vaga</CardTitle>
+								<CardTitle>Imagem da Vaga{!editItem && <p className='fs-6 fw-semibold'>(aleatório)</p>} </CardTitle>
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
 							<div className='row'>
 								<div className='col-12'>
-									{imageFile ? (
+									{editItem ? (
+										<img
+											src={AbstractPicture[nameImage]}
+											alt=''
+											width={128}
+											height={128}
+											className='mx-auto d-block img-fluid mb-3 rounded'
+										/>
+									) : (
 										<img
 											src={imageFile}
 											alt=''
@@ -224,16 +449,15 @@ const JobGridPage = () => {
 											height={128}
 											className='mx-auto d-block img-fluid mb-3 rounded'
 										/>
-									) : (
-										<PlaceholderImage
-											width={128}
-											height={128}
-											className='mx-auto d-block img-fluid mb-3 rounded'
-										/>
+										// <PlaceholderImage
+										// 	width={128}
+										// 	height={128}
+										// 	className='mx-auto d-block img-fluid mb-3 rounded'
+										// />
 									)}
 								</div>
 								<div className='col-12'>
-									<div className='row g-4'>
+									{/* <div className='row g-4'>
 										<div className='col-12'>
 											<Input type='file' accept="image/*" autoComplete='photo' 
 												onChange={(e)=>handleImageChange(e)}
@@ -253,7 +477,7 @@ const JobGridPage = () => {
 												</Button>
 											)}
 										</div>
-									</div>
+									</div> */}
 								</div>
 							</div>
 						</CardBody>
@@ -268,59 +492,135 @@ const JobGridPage = () => {
 						<CardBody>
 							<div className='row g-4'>
 								<div className='col-12'>
-									<FormGroup id='name' label='Name' isFloating>
+									<FormGroup id='function' label='Função' isFloating>
 										<Input
-											placeholder='Name'
+											className='text-capitalize'
+											placeholder='Função'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.name}
+											value={formik.values.function}
 											isValid={formik.isValid}
-											isTouched={formik.touched.name}
-											invalidFeedback={formik.errors.name}
-											validFeedback='Looks good!'
+											isTouched={formik.touched.function}
+											invalidFeedback={formik.errors.function}
+											validFeedback='Ótimo!'
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
-									<FormGroup id='price' label='Price' isFloating>
-										<Input
-											placeholder='Price'
+									<FormGroup id='salary' label='Salario' isFloating>
+										<Input									
 											onChange={formik.handleChange}
+											value={formik.values.salary}
 											onBlur={formik.handleBlur}
-											value={formik.values.price}
 											isValid={formik.isValid}
-											isTouched={formik.touched.price}
-											invalidFeedback={formik.errors.price}
-											validFeedback='Looks good!'
+											isTouched={formik.touched.salary}
+											invalidFeedback={formik.errors.salary}
+											validFeedback='Ótimo!'
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
-									<FormGroup id='stock' label='Stock' isFloating>
+									<FormGroup id='time' label='Horas semanais' isFloating>
 										<Input
-											placeholder='Stock'
+											max={3}
+											min={1}
+											placeholder='Horas semanais'
+											
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.stock}
+											value={formik.values.time}
 											isValid={formik.isValid}
-											isTouched={formik.touched.stock}
-											invalidFeedback={formik.errors.stock}
-											validFeedback='Looks good!'
+											isTouched={formik.touched.time}
+											invalidFeedback={formik.errors.time}
+											validFeedback='Ótimo!'
 										/>
+									</FormGroup>
+
+								</div>
+								<div className='col-12'>
+									<FormGroup id='journey'>
+										<Select
+											className='form-select fw-medium'
+											required={true} 
+											ariaLabel={''}
+											placeholder={'Jornada'}	
+											onChange={formik.handleChange}
+											onBlur={formik.handleBlur}
+											value={formik.values.journey}
+											isValid={formik.isValid}
+											isTouched={formik.touched.journey}
+											invalidFeedback={formik.errors.journey}
+											validFeedback='Ótimo!'								
+										>
+											<option value={'5x2'}>5x2</option>
+											<option value={'6x1'}>6x1</option>
+										</Select>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
-									<FormGroup id='category' label='Category' isFloating>
-										<Input
-											placeholder='Category'
+									<FormGroup id='contract'>
+										<Select 
+											className='form-select fw-medium'
+											required={true} 
+											ariaLabel={'Contratação'}
+											placeholder={'Contratação'}	
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
-											value={formik.values.category}
+											value={formik.values.contract}
 											isValid={formik.isValid}
-											isTouched={formik.touched.category}
-											invalidFeedback={formik.errors.category}
-											validFeedback='Looks good!'
-										/>
+											isTouched={formik.touched.contract}
+											invalidFeedback={formik.errors.contract}
+											validFeedback='Ótimo!'	
+										>
+											<Option value={ 'clt' }>CLT</Option>
+											<Option value={ 'pj' }>PJ </Option>
+											<Option value={ 'contract' }>Contrato</Option>
+										</Select>
+									</FormGroup>
+								</div>								
+								<div className='col-12'>
+									<FormGroup id='obligations' label='Obrigações (opcional)' isFloating>
+										<Textarea
+											onChange={formik.handleChange}
+											value={formik.values.obligations}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											isTouched={formik.touched.obligations}
+											invalidFeedback={formik.errors.obligations}
+											validFeedback='Ótimo!'
+										>
+
+										</Textarea>
+									</FormGroup>
+								</div>
+								<div className='col-12'>
+									<FormGroup id='benefits' label='Benefícios (opcional)' isFloating>
+										<Textarea
+											onChange={formik.handleChange}
+											value={formik.values.benefits}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											isTouched={formik.touched.benefits}
+											invalidFeedback={formik.errors.benefits}
+											validFeedback='Ótimo!'
+										>
+
+										</Textarea>
+									</FormGroup>
+								</div>
+								<div className='col-12'>
+									<FormGroup id='details' label='Detalhes (opcional)' isFloating>
+										<Textarea
+											onChange={formik.handleChange}
+											value={formik.values.details}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											isTouched={formik.touched.details}
+											invalidFeedback={formik.errors.details}
+											validFeedback='Ótimo!'
+										>
+
+										</Textarea>
 									</FormGroup>
 								</div>
 							</div>
@@ -333,7 +633,7 @@ const JobGridPage = () => {
 						icon='Save'
 						type='submit'
 						isDisable={!formik.isValid && !!formik.submitCount}>
-						Save
+						{editItem ? 'Editar' : 'Criar'}
 					</Button>
 				</div>
 			</OffCanvas>
@@ -341,4 +641,4 @@ const JobGridPage = () => {
 	);
 };
 
-export default JobGridPage;
+export default ProductsGridPage;

@@ -1,3 +1,4 @@
+
 export const AbstractPicture = {
     ballSplit : require('../assets/img/abstract/ball-split.png'),
     bendyRectangle : require('../assets/img/abstract/bendy-rectangle.png'),

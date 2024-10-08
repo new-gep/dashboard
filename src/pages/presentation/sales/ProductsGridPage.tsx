@@ -32,8 +32,15 @@ import Select from '../../../components/bootstrap/forms/Select';
 import Option from '../../../components/bootstrap/Option';
 import Textarea from '../../../components/bootstrap/forms/Textarea';
 import AuthContext from '../../../contexts/authContext';
+import Job from '../../../api/post/Job';
+import Mask from '../../../function/Mask';
+import Toasts from '../../../components/bootstrap/Toasts';
+import { toast } from 'react-toastify';
+// Defina as chaves possíveis do objeto AbstractPicture
+type AbstractPictureKeys = keyof typeof AbstractPicture;
 
 interface IValues {
+	image:string;
 	function: string;
 	salary  : any;
 	time    : any;
@@ -43,17 +50,32 @@ interface IValues {
 	details : string;
 	obligations : string;
 };
+
+interface Ijob {
+	user_create ?: any;
+	image:string;
+	function: string;
+	salary  : any;
+	time    : any;
+	journey : string;
+	contract: string
+	benefits: string;
+	details : string;
+	obligations : string;
+	CNPJ_company?: string;
+};
+
 const validate = (values: IValues) => {
 	const errors: any = {};
-	console.log(values)
 	// Campos obrigatórios
+
 	if (!values.function) {
 		errors.function = 'Função é obrigatória';
 	}
-	if (!values.salary) {
+	if (!values.salary || values.salary <= 0) {
 		errors.salary = 'Salário é obrigatório';
 	}
-	if (!values.time) {
+	if (!values.time || values.time <= 0) {
 
 		errors.time = 'Horas semanais são obrigatórias';
 	} else if (values.time.length < 1) {
@@ -100,6 +122,67 @@ const ProductsGridPage = () => {
 		setNameImage(randomKey)
 		return AbstractPicture[randomKey]; // Retorna a imagem correspondente à chave aleatória
 	};
+
+	const createJob = async (job:Ijob) => {
+		job.user_create  = userData.id;
+		job.CNPJ_company = userData.cnpj;
+		job.time = JSON.stringify({
+			time: job.time,
+			journey: job.journey
+		})
+		const response = await Job(job);
+		switch (response.status) {
+			case 201:
+				toast(
+					<Toasts
+						icon={ 'Work' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Successo'}
+						
+						>
+						Vaga criada com sucesso! 
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 3000 // Examples: 1000, 3000, ...
+					}
+				)
+				setEditPanel(false);
+				break;
+			case 500:
+				toast(
+					<Toasts
+						icon={ 'Work' }
+						iconColor={ 'warning' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Erro'}
+						
+						>
+						Algo deu errado, tente novamente! 
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 3000 // Examples: 1000, 3000, ...
+					}
+				)
+				break;
+			default:
+				toast(
+					<Toasts
+						icon={ 'Work' }
+						iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Erro Desconhecido'}
+						
+						>
+						Algo deu errado, tente novamente! 
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 3000 // Examples: 1000, 3000, ...
+					}
+				)
+				break;
+		}
+	};
 	  
 	function handleRemove(id: number) {
 		const newData = data.filter((item) => item.id !== id);
@@ -124,12 +207,13 @@ const ProductsGridPage = () => {
 			image: ''
 		},
 		validate,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		onSubmit: (values) => {
-			values.image = nameImage
-			const job = values
-			console.log(userData)
-			// setEditPanel(false);
+		onSubmit: (values, { resetForm }) => {  
+			values.image = nameImage;
+			const job = values;
+			createJob(job);
+
+			resetForm();
+			// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
 		},
 	});
 	  
@@ -191,7 +275,7 @@ const ProductsGridPage = () => {
 				<div className='row'>
 					{data.map((item) => (
 						<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
-							<CommonGridJobItem
+							{/* <CommonGridJobItem
 								id={item.id}
 								name={item.name}
 								category={item.category}
@@ -204,7 +288,7 @@ const ProductsGridPage = () => {
 									// handleEdit(item.id);
 								}}
 								deleteAction={() => handleRemove(item.id)}
-							/>
+							/> */}
 						</div>
 					))}
 				</div>
@@ -295,6 +379,7 @@ const ProductsGridPage = () => {
 								<div className='col-12'>
 									<FormGroup id='function' label='Função' isFloating>
 										<Input
+											className='text-capitalize'
 											placeholder='Função'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
@@ -309,25 +394,23 @@ const ProductsGridPage = () => {
 								<div className='col-12'>
 									<FormGroup id='salary' label='Salario' isFloating>
 										<Input									
-											component='NumberFormat'
 											onChange={formik.handleChange}
+											value={formik.values.salary}
 											onBlur={formik.handleBlur}
 											isValid={formik.isValid}
 											isTouched={formik.touched.salary}
 											invalidFeedback={formik.errors.salary}
 											validFeedback='Ótimo!'
-											// @ts-ignore
-											thousandSeparator
 										/>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
 									<FormGroup id='time' label='Horas semanais' isFloating>
 										<Input
-											max={2}
+											max={3}
 											min={1}
 											placeholder='Horas semanais'
-											component='NumberFormat'
+											
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
 											value={formik.values.time}
@@ -381,54 +464,50 @@ const ProductsGridPage = () => {
 									</FormGroup>
 								</div>								
 								<div className='col-12'>
-									<FormGroup id='salary' label='Obrigações (opcional)' isFloating>
-										<Textarea>
-
-										</Textarea>
-									</FormGroup>
-								</div>
-								<div className='col-12'>
-									<FormGroup id='salary' label='Benefícios (opcional)' isFloating>
-										<Textarea>
-
-										</Textarea>
-									</FormGroup>
-								</div>
-								<div className='col-12'>
-									<FormGroup id='salary' label='Detalhes (opcional)' isFloating>
-										<Textarea>
-
-										</Textarea>
-									</FormGroup>
-								</div>
-								{/* <div className='col-12'>
-									<FormGroup id='stock' label='Stock' isFloating>
-										<Input
-											placeholder='Stock'
+									<FormGroup id='obligations' label='Obrigações (opcional)' isFloating>
+										<Textarea
 											onChange={formik.handleChange}
+											value={formik.values.obligations}
 											onBlur={formik.handleBlur}
-											value={formik.values.stock}
 											isValid={formik.isValid}
-											isTouched={formik.touched.stock}
-											invalidFeedback={formik.errors.stock}
-											validFeedback='Looks good!'
-										/>
+											isTouched={formik.touched.obligations}
+											invalidFeedback={formik.errors.obligations}
+											validFeedback='Ótimo!'
+										>
+
+										</Textarea>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
-									<FormGroup id='category' label='Category' isFloating>
-										<Input
-											placeholder='Category'
+									<FormGroup id='benefits' label='Benefícios (opcional)' isFloating>
+										<Textarea
 											onChange={formik.handleChange}
+											value={formik.values.benefits}
 											onBlur={formik.handleBlur}
-											value={formik.values.category}
 											isValid={formik.isValid}
-											isTouched={formik.touched.category}
-											invalidFeedback={formik.errors.category}
-											validFeedback='Looks good!'
-										/>
+											isTouched={formik.touched.benefits}
+											invalidFeedback={formik.errors.benefits}
+											validFeedback='Ótimo!'
+										>
+
+										</Textarea>
 									</FormGroup>
-								</div> */}
+								</div>
+								<div className='col-12'>
+									<FormGroup id='details' label='Detalhes (opcional)' isFloating>
+										<Textarea
+											onChange={formik.handleChange}
+											value={formik.values.details}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											isTouched={formik.touched.details}
+											invalidFeedback={formik.errors.details}
+											validFeedback='Ótimo!'
+										>
+
+										</Textarea>
+									</FormGroup>
+								</div>
 							</div>
 						</CardBody>
 					</Card>

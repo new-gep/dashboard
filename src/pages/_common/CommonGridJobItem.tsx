@@ -22,72 +22,68 @@ import showNotification from '../../components/extras/showNotification';
 import Icon from '../../components/icon/Icon';
 import { demoPagesMenu } from '../../menu';
 import useDarkMode from '../../hooks/useDarkMode';
+import { AbstractPicture } from '../../constants/abstract';
 
+type AbstractPictureKeys = keyof typeof AbstractPicture;
 interface ICommonGridJobItemProps {
-	id: string | number;
-	name: string;
-	category: string;
-	img: string;
-	color: string;
-	series: ApexOptions['series'];
-	price: number;
+	id: any;
+	image:AbstractPictureKeys;
+	title_job:string;
+	candidates:any
 	editAction: any;
 	deleteAction: any;
 }
 const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 	id,
-	name,
-	category,
-	img,
-	color,
-	series,
-	price,
+	image,
+	title_job,
 	editAction,
 	deleteAction,
+	candidates
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 
-	const dummyOptions: ApexOptions = {
-		colors: [color],
-		chart: {
-			type: 'line',
-			width: 100,
-			height: 35,
-			sparkline: {
-				enabled: true,
-			},
-		},
-		tooltip: {
-			theme: 'dark',
-			fixed: {
-				enabled: false,
-			},
-			x: {
-				show: false,
-			},
-			y: {
-				title: {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					formatter(seriesName: string) {
-						return '';
-					},
-				},
-			},
-		},
-		stroke: {
-			curve: 'smooth',
-			width: 2,
-		},
-	};
+	// const dummyOptions: ApexOptions = {
+	// 	colors: [color],
+	// 	chart: {
+	// 		type: 'line',
+	// 		width: 100,
+	// 		height: 35,
+	// 		sparkline: {
+	// 			enabled: true,
+	// 		},
+	// 	},
+	// 	tooltip: {
+	// 		theme: 'dark',
+	// 		fixed: {
+	// 			enabled: false,
+	// 		},
+	// 		x: {
+	// 			show: false,
+	// 		},
+	// 		y: {
+	// 			title: {
+	// 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	// 				formatter(seriesName: string) {
+	// 					return '';
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	stroke: {
+	// 		curve: 'smooth',
+	// 		width: 2,
+	// 	},
+	// };
 	return (
 		<Card>
 			<CardHeader>
 				<CardLabel>
 					<CardTitle tag='div' className='h5'>
-						{name}{' '}
+						{title_job}{' '}
 					</CardTitle>
 					<CardSubTitle tag='div' className='h6'>
-						{category}
+						#{id}
 					</CardSubTitle>
 				</CardLabel>
 				<CardActions>
@@ -103,13 +99,13 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 						<DropdownMenu isAlignmentEnd>
 							<DropdownItem>
 								<Button icon='Edit' onClick={() => editAction()}>
-									Edit
+									Editar
 								</Button>
 							</DropdownItem>
 							<DropdownItem isDivider />
 							<DropdownItem>
 								<Button icon='Delete' onClick={() => deleteAction()}>
-									Delete
+									Deletar
 								</Button>
 							</DropdownItem>
 						</DropdownMenu>
@@ -118,7 +114,7 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 			</CardHeader>
 			<CardBody>
 				<img
-					src={img}
+					src={AbstractPicture[image]}
 					alt=''
 					width={128}
 					height={128}
@@ -127,7 +123,7 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 				<div className='row align-items-center'>
 					<div className='col'>Candidatos</div>
 					<div className='col-auto'>
-						<p className='fw-bold fs-3 mb-0 text-success'>50</p>
+						<p className='fw-bold fs-3 mb-0 text-success'> {candidates && Object.keys(candidates).length ? Object.keys(candidates).length : '0'}</p>
 					</div>
 				</div>
 			</CardBody>

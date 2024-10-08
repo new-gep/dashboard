@@ -1,6 +1,5 @@
 import axios from "axios";
-
-interface PropsCreateJob {
+interface PropsUpdateJob {
     benefits?: string;
     contract?: string;
     details ?: string;
@@ -9,16 +8,17 @@ interface PropsCreateJob {
     journey :  string;
     obligations: string;
     salary: string;
-    time  : string;
-    create_at:string;
+    time  : JSON;
+    user_create?: string;
+    CNPJ_company?:string;
+    create_at?:string;
 };
 
-export default async function Job(dates: PropsCreateJob){
+export default async function Job(dates: PropsUpdateJob, id:string){
     try{
-        const  response = await axios.post(`${process.env.REACT_APP_API}job`, dates)
+        const response = await axios.patch(`${process.env.REACT_APP_API}job/${id}`, dates)
         return response.data
     }catch(e){
         console.log(e) 
     }
-    
 };

@@ -30,6 +30,10 @@ export default function Mask(type: MaskType, value: string | number): string {
             return maskedValue;
         }
         case 'amount': {
+            if(value == ''){
+                return ''
+            }
+        
             const formattedAmount = (Number(value) / 100).toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
