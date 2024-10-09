@@ -15,7 +15,9 @@ type MaskType =
     | 'hiddenEmail'
     | 'emailBreakLine'
     | 'fullName'
-    | 'dateFormatBrazil';
+    | 'dateFormatBrazil'
+    | 'lastUpdate'
+    ;
 
 export default function Mask(type: MaskType, value: string | number): string {
     switch (type) {
@@ -98,6 +100,24 @@ export default function Mask(type: MaskType, value: string | number): string {
 
             const dataFormatada = `dia ${dia} de ${mes} de ${ano} às ${horas}:${minutos}`;
             return dataFormatada;
+        }
+        case 'lastUpdate': {
+            const date = new Date(value); // Converte a string para um objeto Date
+            
+            // Extrai a hora e o mês em UTC
+            const hours = date.getUTCHours().toString().padStart(2, '0'); // Hora formatada em UTC
+            const minutes = date.getUTCMinutes().toString().padStart(2, '0'); // Minutos formatados em UTC
+            const day = date.getUTCDate().toString().padStart(2, '0'); // Dia formatado com dois dígitos
+            // Array de meses em português
+            const months = [
+                'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+                'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+            ];
+            
+            const month = months[date.getMonth()]; // Obtém o nome do mês
+        
+            // Retorna a string formatada
+            return `${hours}:${minutes} de ${day} de ${month}`;
         }
         case 'dateFormatBrazil': {
             if (!value) {

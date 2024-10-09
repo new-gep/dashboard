@@ -4,8 +4,7 @@ interface PropsUpdateJob {
     contract?: string;
     details ?: string;
     image   ?: string;
-    function:  string;
-    journey :  string;
+    function : string;
     obligations: string;
     salary: string;
     time  : JSON;
@@ -14,7 +13,7 @@ interface PropsUpdateJob {
     create_at?:string;
 };
 
-export default async function Job(dates: PropsUpdateJob, id:string){
+export default async function Job(dates: PropsUpdateJob, id:any){
     try{
         const response = await axios.patch(`${process.env.REACT_APP_API}job/${id}`, dates)
         return response.data

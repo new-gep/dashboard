@@ -250,9 +250,9 @@ export const demoPagesMenu = {
 		},
 	},
 	sales: {
-		id: 'sales',
-		text: 'Sales',
-		path: 'sales',
+		id: 'job',
+		text: 'Vagas',
+		path: 'job',
 		icon: 'Store',
 		subMenu: {
 			dashboard: dashboardPagesMenu.dashboard,
@@ -268,16 +268,16 @@ export const demoPagesMenu = {
 				path: 'sales/grid',
 				icon: 'CalendarViewMonth',
 			},
-			productID: {
-				id: 'productID',
-				text: 'productID',
-				path: 'sales/product',
+			jobID: {
+				id: 'JobID',
+				text: 'JobID',
+				path: 'sales/Job',
 				hide: true,
 			},
-			product: {
-				id: 'product',
-				text: 'Product',
-				path: 'sales/product/1',
+			job: {
+				id: 'job',
+				text: 'job',
+				path: 'sales/job/1',
 				icon: 'QrCode2',
 			},
 			transactions: {

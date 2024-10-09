@@ -22,7 +22,7 @@ import showNotification from '../../components/extras/showNotification';
 import Icon from '../../components/icon/Icon';
 import { demoPagesMenu } from '../../menu';
 import useDarkMode from '../../hooks/useDarkMode';
-
+import { AbstractPicture } from '../../constants/abstract';
 interface ICommonGridProductItemProps {
 	id: string | number;
 	name: string;
@@ -165,7 +165,7 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 					}`}
 					size='lg'
 					tag='a'
-					to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}>
+					to={`../${demoPagesMenu.sales.subMenu.jobID.path}/${id}`}>
 					View Product
 				</Button>
 			</CardFooter>

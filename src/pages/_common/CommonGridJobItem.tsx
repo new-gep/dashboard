@@ -135,7 +135,7 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 					}`}
 					size='lg'
 					tag='a'
-					to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}>
+					to={`../${demoPagesMenu.sales.subMenu.jobID.path}/${id}`}>
 					Ver Vaga
 				</Button>
 			</CardFooter>

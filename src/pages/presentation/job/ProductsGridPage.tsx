@@ -35,13 +35,12 @@ import AuthContext from '../../../contexts/authContext';
 import Job from '../../../api/post/Job';
 import Mask from '../../../function/Mask';
 import Toasts from '../../../components/bootstrap/Toasts';
-import Job_Open from '../../../api/get/Job_Open';
-import Job_One from '../../../api/get/Job_One';
-import JobUpdate from '../../../api/patch/Job';
 import { toast } from 'react-toastify';
+// Defina as chaves possíveis do objeto AbstractPicture
 type AbstractPictureKeys = keyof typeof AbstractPicture;
+
 interface IValues {
-	image   :any;
+	image:string;
 	function: string;
 	salary  : any;
 	time    : any;
@@ -64,18 +63,6 @@ interface Ijob {
 	details : string;
 	obligations : string;
 	CNPJ_company?: string;
-};
-
-interface IjobUpdate {
-	image:string;
-	function: string;
-	salary  : any;
-	time    : any;
-	contract: string
-	benefits: string;
-	details : string;
-	obligations : string;
-	user_update ?:string;
 };
 
 const validate = (values: IValues) => {
@@ -110,37 +97,14 @@ const validate = (values: IValues) => {
 	return errors;
 };
 
+
 const ProductsGridPage = () => {
 	const { userData } = useContext(AuthContext);
-	const [data, setData] = useState<any>(null);
+	const [data, setData] = useState(tableData);
 	const [editItem,  setEditItem] = useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = useState<boolean>(false);
 	const [imageFile, setImageFile] = useState<any>(null);
-	const [nameImage, setNameImage] = useState<AbstractPictureKeys>('ballSplit');
-	const [rebuild, setRebuild] = useState<number>(1);
-	const formik = useFormik({
-		initialValues: {
-			function: '',
-			salary  : '',
-			time    : '',
-			journey : '',
-			contract: '',
-			benefits: '',
-			details : '',
-			obligations : '',
-			image: ''
-		},
-		validate,
-		onSubmit: (values, { resetForm }) => {  
-			values.image = nameImage;
-			const job = values;
-			createJob(job);
-			if(!editItem){
-				resetForm();
-			}
-			// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
-		},
-	});
+	const [nameImage, setNameImage] = useState<string>('');
 
 	const handleImageChange = (e: any) => {
 		setImageFile(null);
@@ -162,193 +126,121 @@ const ProductsGridPage = () => {
 	const createJob = async (job:Ijob) => {
 		job.user_create  = userData.id;
 		job.CNPJ_company = userData.cnpj;
-		job.time = JSON.stringify({
-			time: job.time,
-			journey: job.journey
-		})
-		if(editItem){
-			console.log('edit true')
-			const update:IjobUpdate = job;
-			update.user_update = userData.id;
-			update.time = JSON.stringify({
-				time: job.time,
-				journey: job.journey
-			})
-			const response = await JobUpdate(update, data.id);
-			console.log(response)
-			switch(response.status){
-				case 200:
-					setRebuild(rebuild + 1)
-					toast(
-						<Toasts
-							icon={ 'Work' }
-							iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={ 'Successo'}
+		// job.time = JSON.stringify({
+		// 	time: job.time,
+		// 	journey: job.journey
+		// })
+		const response = await Job(job);
+		switch (response.status) {
+			case 201:
+				toast(
+					<Toasts
+						icon={ 'Work' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Successo'}
+						
 						>
-							Vaga editada com sucesso! 
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 3000 // Examples: 1000, 3000, ...
-						}
-					)
-					setEditPanel(false);
-					break;
-				case 404:
-					toast(
-						<Toasts
-							icon={ 'Work' }
-							iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={ 'Erro'}
+						Vaga criada com sucesso! 
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 3000 // Examples: 1000, 3000, ...
+					}
+				)
+				setEditPanel(false);
+				break;
+			case 500:
+				toast(
+					<Toasts
+						icon={ 'Work' }
+						iconColor={ 'warning' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Erro'}
+						
 						>
-							Algo deu errado, tente novamente! 
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 3000 // Examples: 1000, 3000, ...
-						}
-					)
-					break
-				case 500:
-					toast(
-						<Toasts
-							icon={ 'Work' }
-							iconColor={ 'warning' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={ 'Erro'}
+						Algo deu errado, tente novamente! 
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 3000 // Examples: 1000, 3000, ...
+					}
+				)
+				break;
+			default:
+				toast(
+					<Toasts
+						icon={ 'Work' }
+						iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Erro Desconhecido'}
+						
 						>
-							Erro interno, tente novamente! 
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 3000 // Examples: 1000, 3000, ...
-						}
-					)
-					break;
-				default:
-					toast(
-						<Toasts
-							icon={ 'Work' }
-							iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={ 'Erro Desconhecido'}
-							
-							>
-							Algo deu errado, tente novamente! 
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 3000 // Examples: 1000, 3000, ...
-						}
-					)
-					break;
-			}
-		}else{
-			console.log('edit false')
-			const response = await Job(job);
-			switch (response.status) {
-				case 201:
-					setRebuild(rebuild + 1)
-					toast(
-						<Toasts
-							icon={ 'Work' }
-							iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={ 'Successo'}
-							
-							>
-							Vaga criada com sucesso! 
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 3000 // Examples: 1000, 3000, ...
-						}
-					)
-					setEditPanel(false);
-					break;
-				case 500:
-					toast(
-						<Toasts
-							icon={ 'Work' }
-							iconColor={ 'warning' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={ 'Erro'}
-							
-							>
-							Algo deu errado, tente novamente! 
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 3000 // Examples: 1000, 3000, ...
-						}
-					)
-					break;
-			
-				default:
-					toast(
-						<Toasts
-							icon={ 'Work' }
-							iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={ 'Erro Desconhecido'}
-							
-							>
-							Algo deu errado, tente novamente! 
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 3000 // Examples: 1000, 3000, ...
-						}
-					)
-					break;
-			};
-		};
+						Algo deu errado, tente novamente! 
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 3000 // Examples: 1000, 3000, ...
+					}
+				)
+				break;
+		}
 	};
 	  
-	const handleRemove = (id: number) => {
-		console.log('delete job')
+	function handleRemove(id: number) {
+		const newData = data.filter((item) => item.id !== id);
+		setData(newData);
 	};
 
-	const handleEdit = async (id: string) => {
-		let response = await Job_One(id);
-		setEditItem(response.job)
-	};
+	// function handleEdit(id: number) {
+	// 	const newData = data.filter((item) => item.id === id);
+	// 	setEditItem(newData[0]);
+	// };
 
-	useEffect(()=>{
+	const formik = useFormik({
+		initialValues: {
+			function: '',
+			salary  : '',
+			time    : '',
+			journey : '',
+			contract: '',
+			benefits: '',
+			details : '',
+			obligations : '',
+			image: ''
+		},
+		validate,
+		onSubmit: (values, { resetForm }) => {  
+			values.image = nameImage;
+			const job = values;
+			createJob(job);
 
-	},[])
-
-	useEffect(() => {
-		if (editItem) {
-			formik.setValues({
-			function: editItem.function,
-			salary  : editItem.salary,
-			time    : editItem.time.time,
-			journey : editItem.time.journey,
-			contract: editItem.contract,
-			benefits: editItem.benefits,
-			details : editItem.details,
-			obligations : editItem.obligations,
-			image: editItem.image
-			});
-			setNameImage(editItem.image)
-		}
-	}, [editItem]);
-
-	useEffect(() => {
-		setImageFile(getRandomImage());
-		if(userData.cnpj){
-			const fetchData = async () => {
-				const response = await Job_Open(userData.cnpj)
-				switch (response.status) {
-					case 200:
-						setData(response.job)
-						break;
-					default:
-
-						break;
-				}
-			};
-			fetchData();
-
-		}
-	}, [userData, rebuild]);
+			resetForm();
+			// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
+		},
+	});
 	  
+
+	// useEffect(() => {
+	// 	if (editItem) {
+	// 		formik.setValues({
+	// 			name: editItem.name,
+	// 			price: editItem.price,
+	// 			stock: editItem.stock,
+	// 			category: editItem.category,
+	// 		});
+	// 	}
+	// 	return () => {
+	// 		formik.setValues({
+	// 			name: '',
+	// 			price: 0,
+	// 			stock: 0,
+	// 			category: '',
+	// 		});
+	// 	};
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, [editItem]);
+
+	useEffect(() => {
+		setImageFile(getRandomImage()); // Define uma imagem aleatória ao carregar o componente
+	  }, []);
 
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.vaga.text}>
@@ -363,7 +255,7 @@ const ProductsGridPage = () => {
 						]}
 					/>
 					<SubheaderSeparator />
-					{data && <span className='text-muted'>{data.length} vagas abertas</span>}
+					<span className='text-muted'>{data.length} vagas abertas</span>
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<Button
@@ -381,24 +273,24 @@ const ProductsGridPage = () => {
 			<Page>
 				<div className='display-4 fw-bold py-3'>Todas Vagas em Aberto</div>
 				<div className='row'>
-					{data && data.length > 0 &&
-					
-						data.map((item:any) => (
-							<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
-								<CommonGridJobItem
-									id={item.id}
-									image={item.image}
-									title_job={item.function}
-									candidates={item.candidates}
-									editAction={() => {
-										setEditPanel(true);
-										handleEdit(item.id);
-									} }
-									deleteAction={() => handleRemove(item.id)}								
-								/>
-							</div>
-						))
-					}
+					{data.map((item) => (
+						<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
+							{/* <CommonGridJobItem
+								id={item.id}
+								name={item.name}
+								category={item.category}
+								img={item.image}
+								color={item.color}
+								series={item.series}
+								price={item.price}
+								editAction={() => {
+									setEditPanel(true);
+									// handleEdit(item.id);
+								}}
+								deleteAction={() => handleRemove(item.id)}
+							/> */}
+						</div>
+					))}
 				</div>
 			</Page>
 
@@ -427,21 +319,13 @@ const ProductsGridPage = () => {
 					<Card>
 						<CardHeader>
 							<CardLabel icon='Photo' iconColor='info'>
-								<CardTitle>Imagem da Vaga{!editItem && <p className='fs-6 fw-semibold'>(aleatório)</p>} </CardTitle>
+								<CardTitle>Imagem da Vaga <p className='fs-6 fw-semibold'>(aleatório)</p> </CardTitle>
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
 							<div className='row'>
 								<div className='col-12'>
-									{editItem ? (
-										<img
-											src={AbstractPicture[nameImage]}
-											alt=''
-											width={128}
-											height={128}
-											className='mx-auto d-block img-fluid mb-3 rounded'
-										/>
-									) : (
+									{imageFile ? (
 										<img
 											src={imageFile}
 											alt=''
@@ -449,11 +333,12 @@ const ProductsGridPage = () => {
 											height={128}
 											className='mx-auto d-block img-fluid mb-3 rounded'
 										/>
-										// <PlaceholderImage
-										// 	width={128}
-										// 	height={128}
-										// 	className='mx-auto d-block img-fluid mb-3 rounded'
-										// />
+									) : (
+										<PlaceholderImage
+											width={128}
+											height={128}
+											className='mx-auto d-block img-fluid mb-3 rounded'
+										/>
 									)}
 								</div>
 								<div className='col-12'>
@@ -633,7 +518,7 @@ const ProductsGridPage = () => {
 						icon='Save'
 						type='submit'
 						isDisable={!formik.isValid && !!formik.submitCount}>
-						{editItem ? 'Editar' : 'Criar'}
+						Criar
 					</Button>
 				</div>
 			</OffCanvas>

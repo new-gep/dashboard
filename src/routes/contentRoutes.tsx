@@ -54,11 +54,11 @@ const APP = {
 		GRID: lazy(() => import('../pages/presentation/knowledge/KnowledgeGridPage')),
 		VIEW: lazy(() => import('../pages/presentation/knowledge/KnowledgeViewPage')),
 	},
-	SALES: {
-		TRANSACTIONS: lazy(() => import('../pages/presentation/sales/TransActionsPage')),
-		PRODUCTS: lazy(() => import('../pages/presentation/sales/SalesListPage')),
-		PRODUCTS_GRID: lazy(() => import('../pages/presentation/sales/JobGridPage')),
-		PRODUCTS_VIEW: lazy(() => import('../pages/presentation/sales/ProductViewPage')),
+	JOB: {
+		TRANSACTIONS: lazy(() => import('../pages/presentation/job/TransActionsPage')),
+		PRODUCTS: lazy(() => import('../pages/presentation/job/SalesListPage')),
+		PRODUCTS_GRID: lazy(() => import('../pages/presentation/job/JobGridPage')),
+		PRODUCTS_VIEW: lazy(() => import('../pages/presentation/job/JobViewPage')),
 	},
 	APPOINTMENT: {
 		CALENDAR: lazy(() => import('../pages/presentation/appointment/CalendarPage')),
@@ -334,19 +334,19 @@ const presentation: RouteProps[] = [
 	 */
 	{
 		path: demoPagesMenu.sales.subMenu.transactions.path,
-		element: <APP.SALES.TRANSACTIONS />,
+		element: <APP.JOB.TRANSACTIONS />,
 	},
 	{
-		path: demoPagesMenu.sales.subMenu.salesList.path,
-		element: <APP.SALES.PRODUCTS />,
+		// path: demoPagesMenu.sales.subMenu.jobList.path,
+		element: <APP.JOB.PRODUCTS />,
 	},
 	{
 		path: demoPagesMenu.sales.subMenu.vaga.path,
-		element: <APP.SALES.PRODUCTS_GRID />,
+		element: <APP.JOB.PRODUCTS_GRID />,
 	},
 	{
-		path: `${demoPagesMenu.sales.subMenu.productID.path}/:id`,
-		element: <APP.SALES.PRODUCTS_VIEW />,
+		path: `${demoPagesMenu.sales.subMenu.jobID.path}/:id`,
+		element: <APP.JOB.PRODUCTS_VIEW />,
 	},
 
 	/**

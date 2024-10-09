@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { ApexOptions } from 'apexcharts';
 import { Link } from 'react-router-dom';
@@ -27,277 +27,215 @@ import useDarkMode from '../../../../hooks/useDarkMode';
 import { demoPagesMenu } from '../../../../menu';
 import Chart from '../../../../components/extras/Chart';
 import Badge from '../../../../components/bootstrap/Badge';
-
+import Job_Open from '../../../../api/get/Job_Open';
+import AuthContext from '../../../../contexts/authContext';
+import { AbstractPicture } from '../../../../constants/abstract';
+import Mask from '../../../../function/Mask';
+import { priceFormat } from '../../../../helpers/helpers'; 
+type AbstractPictureKeys = keyof typeof AbstractPicture;
 interface ITableRowProps {
-	id: string;
-	image: string;
-	name: string;
-	category: string;
-	series: ApexOptions['series'];
-	color: string;
-	stock: string;
-	price: string;
-	store: string;
+	id      : number;
+	image   : AbstractPictureKeys;
+	function: string;
+	salary  : string;
+	contract: string
+	candidates:any;
 }
 const TableRow: FC<ITableRowProps> = ({
-	id,
+	id,     
 	image,
-	name,
-	category,
-	series,
-	color,
-	stock,
-	price,
-	store,
+	function: functionTitle,
+	salary ,
+	contract,
+	candidates
 }) => {
 	const { darkModeStatus } = useDarkMode();
-	const dummyOptions: ApexOptions = {
-		colors: [color],
-		chart: {
-			type: 'line',
-			width: 100,
-			height: 35,
-			sparkline: {
-				enabled: true,
-			},
-		},
-		tooltip: {
-			theme: 'dark',
-			fixed: {
-				enabled: false,
-			},
-			x: {
-				show: false,
-			},
-			y: {
-				title: {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					formatter(seriesName: string) {
-						return '';
-					},
-				},
-			},
-		},
-		stroke: {
-			curve: 'smooth',
-			width: 2,
-		},
-	};
+
 	return (
 		<tr>
 			<th scope='row'>{id}</th>
 			<td>
-				<Link
-					to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}
-					aria-label={name}>
-					<img src={image} alt='' width={54} height={54} />
-				</Link>
+				<img src={AbstractPicture[image]} alt='' width={54} height={54} />
 			</td>
 			<td>
 				<div>
-					<Link
-						to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}
-						className={classNames('fw-bold', {
-							'link-dark': !darkModeStatus,
-							'link-light': darkModeStatus,
-						})}>
-						{name}
-					</Link>
-					<div className='text-muted'>
-						<small>{category}</small>
-					</div>
+					{functionTitle}
 				</div>
 			</td>
-			<td aria-label='Chart'>
-				<Chart
-					series={series}
-					options={dummyOptions}
-					type={dummyOptions.chart?.type}
-					height={dummyOptions.chart?.height}
-					width={dummyOptions.chart?.width}
-				/>
+			<td >
+				R$ {priceFormat(salary)}
 			</td>
 			<td>
-				<span>{stock}</span>
+				<span className={`${contract == 'contract' ? 'text-capitalize' : 'text-uppercase'}`}>
+					{contract == 'contract' ? 'contrato' : contract}
+				</span>
 			</td>
 			<td>
 				<span>
-					{
-						// @ts-ignore
-						price.toLocaleString('en-US', {
-							style: 'currency',
-							currency: 'USD',
-						})
-					}
+					{candidates ? candidates.length : 0}
 				</span>
 			</td>
 			<td className='h5'>
-				<Badge
-					color={
-						(store === 'Company A' && 'danger') ||
-						(store === 'Company B' && 'warning') ||
-						(store === 'Company C' && 'success') ||
-						'info'
-					}>
-					{store}
-				</Badge>
+
 			</td>
 		</tr>
 	);
 };
 
 const CommonDashboardJob = () => {
-	const TOP_SELLER_FILTER = {
-		DAY: 'day',
-		WEEK: 'week',
-		MONTH: 'month',
-	};
-	const [topSellerFilter, setTopSellerFilter] = useState(TOP_SELLER_FILTER.DAY);
-	const filteredData = data
-		.filter(
-			(f) =>
-				(topSellerFilter === TOP_SELLER_FILTER.DAY && f.id < 6) ||
-				(topSellerFilter === TOP_SELLER_FILTER.WEEK && f.name.includes('c')) ||
-				(topSellerFilter === TOP_SELLER_FILTER.MONTH && f.price > 13),
-		)
-		.filter((c, index) => index < 5);
-
+	const { userData } = useContext(AuthContext);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [perPage, setPerPage] = useState(PER_COUNT['3']);
-	const { items, requestSort, getClassNamesFor } = useSortableData(filteredData);
+	const [jobs, setJobs] = useState<null | any>(null);
+
+	useEffect(()=>{
+		const fetchData = async () => {
+			if(userData){
+				const response  = await Job_Open(userData.cnpj);
+				switch (response.status) {
+					case 200:
+						setJobs(response.job)
+						break;
+				
+					default:
+						break;
+				}
+				console.log(response)
+			}
+		}
+		fetchData()
+	},[userData])
+
 	return (
-		<Card stretch>
-			<CardHeader>
-				<CardLabel icon='Work' iconColor='info'>
-					<CardTitle tag='div' className='h5'>
-						Vagas Abertas
-					</CardTitle>
-				</CardLabel>
-				{/* <CardActions>
-					<Dropdown isButtonGroup>
-						<Button color='success' isLight icon='WaterfallChart'>
-							{(topSellerFilter === TOP_SELLER_FILTER.DAY &&
-								dayjs().format('MMM Do')) ||
-								(topSellerFilter === TOP_SELLER_FILTER.WEEK &&
-									`${dayjs().startOf('week').format('MMM Do')} - ${dayjs()
-										.endOf('week')
-										.format('MMM Do')}`) ||
-								(topSellerFilter === TOP_SELLER_FILTER.MONTH &&
-									dayjs().format('MMM YYYY'))}
-						</Button>
-						<DropdownToggle>
-							<Button color='success' isLight isVisuallyHidden />
-						</DropdownToggle>
-						<DropdownMenu isAlignmentEnd>
-							<DropdownItem>
-								<Button onClick={() => setTopSellerFilter(TOP_SELLER_FILTER.DAY)}>
-									Last Day
+		<>
+			{jobs &&
+				<Card stretch>
+					<CardHeader>
+						<CardLabel icon='Work' iconColor='info'>
+							<CardTitle tag='div' className='h5'>
+								Vagas Abertas
+							</CardTitle>
+						</CardLabel>
+						{/* <CardActions>
+							<Dropdown isButtonGroup>
+								<Button color='success' isLight icon='WaterfallChart'>
+									{(topSellerFilter === TOP_SELLER_FILTER.DAY &&
+										dayjs().format('MMM Do')) ||
+										(topSellerFilter === TOP_SELLER_FILTER.WEEK &&
+											`${dayjs().startOf('week').format('MMM Do')} - ${dayjs()
+												.endOf('week')
+												.format('MMM Do')}`) ||
+										(topSellerFilter === TOP_SELLER_FILTER.MONTH &&
+											dayjs().format('MMM YYYY'))}
 								</Button>
-							</DropdownItem>
-							<DropdownItem>
-								<Button onClick={() => setTopSellerFilter(TOP_SELLER_FILTER.WEEK)}>
-									Last Week
-								</Button>
-							</DropdownItem>
-							<DropdownItem>
-								<Button onClick={() => setTopSellerFilter(TOP_SELLER_FILTER.MONTH)}>
-									Last Month
-								</Button>
-							</DropdownItem>
-						</DropdownMenu>
-					</Dropdown>
-					<Button
-						color='info'
-						icon='CloudDownload'
-						isLight
-						tag='a'
-						to='/somefile.txt'
-						target='_blank'
-						download>
-						Export
-					</Button>
-				</CardActions> */}
-			</CardHeader>
-			<CardBody className='table-responsive'>
-				<table className='table table-modern table-hover'>
-					<thead>
-						<tr>
-							<th
-								scope='col'
-								onClick={() => requestSort('id')}
-								className='cursor-pointer text-decoration-underline'>
-								#{' '}
-								<Icon
-									size='lg'
-									className={getClassNamesFor('id')}
-									icon='FilterList'
-								/>
-							</th>
-							<th scope='col'>Image</th>
-							<th
-								scope='col'
-								onClick={() => requestSort('name')}
-								className='cursor-pointer text-decoration-underline'>
-								Name{' '}
-								<Icon
-									size='lg'
-									className={getClassNamesFor('name')}
-									icon='FilterList'
-								/>
-							</th>
-							<th scope='col'>Sales</th>
-							<th
-								scope='col'
-								onClick={() => requestSort('stock')}
-								className='cursor-pointer text-decoration-underline'>
-								Stock{' '}
-								<Icon
-									size='lg'
-									className={getClassNamesFor('stock')}
-									icon='FilterList'
-								/>
-							</th>
-							<th
-								scope='col'
-								onClick={() => requestSort('price')}
-								className='cursor-pointer text-decoration-underline'>
-								Price{' '}
-								<Icon
-									size='lg'
-									className={getClassNamesFor('price')}
-									icon='FilterList'
-								/>
-							</th>
-							<th
-								scope='col'
-								onClick={() => requestSort('store')}
-								className='cursor-pointer text-decoration-underline'>
-								Store{' '}
-								<Icon
-									size='lg'
-									className={getClassNamesFor('store')}
-									icon='FilterList'
-								/>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{dataPagination(items, currentPage, perPage).map((i) => (
-							// eslint-disable-next-line react/jsx-props-no-spreading
-							<TableRow key={i.id} {...i} />
-						))}
-					</tbody>
-				</table>
-			</CardBody>
-			<PaginationButtons
-				data={items}
-				label='items'
-				setCurrentPage={setCurrentPage}
-				currentPage={currentPage}
-				perPage={perPage}
-				setPerPage={setPerPage}
-			/>
-		</Card>
+								<DropdownToggle>
+									<Button color='success' isLight isVisuallyHidden />
+								</DropdownToggle>
+								<DropdownMenu isAlignmentEnd>
+									<DropdownItem>
+										<Button onClick={() => setTopSellerFilter(TOP_SELLER_FILTER.DAY)}>
+											Last Day
+										</Button>
+									</DropdownItem>
+									<DropdownItem>
+										<Button onClick={() => setTopSellerFilter(TOP_SELLER_FILTER.WEEK)}>
+											Last Week
+										</Button>
+									</DropdownItem>
+									<DropdownItem>
+										<Button onClick={() => setTopSellerFilter(TOP_SELLER_FILTER.MONTH)}>
+											Last Month
+										</Button>
+									</DropdownItem>
+								</DropdownMenu>
+							</Dropdown>
+							<Button
+								color='info'
+								icon='CloudDownload'
+								isLight
+								tag='a'
+								to='/somefile.txt'
+								target='_blank'
+								download>
+								Export
+							</Button>
+						</CardActions> */}
+					</CardHeader>
+						
+					<CardBody className='table-responsive'>
+						<table className='table table-modern table-hover'>
+							<thead>
+								<tr>
+									<th
+										scope='col'
+										// onClick={}
+										className='cursor-pointer text-decoration-underline'>
+										#{' '}
+										<Icon
+											size='lg'
+											// className={}
+											icon='FilterList'
+										/>
+									</th>
+									<th scope='col'>Imagem</th>
+									<th
+										scope='col'
+										// onClick={}
+										className='cursor-pointer text-decoration-underline'>
+										Função{' '}
+										<Icon
+											size='lg'
+											// className={}
+											icon='FilterList'
+										/>
+									</th>
+									<th scope='col'>Salario</th>
+									<th
+										scope='col'
+										// onClick={() => requestSort('price')}
+										className='cursor-pointer text-decoration-underline'>
+										Contratação{' '}
+										<Icon
+											size='lg'
+											// className={getClassNamesFor('price')}
+											icon='FilterList'
+										/>
+									</th>
+									<th
+										scope='col'
+										// onClick={() => requestSort('store')}
+										className='cursor-pointer text-decoration-underline'>
+										Candidatos{' '}
+										<Icon
+											size='lg'
+											// className={}
+											icon='FilterList'
+										/>
+									</th>
+								</tr>
+							</thead>
+							
+							<tbody>
+							
+								{dataPagination(jobs, currentPage, perPage).map((i) => (
+									// eslint-disable-next-line react/jsx-props-no-spreading
+									<TableRow key={i.id} {...i} />
+								))}
+							
+							</tbody>
+						</table>
+					</CardBody>
+					<PaginationButtons
+						data={jobs}
+						label='items'
+						setCurrentPage={setCurrentPage}
+						currentPage={currentPage}
+						perPage={perPage}
+						setPerPage={setPerPage}
+					/>
+				</Card>
+			}
+		</>
 	);
 };
 
