@@ -250,7 +250,7 @@ const EditModernPage = () => {
 												isValid={formik.isValid}
 												isTouched={formik.touched.firstName}
 												invalidFeedback={formik.errors.firstName}
-												validFeedback='Looks good!'
+												validFeedback='Ótimo'
 											/>
 										</FormGroup>
 									</div>
@@ -266,7 +266,7 @@ const EditModernPage = () => {
 												isValid={formik.isValid}
 												isTouched={formik.touched.lastName}
 												invalidFeedback={formik.errors.lastName}
-												validFeedback='Looks good!'
+												validFeedback='Ótimo'
 											/>
 										</FormGroup>
 									</div>
@@ -286,7 +286,7 @@ const EditModernPage = () => {
 												isValid={formik.isValid}
 												isTouched={formik.touched.displayName}
 												invalidFeedback={formik.errors.displayName}
-												validFeedback='Looks good!'
+												validFeedback='Ótimo'
 											/>
 										</FormGroup>
 									</div>
@@ -321,7 +321,7 @@ const EditModernPage = () => {
 												isValid={formik.isValid}
 												isTouched={formik.touched.emailAddress}
 												invalidFeedback={formik.errors.emailAddress}
-												validFeedback='Looks good!'
+												validFeedback='Ótimo'
 											/>
 										</FormGroup>
 									</div>
@@ -337,7 +337,7 @@ const EditModernPage = () => {
 												isValid={formik.isValid}
 												isTouched={formik.touched.phone}
 												invalidFeedback={formik.errors.phone}
-												validFeedback='Looks good!'
+												validFeedback='Ótimo'
 											/>
 										</FormGroup>
 									</div>
@@ -409,7 +409,7 @@ const EditModernPage = () => {
 													isValid={formik.isValid}
 													isTouched={formik.touched.newPassword}
 													invalidFeedback={formik.errors.newPassword}
-													validFeedback='Looks good!'
+													validFeedback='Ótimo'
 												/>
 											</FormGroup>
 										</div>
@@ -428,7 +428,7 @@ const EditModernPage = () => {
 													isValid={formik.isValid}
 													isTouched={formik.touched.confirmPassword}
 													invalidFeedback={formik.errors.confirmPassword}
-													validFeedback='Looks good!'
+													validFeedback='Ótimo'
 												/>
 											</FormGroup>
 										</div>
