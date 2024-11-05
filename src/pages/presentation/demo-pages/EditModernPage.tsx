@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import dayjs, { Dayjs } from 'dayjs';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
@@ -33,19 +33,32 @@ import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 import Breadcrumb from '../../../components/bootstrap/Breadcrumb';
 import Avatar from '../../../components/Avatar';
-import USERS from '../../../common/data/userDummyData';
+import { AvatarPicture } from '../../../constants/avatar';
 import CommonDesc from '../../../common/other/CommonDesc';
 import Label from '../../../components/bootstrap/forms/Label';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
+import AuthContext from '../../../contexts/authContext';
+import Mask from '../../../function/Mask';
+import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
+import { color } from 'framer-motion';
 
 const EditModernPage = () => {
 	const { themeStatus } = useDarkMode();
-
+	const { userData } = useContext(AuthContext);
 	/**
 	 * Common
 	 */
 	const [lastSave, setLastSave] = useState<Dayjs | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [modalAvatar, setModalAvatar] = useState<boolean>(false);
+	const [passwordChangeCTA, setPasswordChangeCTA] = useState<boolean>(false);
+	const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+
+	const handleAvatarClick = (key: string) => {
+		setSelectedAvatar(key);
+		console.log(selectedAvatar)
+	};
+
 	const handleSave = () => {
 		setLastSave(dayjs());
 		setIsLoading(false);
@@ -60,10 +73,10 @@ const EditModernPage = () => {
 
 	const formik = useFormik({
 		initialValues: {
-			firstName: 'John',
-			lastName: 'Doe',
-			displayName: 'johndoe',
-			emailAddress: 'johndoe@site.com',
+			firstName: '',
+			lastName: '',
+			displayName: '',
+			emailAddress: '',
 			phone: '',
 			currentPassword: '',
 			newPassword: '',
@@ -71,6 +84,7 @@ const EditModernPage = () => {
 			checkOne: true,
 			checkTwo: false,
 			checkThree: true,
+			avatar: null
 		},
 		validate,
 		onSubmit: () => {
@@ -79,20 +93,69 @@ const EditModernPage = () => {
 		},
 	});
 
-	const [passwordChangeCTA, setPasswordChangeCTA] = useState<boolean>(false);
+	useEffect(() => {
+		console.log(userData)
+		if (userData) {
+			formik.setValues({
+				avatar: userData.avatar && userData.avatar,
+				firstName: userData.name && Mask('firstName', userData.name),
+				lastName : userData.name && Mask('secondName', userData.name),
+				displayName: userData.name || '',
+				emailAddress: userData.email || '',
+				phone: userData.phone && Mask('phone',userData.phone),
+				currentPassword: '',
+				newPassword: '',
+				confirmPassword: '',
+				checkOne: true,
+				checkTwo: false,
+				checkThree: true,
+			});
+		}
+	}, [userData]);
 
 	return (
 		<PageWrapper title={demoPagesMenu.editPages.subMenu.editModern.text}>
+			<Modal isOpen={modalAvatar} setIsOpen={setModalAvatar}>
+				<ModalHeader >
+					<ModalTitle id={ 'teste' }>
+						<h5>Escolha seu Avatar</h5>
+					</ModalTitle>
+				</ModalHeader>
+				<ModalBody>
+					<div className="d-flex align-items-center flex-wrap p-2 gap-4 ">
+						{Object.keys(AvatarPicture)
+						.filter((key) => key !== 'default')
+						.map((key, index) => (
+							<img
+								height={70}
+								width={70}
+								key={index}
+								//@ts-ignore
+								src={AvatarPicture[key]} // Supondo que cada avatar tenha uma propriedade `src`
+								alt={'Avatar do Usuário'} // Supondo que cada avatar tenha uma propriedade `alt`
+								onClick={() => handleAvatarClick(key)}
+								className={`border-hover cursor-pointer ${selectedAvatar === key && 'rounded-1 bg-primary' }`}
+							/>
+						))}
+					</div>
+				</ModalBody>
+				<ModalFooter>
+					<Button className='btn btn-outline-info border-0' onClick={()=>setModalAvatar(false)}>
+						Fechar
+					</Button>
+					<Button icon='Save' className='btn btn-info'>Salvar</Button>
+				</ModalFooter>
+			</Modal>
 			<SubHeader>
 				<SubHeaderLeft>
 					<Breadcrumb
 						list={[
-							{ title: 'Users', to: '/' },
-							{ title: 'Edit User', to: '/' },
+							{ title: 'Perfil', to: '/' },
+							{ title: 'Editar Usuário', to: '/' },
 						]}
 					/>
 					<SubheaderSeparator />
-					<span className='text-muted'>John Doe</span>
+					<span className='text-muted text-capitalize'>{userData && userData.name} </span>
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<Button
@@ -104,7 +167,7 @@ const EditModernPage = () => {
 						{isLoading && <Spinner isSmall inButton />}
 						{isLoading
 							? (lastSave && 'Saving') || 'Publishing'
-							: (lastSave && 'Save') || 'Publish'}
+							: (lastSave && 'Save') || 'Salvar'}
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -117,9 +180,15 @@ const EditModernPage = () => {
 									<div className='row g-4 align-items-center'>
 										<div className='col-lg-auto'>
 											<Avatar
-												srcSet={USERS.JOHN.srcSet}
-												src={USERS.JOHN.src}
-												color={USERS.JOHN.color}
+												src={
+													selectedAvatar 
+													//@ts-ignore
+													  ? AvatarPicture[selectedAvatar]                // Se o usuário selecionou um avatar, exiba-o
+													  : userData.avatar 
+													  ? userData.avatar                             // Caso contrário, exiba o avatar do usuário (se disponível)
+													  : AvatarPicture.default                       // Caso contrário, exiba o avatar padrão
+												  }
+												color='storybook'
 												rounded={3}
 											/>
 										</div>
@@ -130,16 +199,24 @@ const EditModernPage = () => {
 														type='file'
 														autoComplete='photo'
 														ariaLabel='Upload image file'
+														disabled={true}
 													/>
 												</div>
 												<div className='col-auto'>
-													<Button color='dark' isLight icon='Delete'>
-														Delete Avatar
+													<Button color='dark' isLight icon='Sync'
+														onClick={()=>setModalAvatar(true)}
+													>
+														Alterar Avatar
+													</Button>
+												</div>
+												<div className='col-auto'>
+													<Button color='dark' isLight icon='Delete' isDisable>
+														Deletar Avatar
 													</Button>
 												</div>
 												<div className='col-12'>
 													<p className='lead text-muted'>
-														Avatar helps your teammates get to know you.
+														Atualmente não é possível colocar sua foto, apenas avatares. 
 													</p>
 												</div>
 											</div>
@@ -152,19 +229,20 @@ const EditModernPage = () => {
 							<CardHeader>
 								<CardLabel icon='Person' iconColor='success'>
 									<CardTitle tag='div' className='h5'>
-										Personal Information
+										Informação Pessoal
 									</CardTitle>
 									<CardSubTitle tag='div' className='h6'>
-										User's credentials
+										Credenciais do usuário
 									</CardSubTitle>
 								</CardLabel>
 							</CardHeader>
 							<CardBody>
 								<div className='row g-4'>
 									<div className='col-md-6'>
-										<FormGroup id='firstName' label='First Name' isFloating>
+										<FormGroup id='firstName' label='Primeiro Nome' isFloating>
 											<Input
-												placeholder='First Name'
+												className='text-capitalize'
+												placeholder='Primeiro Nome'
 												autoComplete='additional-name'
 												onChange={formik.handleChange}
 												onBlur={formik.handleBlur}
@@ -177,9 +255,10 @@ const EditModernPage = () => {
 										</FormGroup>
 									</div>
 									<div className='col-md-6'>
-										<FormGroup id='lastName' label='Last Name' isFloating>
+										<FormGroup id='lastName' label='Último Nome' isFloating>
 											<Input
-												placeholder='Last Name'
+												className='text-capitalize'
+												placeholder='Último Nome'
 												autoComplete='family-name'
 												onChange={formik.handleChange}
 												onBlur={formik.handleBlur}
@@ -194,10 +273,11 @@ const EditModernPage = () => {
 									<div className='col-12'>
 										<FormGroup
 											id='displayName'
-											label='Display Name'
+											label='Nome Completo'
 											isFloating
-											formText='This will be how your name will be displayed in the account section and in reviews'>
+											formText='Será assim que seu nome será exibido na seção da conta e nas avaliações'>
 											<Input
+												className='text-capitalize'
 												placeholder='Display Name'
 												autoComplete='username'
 												onChange={formik.handleChange}
@@ -217,10 +297,10 @@ const EditModernPage = () => {
 							<CardHeader>
 								<CardLabel icon='Phonelink' iconColor='danger'>
 									<CardTitle tag='div' className='h5'>
-										Contact Information
+										Informações de Contato
 									</CardTitle>
 									<CardSubTitle tag='div' className='h6'>
-										User's contact information
+										Informações de contato do usuário
 									</CardSubTitle>
 								</CardLabel>
 							</CardHeader>
@@ -229,11 +309,11 @@ const EditModernPage = () => {
 									<div className='col-md-6'>
 										<FormGroup
 											id='emailAddress'
-											label='Email address'
+											label='Email'
 											isFloating>
 											<Input
 												type='email'
-												placeholder='Email address'
+												placeholder='Email'
 												autoComplete='email'
 												onChange={formik.handleChange}
 												onBlur={formik.handleBlur}
@@ -246,10 +326,10 @@ const EditModernPage = () => {
 										</FormGroup>
 									</div>
 									<div className='col-md-6'>
-										<FormGroup id='phone' label='Phone Number' isFloating>
+										<FormGroup id='phone' label='Celular' isFloating>
 											<Input
 												type='tel'
-												placeholder='Phone Number'
+												placeholder='Celular'
 												autoComplete='tel'
 												onChange={formik.handleChange}
 												onBlur={formik.handleBlur}
@@ -268,10 +348,10 @@ const EditModernPage = () => {
 							<CardHeader>
 								<CardLabel icon='LocalPolice' iconColor='primary'>
 									<CardTitle tag='div' className='h5'>
-										Password
+										Senha
 									</CardTitle>
 									<CardSubTitle tag='div' className='h6'>
-										Password change operations
+										Operações de alteração de senha
 									</CardSubTitle>
 								</CardLabel>
 								<CardActions>
@@ -281,17 +361,17 @@ const EditModernPage = () => {
 											isLight
 											icon='Cancel'
 											onClick={() => setPasswordChangeCTA(false)}>
-											Cancel
+											Cancelar
 										</Button>
 									) : (
 										<>
-											<span>Do you want to change?</span>
+											<span>Você quer mudar?</span>
 											<Button
 												color='primary'
 												isLight
 												icon='PublishedWithChanges'
 												onClick={() => setPasswordChangeCTA(true)}>
-												Yes
+												Sim
 											</Button>
 										</>
 									)}
@@ -303,11 +383,11 @@ const EditModernPage = () => {
 										<div className='col-12'>
 											<FormGroup
 												id='currentPassword'
-												label='Current password'
+												label='Senha Atual'
 												isFloating>
 												<Input
 													type='password'
-													placeholder='Current password'
+													placeholder='Senha Atual'
 													autoComplete='current-password'
 													onChange={formik.handleChange}
 													value={formik.values.currentPassword}
@@ -317,11 +397,11 @@ const EditModernPage = () => {
 										<div className='col-12'>
 											<FormGroup
 												id='newPassword'
-												label='New password'
+												label='Nova Senha'
 												isFloating>
 												<Input
 													type='password'
-													placeholder='New password'
+													placeholder='Nova Senha'
 													autoComplete='new-password'
 													onChange={formik.handleChange}
 													onBlur={formik.handleBlur}
@@ -336,7 +416,7 @@ const EditModernPage = () => {
 										<div className='col-12'>
 											<FormGroup
 												id='confirmPassword'
-												label='Confirm new password'
+												label='Confirma Nova Senha'
 												isFloating>
 												<Input
 													type='password'
@@ -357,8 +437,7 @@ const EditModernPage = () => {
 							)}
 							<CardFooter>
 								<CommonDesc>
-									For your security, we recommend that you change your password
-									every 3 months at most.
+									Para sua segurança, recomendamos que você altere sua senha a cada 3 meses, no máximo.
 								</CommonDesc>
 							</CardFooter>
 						</Card>
@@ -368,7 +447,7 @@ const EditModernPage = () => {
 							<CardHeader>
 								<CardLabel icon='MarkEmailUnread'>
 									<CardTitle tag='div' className='h5'>
-										Email notification
+										Notificação por e-mail
 									</CardTitle>
 								</CardLabel>
 							</CardHeader>
@@ -378,19 +457,18 @@ const EditModernPage = () => {
 										<FormGroup>
 											{/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
 											<Label>
-												Choose what messages you’d like to receive for each
-												of your accounts.
+												Escolha quais mensagens você gostaria de receber por e-mail.
 											</Label>
 											<ChecksGroup>
 												<Checks
 													type='switch'
 													id='inlineCheckOne'
-													label='Successful Payments'
+													label='Receber novidades'
 													name='checkOne'
 													onChange={formik.handleChange}
 													checked={formik.values.checkOne}
 												/>
-												<Checks
+												{/* <Checks
 													type='switch'
 													id='inlineCheckTwo'
 													label='Payouts'
@@ -405,7 +483,7 @@ const EditModernPage = () => {
 													name='checkThree'
 													onChange={formik.handleChange}
 													checked={formik.values.checkThree}
-												/>
+												/> */}
 											</ChecksGroup>
 										</FormGroup>
 									</div>
@@ -439,9 +517,9 @@ const EditModernPage = () => {
 												<Icon
 													icon='Warning'
 													size='lg'
-													className='me-2 text-warning'
+													className='me-2'
 												/>
-												<span className='text-warning'>Not saved yet</span>
+												<span className=''>Ainda não salvo</span>
 											</>
 										)}
 									</div>
@@ -458,7 +536,7 @@ const EditModernPage = () => {
 													{isLoading && <Spinner isSmall inButton />}
 													{isLoading
 														? (lastSave && 'Saving') || 'Publishing'
-														: (lastSave && 'Save') || 'Publish'}
+														: (lastSave && 'Save') || 'Salvar'}
 												</Button>
 											</div>
 											<div className='col-auto'>
@@ -478,7 +556,7 @@ const EditModernPage = () => {
 																isLight
 																isDisable={isLoading}
 																onClick={formik.resetForm}>
-																Reset
+																Resetar
 															</Button>
 														</DropdownItem>
 													</DropdownMenu>

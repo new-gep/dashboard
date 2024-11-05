@@ -57,6 +57,7 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 			try{
 				if (token !== '') {
 					const userData = await verifyTokenWithAPI(token);
+					console.log(userData)
 					switch (userData.status) {
 						case 400:
 							setUserData({});

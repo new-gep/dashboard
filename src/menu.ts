@@ -128,7 +128,7 @@ export const demoPagesMenu = {
 		subMenu: {
 			editModern: {
 				id: 'editModern',
-				text: 'Modern Edit',
+				text: 'Profile Edit',
 				path: 'edit-pages/modern',
 				icon: 'AutoAwesomeMosaic',
 				notification: 'primary',

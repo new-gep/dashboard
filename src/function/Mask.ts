@@ -19,7 +19,7 @@ type MaskType =
     | 'lastUpdate'
     ;
 
-export default function Mask(type: MaskType, value: string | number): string {
+export default function Mask(type: MaskType, value: any): string {
     switch (type) {
         case 'phone': {
             const cleanedValue = value.toString().replace(/\D/g, '');

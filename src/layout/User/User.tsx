@@ -82,7 +82,7 @@ const User = () => {
 							className='navigation-item cursor-pointer'
 							onClick={() =>
 								navigate(
-									// `../${demoPagesMenu.appointment.subMenu.employeeID.path}/${userData?.id}`,
+									`../${demoPagesMenu.editPages.subMenu.editModern.path}/${userData?.id}`,
 									// @ts-ignore
 									handleItem(),
 								)

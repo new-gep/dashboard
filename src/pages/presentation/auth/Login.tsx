@@ -15,6 +15,7 @@ import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyDa
 import Spinner from '../../../components/bootstrap/Spinner';
 import Alert, { AlertHeading } from '../../../components/bootstrap/Alert';
 import Logo from '../../../assets/logo/logo.png'
+import LogoDark from '../../../assets/logo/logo_yellow.png'
 import Icon from '../../../components/icon/Icon';
 import Cnpj from '../../../api/get/Cnpj';
 import Company from '../../../api/post/Company';
@@ -286,7 +287,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 							<CardBody>
 								<div className='row items-center justify-content-center'>
 									<img 
-										src={Logo}
+										src={darkModeStatus ? LogoDark : Logo}
 										style={{height:'50%', width:'50%', objectFit: 'contain'}}
 									/>
 								</div>
