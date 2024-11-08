@@ -1,4 +1,4 @@
-import React, { useState, useContext, ReactNode } from 'react';
+import React, { useState, useContext, ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
@@ -16,6 +16,7 @@ import ThemeContext from '../../contexts/themeContext';
 import Mask from '../../function/Mask';
 import UserOne from '../../assets/img/10067026.webp'
 import UserTwo from '../../assets/img/3187499.webp'
+import { AvatarPicture } from '../../constants/avatar';  
 const User = () => {
 	const { width } = useWindowSize();
 	const { setAsideStatus } = useContext(ThemeContext);
@@ -23,10 +24,13 @@ const User = () => {
 	const navigate = useNavigate();
 	const handleItem = useNavigationItemHandle();
 	const { darkModeStatus, setDarkModeStatus } = useDarkMode();
-
 	const [collapseStatus, setCollapseStatus] = useState<boolean>(false);
-
 	const { t } = useTranslation(['translation', 'menu']);
+
+	useEffect(()=>{
+		//@ts-ignore
+		console.log(AvatarPicture[userData.avatar])
+	},[])
 
 	return (
 		<>
@@ -37,7 +41,10 @@ const User = () => {
 				<div className='user-avatar'>
 					<img
 						// srcSet={userData?.srcSet}
-						src={UserTwo}
+						src={ userData.avatar ?
+							//@ts-ignore
+							AvatarPicture[userData.avatar]  : AvatarPicture.default
+						}
 						alt='Avatar'
 						width={128}
 						height={128}
@@ -73,7 +80,6 @@ const User = () => {
 					</Button>
 				</DropdownItem>
 			</DropdownMenu>
-
 			<Collapse isOpen={collapseStatus} className='user-menu'>
 				<nav aria-label='aside-bottom-user-menu'>
 					<div className='navigation'>

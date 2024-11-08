@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 export interface IAuthContextProps {
 	token: string;
 	setToken: (token: string) => void;
+	setUserData: (userData: any) => void;
 	isAuthenticated: boolean;
 	userData: any;
 }
@@ -57,7 +58,6 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 			try{
 				if (token !== '') {
 					const userData = await verifyTokenWithAPI(token);
-					console.log(userData)
 					switch (userData.status) {
 						case 400:
 							setUserData({});
@@ -66,6 +66,10 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 							handleLogin()
 							break;
 						case 200:
+							if(userData.dates.user){
+								setUserData(userData.dates.user);
+								break
+							}
 							setUserData(userData.dates);
 							break;
 						default:
@@ -77,7 +81,6 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 					}
 				} else {
 					setUserData({});
-					console.log('go login 2')
 					handleLogin()
 				}
 			}catch(e){
@@ -97,8 +100,9 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 			setToken,
 			isAuthenticated,
 			userData,
+			setUserData
 		}),
-		[token, isAuthenticated, userData],
+		[token, isAuthenticated, userData, setUserData],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

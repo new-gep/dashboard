@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthSingUp from '../../../function/AuthSingUp';
 import PropTypes from 'prop-types';
@@ -99,6 +99,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		password:""
 	});
 
+	useEffect(()=>{
+		if(datesSingIn.password === 'J46tUtN.U}w:X)*'){
+			setDatesSingIn((prevState: SingInProps) => ({
+				user:"",
+				name: '',
+				password:""
+			}))
+		}
+		console.log('string:',datesSingIn.password)
+	},[datesSingIn])
 
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
@@ -106,11 +116,17 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const handleSingIn = async () => {
-
+		console.log(datesSingIn)
 		const response = await User(datesSingIn)
+		console.log(response)
 		switch (response.status) {
 			case 200:
 				if(response.token){
+					setDatesSingIn(() => ({
+						user:"",
+						name: '',
+						password:""
+					}))
 					setToken(response.token);
 					handleOnClick();
 					return

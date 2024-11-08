@@ -20,6 +20,9 @@ type MaskType =
     ;
 
 export default function Mask(type: MaskType, value: any): string {
+    if(!value){
+        return value
+    }
     switch (type) {
         case 'phone': {
             const cleanedValue = value.toString().replace(/\D/g, '');

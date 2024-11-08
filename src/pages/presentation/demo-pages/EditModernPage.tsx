@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useFormik } from 'formik';
+import { useFormik, Form } from 'formik';
 import dayjs, { Dayjs } from 'dayjs';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import { demoPagesMenu } from '../../../menu';
@@ -41,10 +41,10 @@ import AuthContext from '../../../contexts/authContext';
 import Mask from '../../../function/Mask';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
 import { color } from 'framer-motion';
-
+import User from '../../../api/patch/User';
 const EditModernPage = () => {
 	const { themeStatus } = useDarkMode();
-	const { userData } = useContext(AuthContext);
+	const { userData, setUserData, setToken } = useContext(AuthContext);
 	/**
 	 * Common
 	 */
@@ -56,27 +56,134 @@ const EditModernPage = () => {
 
 	const handleAvatarClick = (key: string) => {
 		setSelectedAvatar(key);
-		console.log(selectedAvatar)
+		formik.setFieldValue('avatar', key);
 	};
 
-	const handleSave = () => {
-		setLastSave(dayjs());
-		setIsLoading(false);
-		showNotification(
-			<span className='d-flex align-items-center'>
-				<Icon icon='Info' size='lg' className='me-1' />
-				<span>Updated Successfully</span>
-			</span>,
-			"The user's account details have been successfully updated.",
-		);
+	const handleSave = async (picture?:boolean) => {
+		try{
+			if (picture) {
+				setUserData((prevUserData:any) => ({
+					...prevUserData,   
+					avatar: selectedAvatar   
+				}));
+			};
+			setModalAvatar(false)
+			setIsLoading(false);
+			const response = await User(userData.id, formik.values)
+			console.log(response)
+			switch (response.status) {
+				case 200:
+					setToken(response.token)
+					localStorage.setItem('gep_authToken', response.token);
+					showNotification(
+						<span className='d-flex align-items-center'>
+							<Icon icon='Info' size='lg' className='me-1' />
+							<span>Sucesso</span>
+						</span>,
+						"Os detalhes da conta foram atualizados com sucesso.",
+					);
+				return;
+				default:
+					showNotification(
+						<span className='d-flex align-items-center'>
+							<Icon icon='Info' size='lg' className='me-1' />
+							<span>Error</span>
+						</span>,
+						"Os detalhes da conta não foram atualizados.",
+					);
+				break;
+			}
+
+		}catch(e){
+			console.log(e)
+		}
+	};
+
+	const cancelEditPassword = async () => {
+		setPasswordChangeCTA(false)
+		formik.setFieldValue('currentPassword', '');
+		formik.setFieldValue('newPassword', '');
+		formik.setFieldValue('confirmPassword', '');
+		return
+	};
+
+	interface IValues {
+		firstName :string;
+		lastName  : string;
+		name  : string;
+		email : string;
+		phone : string;
+		currentPassword: string
+		newPassword: string;
+		confirmPassword : string;
+		checkOne : boolean;
+		checkTwo : boolean;
+		checkThree : boolean;
+		avatar : any;
+	};
+
+	const validate = (values: IValues) => {
+		const errors: any = {};
+		// Campos obrigatórios
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		const phoneRegex = /^(\d{2})(\d{9})$/;
+		if (!values.firstName) {
+			errors.firstName = 'Nome é obrigatório';
+		}
+		if (!values.lastName) {
+			errors.lastName = 'Sobrenome é obrigatório';
+		}
+		if (!values.name) {
+			errors.name = 'Nome completo é obrigatório';
+		}
+		if (!values.phone) {
+    		errors.phone = 'Telefone é obrigatório';
+		} else if (!phoneRegex.test(Mask('remove', values.phone))) {
+			errors.phone = 'Telefone inválido. Formato esperado: DDD seguido do número, ex: (11) 98765-4321';
+		}
+
+		if (!values.email) {
+			errors.email = 'E-mail é obrigatório';
+		} else if (!emailRegex.test(values.email)) {
+			errors.email = 'E-mail inválido. Formato esperado: exemplo@dominio.com';
+		}
+		if (passwordChangeCTA) {
+			// Validar senha atual
+			if (!values.currentPassword) {
+				errors.currentPassword = 'Senha atual é obrigatória';
+			}
+			
+			// Validar nova senha
+			if (!values.newPassword) {
+				errors.newPassword = 'Nova senha é obrigatória';
+			} else if (values.newPassword.length < 6) {
+				errors.newPassword = 'Nova senha deve ter pelo menos 6 caracteres';
+			}
+			
+			// Validar confirmação da nova senha
+			if (!values.confirmPassword) {
+				errors.confirmPassword = 'Confirmação de senha é obrigatória';
+			} else if (values.confirmPassword.length < 6) {
+				errors.confirmPassword = 'Confirmação de senha deve ter pelo menos 6 caracteres';
+			}
+			
+			// Verificar se nova senha e confirmação são iguais
+			if (values.newPassword && values.confirmPassword && values.newPassword !== values.confirmPassword) {
+				errors.confirmPassword = 'As senhas não correspondem';
+			}
+		};
+	
+		// Não validamos os campos opcionais (benefits, details, obligations)
+	
+		return errors;
 	};
 
 	const formik = useFormik({
 		initialValues: {
 			firstName: '',
 			lastName: '',
-			displayName: '',
-			emailAddress: '',
+			name: '',
+			email: '',
 			phone: '',
 			currentPassword: '',
 			newPassword: '',
@@ -89,27 +196,26 @@ const EditModernPage = () => {
 		validate,
 		onSubmit: () => {
 			setIsLoading(true);
-			setTimeout(handleSave, 2000);
+			handleSave()
 		},
 	});
 
 	useEffect(() => {
-		console.log(userData)
 		if (userData) {
 			formik.setValues({
 				avatar: userData.avatar && userData.avatar,
 				firstName: userData.name && Mask('firstName', userData.name),
 				lastName : userData.name && Mask('secondName', userData.name),
-				displayName: userData.name || '',
-				emailAddress: userData.email || '',
-				phone: userData.phone && Mask('phone',userData.phone),
+				name: userData.name || '',
+				email: userData.email || '',
+				phone: userData.phone,
 				currentPassword: '',
 				newPassword: '',
 				confirmPassword: '',
 				checkOne: true,
 				checkTwo: false,
 				checkThree: true,
-			});
+			} as any);
 		}
 	}, [userData]);
 
@@ -143,7 +249,7 @@ const EditModernPage = () => {
 					<Button className='btn btn-outline-info border-0' onClick={()=>setModalAvatar(false)}>
 						Fechar
 					</Button>
-					<Button icon='Save' className='btn btn-info'>Salvar</Button>
+					<Button type='submit' icon='Save' className='btn btn-info' onClick={()=>handleSave(true)}>Salvar</Button>
 				</ModalFooter>
 			</Modal>
 			<SubHeader>
@@ -159,6 +265,7 @@ const EditModernPage = () => {
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<Button
+						type='submit'
 						icon={isLoading ? undefined : 'Save'}
 						isLight
 						color={lastSave ? 'info' : 'success'}
@@ -167,7 +274,7 @@ const EditModernPage = () => {
 						{isLoading && <Spinner isSmall inButton />}
 						{isLoading
 							? (lastSave && 'Saving') || 'Publishing'
-							: (lastSave && 'Save') || 'Salvar'}
+							: (lastSave && 'Atualizado') || 'Salvar'}
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -185,7 +292,8 @@ const EditModernPage = () => {
 													//@ts-ignore
 													  ? AvatarPicture[selectedAvatar]                // Se o usuário selecionou um avatar, exiba-o
 													  : userData.avatar 
-													  ? userData.avatar                             // Caso contrário, exiba o avatar do usuário (se disponível)
+													  // @ts-ignore
+													  ? AvatarPicture[userData.avatar]                           // Caso contrário, exiba o avatar do usuário (se disponível)
 													  : AvatarPicture.default                       // Caso contrário, exiba o avatar padrão
 												  }
 												color='storybook'
@@ -272,7 +380,7 @@ const EditModernPage = () => {
 									</div>
 									<div className='col-12'>
 										<FormGroup
-											id='displayName'
+											id='name'
 											label='Nome Completo'
 											isFloating
 											formText='Será assim que seu nome será exibido na seção da conta e nas avaliações'>
@@ -282,11 +390,12 @@ const EditModernPage = () => {
 												autoComplete='username'
 												onChange={formik.handleChange}
 												onBlur={formik.handleBlur}
-												value={formik.values.displayName}
+												value={`${formik.values.firstName} ${formik.values.lastName}`}
 												isValid={formik.isValid}
-												isTouched={formik.touched.displayName}
-												invalidFeedback={formik.errors.displayName}
+												isTouched={formik.touched.name}
+												invalidFeedback={formik.errors.name}
 												validFeedback='Ótimo'
+												disabled={true}
 											/>
 										</FormGroup>
 									</div>
@@ -308,7 +417,7 @@ const EditModernPage = () => {
 								<div className='row g-4'>
 									<div className='col-md-6'>
 										<FormGroup
-											id='emailAddress'
+											id='email'
 											label='Email'
 											isFloating>
 											<Input
@@ -317,10 +426,10 @@ const EditModernPage = () => {
 												autoComplete='email'
 												onChange={formik.handleChange}
 												onBlur={formik.handleBlur}
-												value={formik.values.emailAddress}
+												value={formik.values.email}
 												isValid={formik.isValid}
-												isTouched={formik.touched.emailAddress}
-												invalidFeedback={formik.errors.emailAddress}
+												isTouched={formik.touched.email}
+												invalidFeedback={formik.errors.email}
 												validFeedback='Ótimo'
 											/>
 										</FormGroup>
@@ -333,7 +442,7 @@ const EditModernPage = () => {
 												autoComplete='tel'
 												onChange={formik.handleChange}
 												onBlur={formik.handleBlur}
-												value={formik.values.phone}
+												value={Mask('phone', formik.values.phone)}
 												isValid={formik.isValid}
 												isTouched={formik.touched.phone}
 												invalidFeedback={formik.errors.phone}
@@ -360,7 +469,7 @@ const EditModernPage = () => {
 											color='danger'
 											isLight
 											icon='Cancel'
-											onClick={() => setPasswordChangeCTA(false)}>
+											onClick={() => cancelEditPassword()}>
 											Cancelar
 										</Button>
 									) : (
@@ -390,7 +499,12 @@ const EditModernPage = () => {
 													placeholder='Senha Atual'
 													autoComplete='current-password'
 													onChange={formik.handleChange}
+													isValid={formik.isValid}
 													value={formik.values.currentPassword}
+													isTouched={formik.touched.currentPassword}
+													invalidFeedback={formik.errors.currentPassword}
+													onBlur={formik.handleBlur}
+													validFeedback='Ótimo'
 												/>
 											</FormGroup>
 										</div>
@@ -505,11 +619,9 @@ const EditModernPage = () => {
 													size='lg'
 													className='me-2 text-muted'
 												/>
-												<span className='me-2 text-muted'>Last Saved</span>
+												<span className='me-2 text-muted'>Última atualização</span>
 												<strong>
-													{dayjs(lastSave).format(
-														'MMMM Do, YYYY - HH:mm',
-													)}
+													{userData.lastUpdate && Mask('lastUpdate', userData.lastUpdate)}
 												</strong>
 											</>
 										) : (
