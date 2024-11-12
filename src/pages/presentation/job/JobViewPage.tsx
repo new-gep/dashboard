@@ -62,6 +62,13 @@ interface IjobUpdate {
 	update_at?:string
 };
 
+interface Candidate {
+	cpf   : any;
+	verify: any;
+	status: any;
+	step  : any;
+};
+
 type TTabs = 'Detalhes' | 'Candidatos' | 'Editar';
 interface ITabs {
 	[key: string]: TTabs;
@@ -113,8 +120,9 @@ const JobViewPage = () => {
 	// @ts-ignore
 	const [activeTab, setActiveTab] = useState(TABS.DETAILS);
 	const [editItem, setEditItem] = useState<IjobUpdate | null>(null);
+	const [deleteModal, setDeleteModal] = useState<boolean>(false);
+	const [candidates,  setCandidates] = useState<Array<object> |  null>(null);
 	const [userCreate, setuserCreate] = useState<any | null>(null);
-	const [deleteModal,  setDeleteModal] = useState<boolean>(false);
 	const [rebuild, setRebuild] = useState<number>(1);
 	const navigate = useNavigate();
 
@@ -259,6 +267,69 @@ const JobViewPage = () => {
 			}
 		}
 	}
+
+	const aprovedCandidate = async (candidate:any, index:number) => {
+		if(!candidate.verify){
+			showNotification(
+				<span className='d-flex align-items-center'>
+					<Icon icon='Info' size='lg' className='me-1' />
+					<span>Error</span>
+				</span>,
+				"Primeiro verifique os documentos, clicando em visualizar",
+			);
+			return
+		}
+	}
+
+	const reprovedCandidate = async (candidate:any, index:number) => {
+		if (candidates && candidates.length > index) {
+			const updatedCandidates:any = [...candidates];
+			updatedCandidates[index] = {
+				...updatedCandidates[index],
+				recused: true, // Definindo o status como reprovado
+			};
+			setCandidates(updatedCandidates);
+			//@ts-ignore
+			const updatedCandidatesWithoutPicture = updatedCandidates.map(candidate => {
+				const { name ,picture, ...rest } = candidate; // Desestruturação para excluir `picture`
+				return rest;
+			});
+			const update = {
+				candidates:JSON.stringify(updatedCandidatesWithoutPicture)
+			}
+			const response = await JobUpdate(update, id);
+			console.log('reprovado? ',response)
+			showNotification(
+				<span className='d-flex align-items-center'>
+					<Icon icon='Check' size='lg' className='me-1' />
+					<span>Sucesso</span>
+				</span>,
+				"Candidato reprovado com sucesso!",
+			);
+		}
+	}
+
+	const restoreCandidate = async (candidate:any, index:number) => {
+		if (candidates && candidates.length > index) {
+			const updatedCandidates = [...candidates];
+
+			// Atualiza o status do candidato no índice especificado
+			updatedCandidates[index] = {
+				...updatedCandidates[index],
+				recused: false, // Definindo o status como reprovado
+			};
+	
+			// Atualiza o estado com a nova lista
+			setCandidates(updatedCandidates);
+			showNotification(
+				<span className='d-flex align-items-center'>
+					<Icon icon='Check' size='lg' className='me-1' />
+					<span>Sucesso</span>
+				</span>,
+				"Candidato restaurado com sucesso!",
+			);
+		}
+	}
 	
 	const formik = useFormik({
 		initialValues: {
@@ -307,6 +378,7 @@ const JobViewPage = () => {
 				case 200:
 					setEditItem(response.job);
 					setuserCreate(response.userCreate)
+					setCandidates(response.job.candidates)
 					break;
 				default:
 					break;
@@ -618,80 +690,60 @@ const JobViewPage = () => {
 									</CardHeader>
 									<CardBody isScrollable>
 										<div className='row g-4'>
-											<div className='col-12 d-flex align-items-center'>
-												<div className='flex-shrink-0'>
-													<Avatar
-														src={USERS.GRACE.src}
-														srcSet={USERS.GRACE.srcSet}
-														color={USERS.GRACE.color}
-														size={64}
-													/>
+											{ Array.isArray(candidates) && candidates.length > 0 ? 
+												candidates.map((candidate:any, index:number) => (
+													<div key={candidate.cpf} className="col-12 d-flex align-items-center">
+														<div className="flex-shrink-0">
+															   <img
+																	src={`${candidate.picture}`}
+																	alt="Foto do candidato"
+																	width={64}
+																	height={64}
+																	className='rounded-circle'
+																/>
+														</div>
+														<div className="flex-grow-1 ms-3 d-flex justify-content-between align-items-center">
+																<figure className="mb-0">
+																	<blockquote className="blockquote mb-0">
+																		<p>{candidate.name}</p>
+																	</blockquote>
+																	<p className={`mb-0 text-warning`}>
+																		{
+																			candidate.status ? 
+																			'aprovado'
+																			:
+																			candidate.status == null ?
+																			'em espera'
+																			:
+																			'reprovado'
+																		}
+																	</p>
+																</figure>
+														</div>
+														<div className="d-flex flex-row gap-4">
+															<Button icon="Check" color="success" isLight={true} isDisable={candidate.recused} onClick={()=>aprovedCandidate(candidate, index)}>
+																	aprovar
+															</Button>
+															<Button icon="Visibility" color="info" isLight={true} isDisable={candidate.recused} >
+																	visualizar
+															</Button>
+															{ candidate.recused ?
+																<Button icon="Autorenew" color="light" isLight={true} onClick={()=>restoreCandidate(candidate, index)}>
+																		restaurar
+																</Button>
+																:
+																<Button icon="Close" color="danger" isLight={true} onClick={()=>reprovedCandidate(candidate, index)}>
+																		reprovar
+																</Button>
+															}
+														</div>
+													</div>
+												))
+												:
+												<div>
+													<p className='fw-bold fs-3'>Nenhum candidato cadastrado no momento</p>
 												</div>
-												<div className='flex-grow-1 ms-3 d-flex justify-content-between align-items-center'>
-													<figure className='mb-0'>
-														<blockquote className='blockquote'>
-															<p>
-																We made a very logical decision to
-																use it in our project. Design
-																quality is very nice.
-															</p>
-														</blockquote>
-														<figcaption className='blockquote-footer mb-0'>
-															{USERS.GRACE.name} in{' '}
-															<cite title='Company'>Company</cite>
-														</figcaption>
-													</figure>
-												</div>
-											</div>
-											<div className='col-12 d-flex align-items-center'>
-												<div className='flex-shrink-0'>
-													<Avatar
-														src={USERS.SAM.src}
-														srcSet={USERS.SAM.srcSet}
-														color={USERS.SAM.color}
-														size={64}
-													/>
-												</div>
-												<div className='flex-grow-1 ms-3 d-flex justify-content-between align-items-center'>
-													<figure className='mb-0'>
-														<blockquote className='blockquote'>
-															<p>
-																We have used another product of the
-																same author before. It was very easy
-																to integrate it into our project.
-															</p>
-														</blockquote>
-														<figcaption className='blockquote-footer mb-0'>
-															{USERS.SAM.name} in{' '}
-															<cite title='Company'>Company</cite>
-														</figcaption>
-													</figure>
-												</div>
-											</div>
-											<div className='col-12 d-flex align-items-center'>
-												<div className='flex-shrink-0'>
-													<Avatar
-														src={USERS.CHLOE.src}
-														srcSet={USERS.CHLOE.srcSet}
-														color={USERS.CHLOE.color}
-														size={64}
-													/>
-												</div>
-												<div className='flex-grow-1 ms-3 d-flex justify-content-between align-items-center'>
-													<figure className='mb-0'>
-														<blockquote className='blockquote'>
-															<p>
-																Just the design I was looking
-																for.🎉🎉
-															</p>
-														</blockquote>
-														<figcaption className='blockquote-footer mb-0'>
-															{USERS.CHLOE.name} in{' '}
-															<cite title='Company'>Company</cite>
-														</figcaption>
-													</figure>
-												</div>
-											</div>
+											}
 										</div>
 									</CardBody>
 								</>

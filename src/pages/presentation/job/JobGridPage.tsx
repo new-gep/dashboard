@@ -41,6 +41,7 @@ import JobUpdate from '../../../api/patch/Job';
 import JobDelete from '../../../api/delete/job';
 import { toast } from 'react-toastify';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
+import { isArray } from 'util';
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 interface IValues {
 	image   :any;
@@ -393,6 +394,7 @@ const ProductsGridPage = () => {
 				switch (response.status) {
 					case 200:
 						setData(response.job)
+						console.log('job:', response.job)
 						break;
 					default:
 
@@ -459,7 +461,18 @@ const ProductsGridPage = () => {
 				</ModalFooter>
 			</Modal>
 			<Page>
-				<div className='display-4 fw-bold py-3'>Todas Vagas em Aberto</div>
+				<div className='display-4 fw-bold py-3'>
+					{ Array.isArray(data) && data.length > 0 ?
+					"Todas Vagas em Aberto"
+					:
+					<>
+						Nenhuma Vaga Aberta no Momento
+						<p className='fs-4'>
+							Gere uma vaga já
+						</p>
+					</>
+					}
+				</div>
 				<div className='row'>
 					{data && data.length > 0 &&
 						data.map((item:any) => (

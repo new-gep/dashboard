@@ -107,7 +107,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				password:""
 			}))
 		}
-		console.log('string:',datesSingIn.password)
 	},[datesSingIn])
 
 	const navigate = useNavigate();
@@ -116,9 +115,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const handleSingIn = async () => {
-		console.log(datesSingIn)
 		const response = await User(datesSingIn)
-		console.log(response)
 		switch (response.status) {
 			case 200:
 				if(response.token){

@@ -66,7 +66,7 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 							handleLogin()
 							break;
 						case 200:
-							if(userData.dates.user){
+							if(typeof userData.dates.user === 'object'){
 								setUserData(userData.dates.user);
 								break
 							}

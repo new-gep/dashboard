@@ -48,7 +48,7 @@ const EditModernPage = () => {
 	/**
 	 * Common
 	 */
-	const [lastSave, setLastSave] = useState<Dayjs | null>(null);
+	const [lastSave, setLastSave] = useState<any | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [modalAvatar, setModalAvatar] = useState<boolean>(false);
 	const [passwordChangeCTA, setPasswordChangeCTA] = useState<boolean>(false);
@@ -70,10 +70,15 @@ const EditModernPage = () => {
 			setModalAvatar(false)
 			setIsLoading(false);
 			const response = await User(userData.id, formik.values)
-			console.log(response)
 			switch (response.status) {
 				case 200:
+					setPasswordChangeCTA(false)
 					setToken(response.token)
+					setUserData((prevUserData:any) => ({
+						...prevUserData,   
+						lastUpdate: response.update_at   
+					}));
+					setLastSave(true)
 					localStorage.setItem('gep_authToken', response.token);
 					showNotification(
 						<span className='d-flex align-items-center'>
@@ -273,7 +278,7 @@ const EditModernPage = () => {
 						onClick={formik.handleSubmit}>
 						{isLoading && <Spinner isSmall inButton />}
 						{isLoading
-							? (lastSave && 'Saving') || 'Publishing'
+							? (lastSave && 'Salvando') || 'Atualizando'
 							: (lastSave && 'Atualizado') || 'Salvar'}
 					</Button>
 				</SubHeaderRight>
@@ -619,7 +624,7 @@ const EditModernPage = () => {
 													size='lg'
 													className='me-2 text-muted'
 												/>
-												<span className='me-2 text-muted'>Última atualização</span>
+												<span className='me-2 text-muted'>Atualizado</span>
 												<strong>
 													{userData.lastUpdate && Mask('lastUpdate', userData.lastUpdate)}
 												</strong>

@@ -4,13 +4,13 @@ interface PropsUpdateJob {
     contract?: string;
     details ?: string;
     image   ?: string;
-    function : string;
-    obligations: string;
-    salary: string;
-    time  : JSON;
+    candidates?:any
+    function ?: string;
+    obligations?: string;
+    salary?: string;
+    time  ?: JSON;
     user_create?: string;
     CNPJ_company?:string;
-    create_at?:string;
 };
 
 export default async function Job(dates: PropsUpdateJob, id:any){

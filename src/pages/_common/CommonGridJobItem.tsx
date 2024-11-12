@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { ApexOptions } from 'apexcharts';
 import Card, {
 	CardActions,
@@ -43,38 +43,7 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 
-	// const dummyOptions: ApexOptions = {
-	// 	colors: [color],
-	// 	chart: {
-	// 		type: 'line',
-	// 		width: 100,
-	// 		height: 35,
-	// 		sparkline: {
-	// 			enabled: true,
-	// 		},
-	// 	},
-	// 	tooltip: {
-	// 		theme: 'dark',
-	// 		fixed: {
-	// 			enabled: false,
-	// 		},
-	// 		x: {
-	// 			show: false,
-	// 		},
-	// 		y: {
-	// 			title: {
-	// 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	// 				formatter(seriesName: string) {
-	// 					return '';
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// 	stroke: {
-	// 		curve: 'smooth',
-	// 		width: 2,
-	// 	},
-	// };
+
 	return (
 		<Card>
 			<CardHeader>
@@ -123,7 +92,7 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 				<div className='row align-items-center'>
 					<div className='col'>Candidatos</div>
 					<div className='col-auto'>
-						<p className='fw-bold fs-3 mb-0 text-success'> {candidates && Object.keys(candidates).length ? Object.keys(candidates).length : '0'}</p>
+						<p className='fw-bold fs-3 mb-0 text-success'> {candidates && candidates.length ? candidates.length : '0'}</p>
 					</div>
 				</div>
 			</CardBody>

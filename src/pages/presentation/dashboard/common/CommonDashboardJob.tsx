@@ -100,7 +100,6 @@ const CommonDashboardJob = () => {
 					default:
 						break;
 				}
-				console.log(response)
 			}
 		}
 		fetchData()
