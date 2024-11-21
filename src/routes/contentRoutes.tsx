@@ -59,6 +59,7 @@ const APP = {
 		PRODUCTS: lazy(() => import('../pages/presentation/job/SalesListPage')),
 		PRODUCTS_GRID: lazy(() => import('../pages/presentation/job/JobGridPage')),
 		PRODUCTS_VIEW: lazy(() => import('../pages/presentation/job/JobViewPage')),
+		VALIDATION_CANDIDATE: lazy(() => import('../pages/presentation/job/CustomerCandidate'))
 	},
 	APPOINTMENT: {
 		CALENDAR: lazy(() => import('../pages/presentation/appointment/CalendarPage')),
@@ -275,7 +276,6 @@ const presentation: RouteProps[] = [
 		path: demoPagesMenu.editPages.subMenu.editInModal.path,
 		element: <EDIT.IN_MODAL />,
 	},
-
 	{
 		path: demoPagesMenu.pricingTable.path,
 		element: <PRICING.PRICING_TABLE />,
@@ -330,7 +330,7 @@ const presentation: RouteProps[] = [
 	},
 
 	/**
-	 * App > Sales
+	 * App > job
 	 */
 	{
 		path: demoPagesMenu.sales.subMenu.transactions.path,
@@ -348,7 +348,10 @@ const presentation: RouteProps[] = [
 		path: `${demoPagesMenu.sales.subMenu.jobID.path}/:id`,
 		element: <APP.JOB.PRODUCTS_VIEW />,
 	},
-
+	{
+		path: `${demoPagesMenu.sales.subMenu.customerID.path}/:cpf/:jobId`,
+		element: <APP.JOB.VALIDATION_CANDIDATE />,
+	},
 	/**
 	 * App > Appointment
 	 */

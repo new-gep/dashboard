@@ -17,6 +17,8 @@ type MaskType =
     | 'fullName'
     | 'dateFormatBrazil'
     | 'lastUpdate'
+    | 'date'
+    | 'birth'
     ;
 
 export default function Mask(type: MaskType, value: any): string {
@@ -161,6 +163,39 @@ export default function Mask(type: MaskType, value: any): string {
             // Retorne o e-mail formatado com uma quebra de linha entre o usuário e o domínio
             return `${user}\n@${domain}`;
         }
+        case 'date': {
+            // Cria um objeto Date a partir do valor ISO
+            const dateObj = new Date(value);
+        
+            // Extrai o dia, mês e ano
+            const dia = String(dateObj.getDate()).padStart(2, '0');  // Garante que o dia tenha 2 dígitos
+            const mes = String(dateObj.getMonth() + 1).padStart(2, '0'); // Garante que o mês tenha 2 dígitos
+            const ano = dateObj.getFullYear();  // Extrai o ano
+        
+            // Retorna a data no formato brasileiro (DD/MM/YYYY)
+            return `${dia}/${mes}/${ano}`;
+        }
+        case 'birth': {
+            // Converte o valor (ISO format) diretamente em um objeto Date
+            const birthDate = new Date(value);
+        
+            if (isNaN(birthDate.getTime())) {
+                console.error('Data de nascimento inválida');
+                return 'Data inválida';
+            }
+        
+            const hoje = new Date();
+            let idade = hoje.getFullYear() - birthDate.getFullYear();
+            const mesAtual = hoje.getMonth();
+            const diaAtual = hoje.getDate();
+        
+            // Ajusta a idade se a data de nascimento ainda não foi alcançada no ano atual
+            if (mesAtual < birthDate.getMonth() || (mesAtual === birthDate.getMonth() && diaAtual < birthDate.getDate())) {
+                idade--;
+            }
+            
+            return `${idade} anos`;
+        }     
         default: {
             return value.toString();
         }

@@ -274,6 +274,12 @@ export const demoPagesMenu = {
 				path: 'sales/Job',
 				hide: true,
 			},
+			customerID: {
+				id: 'JobID',
+				text: 'JobID',
+				path: 'sales/Job/Customer',
+				hide: true,
+			},
 			job: {
 				id: 'job',
 				text: 'job',

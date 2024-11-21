@@ -62,13 +62,6 @@ interface IjobUpdate {
 	update_at?:string
 };
 
-interface Candidate {
-	cpf   : any;
-	verify: any;
-	status: any;
-	step  : any;
-};
-
 type TTabs = 'Detalhes' | 'Candidatos' | 'Editar';
 interface ITabs {
 	[key: string]: TTabs;
@@ -127,6 +120,10 @@ const JobViewPage = () => {
 	const navigate = useNavigate();
 
 	const redirect = useCallback(() => navigate('/sales/grid'), [navigate]);
+	
+	const navigateToCustomer = (cpf:any)=> {
+		return navigate(`/sales/Job/Customer/${cpf}/${id}`);
+	} 
 	
 	const handleRemove = async () => {
 		setDeleteModal(true)
@@ -266,7 +263,7 @@ const JobViewPage = () => {
 				break;
 			}
 		}
-	}
+	};
 
 	const aprovedCandidate = async (candidate:any, index:number) => {
 		if(!candidate.verify){
@@ -279,14 +276,14 @@ const JobViewPage = () => {
 			);
 			return
 		}
-	}
+	};
 
 	const reprovedCandidate = async (candidate:any, index:number) => {
 		if (candidates && candidates.length > index) {
 			const updatedCandidates:any = [...candidates];
 			updatedCandidates[index] = {
 				...updatedCandidates[index],
-				recused: true, // Definindo o status como reprovado
+				status: false, // Definindo o status como reprovado
 			};
 			setCandidates(updatedCandidates);
 			//@ts-ignore
@@ -298,7 +295,6 @@ const JobViewPage = () => {
 				candidates:JSON.stringify(updatedCandidatesWithoutPicture)
 			}
 			const response = await JobUpdate(update, id);
-			console.log('reprovado? ',response)
 			showNotification(
 				<span className='d-flex align-items-center'>
 					<Icon icon='Check' size='lg' className='me-1' />
@@ -307,20 +303,25 @@ const JobViewPage = () => {
 				"Candidato reprovado com sucesso!",
 			);
 		}
-	}
+	};
 
 	const restoreCandidate = async (candidate:any, index:number) => {
 		if (candidates && candidates.length > index) {
-			const updatedCandidates = [...candidates];
-
-			// Atualiza o status do candidato no índice especificado
+			const updatedCandidates:any = [...candidates];
 			updatedCandidates[index] = {
 				...updatedCandidates[index],
-				recused: false, // Definindo o status como reprovado
+				status: null, // Definindo o status como reprovado
 			};
-	
-			// Atualiza o estado com a nova lista
 			setCandidates(updatedCandidates);
+			//@ts-ignore
+			const updatedCandidatesWithoutPicture = updatedCandidates.map(candidate => {
+				const { name , picture, ...rest } = candidate; // Desestruturação para excluir `picture`
+				return rest;
+			});
+			const update = {
+				candidates:JSON.stringify(updatedCandidatesWithoutPicture)
+			}
+			const response = await JobUpdate(update, id);
 			showNotification(
 				<span className='d-flex align-items-center'>
 					<Icon icon='Check' size='lg' className='me-1' />
@@ -329,7 +330,7 @@ const JobViewPage = () => {
 				"Candidato restaurado com sucesso!",
 			);
 		}
-	}
+	};
 	
 	const formik = useFormik({
 		initialValues: {
@@ -707,7 +708,7 @@ const JobViewPage = () => {
 																	<blockquote className="blockquote mb-0">
 																		<p>{candidate.name}</p>
 																	</blockquote>
-																	<p className={`mb-0 text-warning`}>
+																	<p className={`mb-0 ${candidate.status ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
 																		{
 																			candidate.status ? 
 																			'aprovado'
@@ -721,19 +722,21 @@ const JobViewPage = () => {
 																</figure>
 														</div>
 														<div className="d-flex flex-row gap-4">
-															<Button icon="Check" color="success" isLight={true} isDisable={candidate.recused} onClick={()=>aprovedCandidate(candidate, index)}>
+															<Button icon="Check" color="success" isLight={true} isDisable={candidate.status == false} onClick={()=>aprovedCandidate(candidate, index)}>
 																	aprovar
 															</Button>
-															<Button icon="Visibility" color="info" isLight={true} isDisable={candidate.recused} >
-																	visualizar
+															<Button icon="Visibility" color="info" isLight={true} isDisable={candidate.status == false} 
+																onClick={()=>navigateToCustomer(candidate.cpf)}
+															>
+																visualizar
 															</Button>
-															{ candidate.recused ?
+															{ candidate.status == false ?
 																<Button icon="Autorenew" color="light" isLight={true} onClick={()=>restoreCandidate(candidate, index)}>
-																		restaurar
+																	restaurar
 																</Button>
 																:
 																<Button icon="Close" color="danger" isLight={true} onClick={()=>reprovedCandidate(candidate, index)}>
-																		reprovar
+																	reprovar
 																</Button>
 															}
 														</div>

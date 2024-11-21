@@ -391,18 +391,17 @@ const ProductsGridPage = () => {
 		if(userData.cnpj){
 			const fetchData = async () => {
 				const response = await Job_Open(userData.cnpj)
+				console.log('job:', response)
 				switch (response.status) {
 					case 200:
 						setData(response.job)
-						console.log('job:', response.job)
 						break;
 					default:
-
+					console.log('aq')
 						break;
 				}
 			};
 			fetchData();
-
 		}
 	}, [userData, rebuild]);
 	  
