@@ -275,7 +275,33 @@ const JobViewPage = () => {
 				"Primeiro verifique os documentos, clicando em visualizar",
 			);
 			return
-		}
+		};
+
+		if (candidates && candidates.length > index) {
+			const updatedCandidates:any = [...candidates];
+			updatedCandidates[index] = {
+				...updatedCandidates[index],
+				status: true, 
+				step  : '1',
+			};
+			setCandidates(updatedCandidates);
+			//@ts-ignore
+			const updatedCandidatesWithoutPicture = updatedCandidates.map(candidate => {
+				const { name ,picture, ...rest } = candidate; // Desestruturação para excluir `picture`
+				return rest;
+			});
+			const update = {
+				candidates:JSON.stringify(updatedCandidatesWithoutPicture)
+			};
+			const response = await JobUpdate(update, id);
+			showNotification(
+				<span className='d-flex align-items-center'>
+					<Icon icon='Check' size='lg' className='me-1' />
+					<span>Sucesso</span>
+				</span>,
+				"Candidato passado para proxima fase!",
+			);
+		};
 	};
 
 	const reprovedCandidate = async (candidate:any, index:number) => {
@@ -708,29 +734,40 @@ const JobViewPage = () => {
 																	<blockquote className="blockquote mb-0">
 																		<p>{candidate.name}</p>
 																	</blockquote>
-																	<p className={`mb-0 ${candidate.status ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
-																		{
-																			candidate.status ? 
-																			'aprovado'
-																			:
-																			candidate.status == null ?
-																			'em espera'
-																			:
-																			'reprovado'
-																		}
-																	</p>
+																	<div className='d-flex align-items-center gap-2'>
+																		<p className={`mb-0 ${candidate.status ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
+																			{
+																				candidate.status ? 
+																				'aprovado para próxima fase'
+																				:
+																				candidate.status == null ?
+																				'em espera'
+																				:
+																				'reprovado'
+																			}
+																		</p>
+																		<Icon 
+																			icon={
+																				candidate.verify ? 'GppGood' : 'GppMaybe'
+																			}
+																			color={
+																				candidate.verify ? 'success' : 'warning'
+																			}
+																			title={candidate.verify ? 'documentos aprovado' : 'documentos em espera'}
+																		/>
+																	</div>
 																</figure>
 														</div>
 														<div className="d-flex flex-row gap-4">
-															<Button icon="Check" color="success" isLight={true} isDisable={candidate.status == false} onClick={()=>aprovedCandidate(candidate, index)}>
-																	aprovar
+															<Button icon="Check" color="success" isLight={true} isDisable={ (candidate.status == false || candidate.status) }  onClick={()=>aprovedCandidate(candidate, index)}>
+																aprovar
 															</Button>
-															<Button icon="Visibility" color="info" isLight={true} isDisable={candidate.status == false} 
+															<Button icon="Visibility" color="info" isLight={true} isDisable={ (candidate.status == false || candidate.status) } 
 																onClick={()=>navigateToCustomer(candidate.cpf)}
 															>
 																visualizar
 															</Button>
-															{ candidate.status == false ?
+															{ candidate.status == false || candidate.status ?
 																<Button icon="Autorenew" color="light" isLight={true} onClick={()=>restoreCandidate(candidate, index)}>
 																	restaurar
 																</Button>

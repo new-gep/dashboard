@@ -131,6 +131,10 @@ const headers: RouteProps[] = [
 		element: <ProductListHeader />,
 	},
 	{
+		path: `${demoPagesMenu.sales.subMenu.customerID.path}/:cpf/:jobId`,
+		element: <ProductListHeader />,
+	},
+	{
 		path: `${pageLayoutTypesPagesMenu.asideTypes.path}/*`,
 		element: <PageLayoutHeader />,
 	},

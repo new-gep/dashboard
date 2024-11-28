@@ -275,10 +275,10 @@ export const demoPagesMenu = {
 				hide: true,
 			},
 			customerID: {
+				cpf:'cpf',
 				id: 'JobID',
 				text: 'JobID',
 				path: 'sales/Job/Customer',
-				hide: true,
 			},
 			job: {
 				id: 'job',

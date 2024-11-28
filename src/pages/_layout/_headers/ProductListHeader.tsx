@@ -8,7 +8,6 @@ const ProductListHeader = () => {
 		<Header>
 			<HeaderLeft>
 				LOGO EMPRESA 
-				<span>Vagas</span>
 			</HeaderLeft>
 			<CommonHeaderRight />
 		</Header>
