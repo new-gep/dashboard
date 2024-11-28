@@ -38,12 +38,12 @@ export const dashboardPagesMenu = {
 		icon: 'Home',
 		subMenu: null,
 	},
-	vaga: {
-		id: 'Vaga',
-		text: 'Vaga',
-		path: 'sales/grid',
-		icon: 'Work',
-	},
+	// vaga: {
+	// 	id: 'Vaga',
+	// 	text: 'Vaga',
+	// 	path: 'sales/grid',
+	// 	icon: 'Work',
+	// },
 	// dashboardProject: {
 	// 	id: 'dashboardProject',
 	// 	text: 'Dashboard Projects',
@@ -72,6 +72,35 @@ export const dashboardPagesMenu = {
 	// 	icon: 'sticky_note_2',
 	// 	subMenu: null,
 	// },
+};
+
+export const mainMenu = {
+	process: {
+		id: 'processPages',
+		text: 'DP Digital',
+		path: 'process-pages',
+		icon: 'Dvr',
+		subMenu: {
+			job: {
+				id  : 'Job',
+				text: 'Vaga',
+				path: 'sales/grid',
+				icon: 'Work',
+			},
+			admission: {
+				id: 'admission',
+				text: 'Admissão',
+				path: 'list-pages/fluid-list',
+				icon: 'ManageAccounts',
+			},
+			dismissal: {
+				id: 'dismissal',
+				text: 'Demissão',
+				path: 'list-pages/fluid-list',
+				icon: 'DoorBack',
+			},
+		},
+	}
 };
 
 export const demoPagesMenu = {

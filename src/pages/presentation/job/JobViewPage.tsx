@@ -719,65 +719,65 @@ const JobViewPage = () => {
 										<div className='row g-4'>
 											{ Array.isArray(candidates) && candidates.length > 0 ? 
 												candidates.map((candidate:any, index:number) => (
-													<div key={candidate.cpf} className="col-12 d-flex align-items-center">
-														<div className="flex-shrink-0">
-															   <img
+														<div key={candidate.cpf} className="col-12 d-md-flex align-items-center">
+															<div className="flex-shrink-0 d-flex justify-content-center">
+																<img
 																	src={`${candidate.picture}`}
 																	alt="Foto do candidato"
 																	width={64}
 																	height={64}
 																	className='rounded-circle'
 																/>
-														</div>
-														<div className="flex-grow-1 ms-3 d-flex justify-content-between align-items-center">
-																<figure className="mb-0">
-																	<blockquote className="blockquote mb-0">
-																		<p>{candidate.name}</p>
-																	</blockquote>
-																	<div className='d-flex align-items-center gap-2'>
-																		<p className={`mb-0 ${candidate.status ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
-																			{
-																				candidate.status ? 
-																				'aprovado para próxima fase'
-																				:
-																				candidate.status == null ?
-																				'em espera'
-																				:
-																				'reprovado'
-																			}
-																		</p>
-																		<Icon 
-																			icon={
-																				candidate.verify ? 'GppGood' : 'GppMaybe'
-																			}
-																			color={
-																				candidate.verify ? 'success' : 'warning'
-																			}
-																			title={candidate.verify ? 'documentos aprovado' : 'documentos em espera'}
-																		/>
-																	</div>
-																</figure>
-														</div>
-														<div className="d-flex flex-row gap-4">
-															<Button icon="Check" color="success" isLight={true} isDisable={ (candidate.status == false || candidate.status) }  onClick={()=>aprovedCandidate(candidate, index)}>
-																aprovar
-															</Button>
-															<Button icon="Visibility" color="info" isLight={true} isDisable={ (candidate.status == false || candidate.status) } 
-																onClick={()=>navigateToCustomer(candidate.cpf)}
-															>
-																visualizar
-															</Button>
-															{ candidate.status == false || candidate.status ?
-																<Button icon="Autorenew" color="light" isLight={true} onClick={()=>restoreCandidate(candidate, index)}>
-																	restaurar
+															</div>
+															<div className="flex-grow-1 ms-3 d-flex justify-content-center justify-content-md-between align-items-center m-2 ">
+																	<figure className="mb-0" >
+																		<blockquote className="blockquote mb-0 d-flex justify-content-center justify-content-md-start">
+																			<p>{candidate.name}</p>
+																		</blockquote>
+																		<div className='d-flex align-items-center gap-2 justify-content-center justify-content-md-start'>
+																			<p className={`mb-0 ${candidate.status ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
+																				{
+																					candidate.status ? 
+																					'aprovado para próxima fase'
+																					:
+																					candidate.status == null ?
+																					'em espera'
+																					:
+																					'reprovado'
+																				}
+																			</p>
+																			<Icon 
+																				icon={
+																					candidate.verify ? 'GppGood' : 'GppMaybe'
+																				}
+																				color={
+																					candidate.verify ? 'success' : 'warning'
+																				}
+																				title={candidate.verify ? 'documentos aprovado' : 'documentos em espera'}
+																			/>
+																		</div>
+																	</figure>
+															</div>
+															<div className="d-flex flex-row gap-4">
+																<Button icon="Check" color="success" isLight={true} isDisable={ (candidate.status == false || candidate.status) }  onClick={()=>aprovedCandidate(candidate, index)}>
+																	aprovar
 																</Button>
-																:
-																<Button icon="Close" color="danger" isLight={true} onClick={()=>reprovedCandidate(candidate, index)}>
-																	reprovar
+																<Button icon="Visibility" color="info" isLight={true} isDisable={ (candidate.status == false || candidate.status) } 
+																	onClick={()=>navigateToCustomer(candidate.cpf)}
+																>
+																	visualizar
 																</Button>
-															}
+																{ candidate.status == false || candidate.status ?
+																	<Button icon="Autorenew" color="light" isLight={true} onClick={()=>restoreCandidate(candidate, index)}>
+																		restaurar
+																	</Button>
+																	:
+																	<Button icon="Close" color="danger" isLight={true} onClick={()=>reprovedCandidate(candidate, index)}>
+																		reprovar
+																	</Button>
+																}
+															</div>
 														</div>
-													</div>
 												))
 												:
 												<div>

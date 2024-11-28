@@ -6,6 +6,7 @@ import Navigation, { NavigationLine } from '../../../layout/Navigation/Navigatio
 import User from '../../../layout/User/User';
 import {
 	componentPagesMenu,
+	mainMenu,
 	dashboardPagesMenu,
 	demoPagesMenu,
 	gettingStartedPagesMenu,
@@ -41,8 +42,8 @@ const DefaultAside = () => {
 					<>
 						<Navigation menu={dashboardPagesMenu} id='aside-dashboard' />
 						<NavigationLine />
-						{/* <Navigation  menu={demoPagesMenu} id='aside-demo-pages' />
-						<NavigationLine /> */}
+						<Navigation menu={mainMenu} id='processPages' />
+						{/* <NavigationLine />  */}
 						{/* <Navigation menu={pageLayoutTypesPagesMenu} id='aside-menu' /> */}
 					</>
 				)}
