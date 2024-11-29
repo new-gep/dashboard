@@ -6,6 +6,7 @@ import {
 	demoPagesMenu,
 	gettingStartedPagesMenu,
 	pageLayoutTypesPagesMenu,
+	mainMenu
 } from '../menu';
 import Login from '../pages/presentation/auth/Login';
 
@@ -53,6 +54,9 @@ const APP = {
 	KNOWLEDGE: {
 		GRID: lazy(() => import('../pages/presentation/knowledge/KnowledgeGridPage')),
 		VIEW: lazy(() => import('../pages/presentation/knowledge/KnowledgeViewPage')),
+	},
+	PROCESS:{
+		ADMISSION: lazy(() => import('../pages/presentation/process/AdmissionList')),
 	},
 	JOB: {
 		TRANSACTIONS: lazy(() => import('../pages/presentation/job/TransActionsPage')),
@@ -304,6 +308,14 @@ const presentation: RouteProps[] = [
 	/**
 	 * App
 	 */
+
+	/**
+	 * App > DP Digital
+	 */
+	{
+		path: mainMenu.process.subMenu.admission.path,
+		element: <APP.PROCESS.ADMISSION />,
+	},
 
 	/**
 	 * App > Project Management

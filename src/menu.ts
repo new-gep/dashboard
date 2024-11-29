@@ -90,7 +90,7 @@ export const mainMenu = {
 			admission: {
 				id: 'admission',
 				text: 'Admissão',
-				path: 'list-pages/fluid-list',
+				path: 'admission/fluid-list',
 				icon: 'ManageAccounts',
 			},
 			dismissal: {

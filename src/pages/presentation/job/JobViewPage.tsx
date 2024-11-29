@@ -731,7 +731,16 @@ const JobViewPage = () => {
 															</div>
 															<div className="flex-grow-1 ms-3 d-flex justify-content-center justify-content-md-between align-items-center m-2 ">
 																	<figure className="mb-0" >
-																		<blockquote className="blockquote mb-0 d-flex justify-content-center justify-content-md-start">
+																		<blockquote className="gap-2 align-items-center  blockquote mb-0 d-flex justify-content-center justify-content-md-start">
+																			<Icon 
+																				icon={
+																					candidate.verify ? 'GppGood' : 'GppMaybe'
+																				}
+																				color={
+																					candidate.verify ? 'success' : 'warning'
+																				}
+																				title={candidate.verify ? 'documentos aprovado' : 'documentos em espera'}
+																			/>
 																			<p>{candidate.name}</p>
 																		</blockquote>
 																		<div className='d-flex align-items-center gap-2 justify-content-center justify-content-md-start'>
@@ -746,7 +755,7 @@ const JobViewPage = () => {
 																					'reprovado'
 																				}
 																			</p>
-																			<Icon 
+																			{/* <Icon 
 																				icon={
 																					candidate.verify ? 'GppGood' : 'GppMaybe'
 																				}
@@ -754,7 +763,7 @@ const JobViewPage = () => {
 																					candidate.verify ? 'success' : 'warning'
 																				}
 																				title={candidate.verify ? 'documentos aprovado' : 'documentos em espera'}
-																			/>
+																			/> */}
 																		</div>
 																	</figure>
 															</div>

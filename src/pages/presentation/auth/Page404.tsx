@@ -16,11 +16,7 @@ const Page404 = () => {
 							className='text-primary fw-bold'
 							style={{ fontSize: 'calc(3rem + 3vw)' }}>
 							404
-						</div>
-						<div
-							className='text-dark fw-bold'
-							style={{ fontSize: 'calc(1.5rem + 1.5vw)' }}>
-							Page not found
+							<p className='fs-6 '>Pagina não encontrada</p>
 						</div>
 					</div>
 					<div className='col-12 d-flex align-items-baseline justify-content-center'>
@@ -28,10 +24,11 @@ const Page404 = () => {
 							srcSet={HumansWebp}
 							src={Humans}
 							alt='Humans'
-							style={{ height: '50vh' }}
+							className='mr-5'
+							style={{ height: '50vh', marginLeft:'9%' }}
 						/>
 					</div>
-					<div className='col-12 d-flex flex-column justify-content-center align-items-center'>
+					<div className='col-12 d-flex flex-column justify-content-center align-items-center mb-2'>
 						<Button
 							className='px-5 py-3'
 							color='primary'
@@ -39,7 +36,7 @@ const Page404 = () => {
 							icon='HolidayVillage'
 							tag='a'
 							href='/'>
-							Homepage
+							Início
 						</Button>
 					</div>
 				</div>

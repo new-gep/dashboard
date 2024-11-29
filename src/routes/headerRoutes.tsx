@@ -180,7 +180,7 @@ const headers: RouteProps[] = [
 	},
 	{
 		path: `*`,
-		element: <DefaultHeader />,
+		// element: <DefaultHeader />,
 	},
 ];
 
