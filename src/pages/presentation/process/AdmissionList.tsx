@@ -5,14 +5,16 @@ import Icon from '../../../components/icon/Icon';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Button from '../../../components/bootstrap/Button';
-import { demoPagesMenu } from '../../../menu';
+import { mainMenu } from '../../../menu';
 import AdmissionTable from '../../_common/Process/AdmissionTable';
 import useDarkMode from '../../../hooks/useDarkMode';
 
 const AppointmentList = () => {
 	const { themeStatus } = useDarkMode();
+
+
 	return (
-		<PageWrapper title={demoPagesMenu.appointment.subMenu.appointmentList.text}>
+		<PageWrapper title={mainMenu.process.subMenu.admission.text} >
 			<SubHeader>
 				<SubHeaderLeft>
 					<div className='d-flex gap-2 p-3'>

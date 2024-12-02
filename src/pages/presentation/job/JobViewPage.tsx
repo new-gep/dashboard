@@ -281,7 +281,7 @@ const JobViewPage = () => {
 			const updatedCandidates:any = [...candidates];
 			updatedCandidates[index] = {
 				...updatedCandidates[index],
-				status: true, 
+				status: null, 
 				step  : '1',
 			};
 			setCandidates(updatedCandidates);
@@ -734,19 +734,19 @@ const JobViewPage = () => {
 																		<blockquote className="gap-2 align-items-center  blockquote mb-0 d-flex justify-content-center justify-content-md-start">
 																			<Icon 
 																				icon={
-																					candidate.verify ? 'GppGood' : 'GppMaybe'
+																					candidate.verify || candidate.step != '0' ? 'GppGood' : 'GppMaybe'
 																				}
 																				color={
-																					candidate.verify ? 'success' : 'warning'
+																					candidate.verify || candidate.step != '0' ? 'success' : 'warning'
 																				}
-																				title={candidate.verify ? 'documentos aprovado' : 'documentos em espera'}
+																				title={candidate.verify || candidate.step != '0' ? 'documentos aprovado' : 'documentos em espera'}
 																			/>
 																			<p>{candidate.name}</p>
 																		</blockquote>
 																		<div className='d-flex align-items-center gap-2 justify-content-center justify-content-md-start'>
-																			<p className={`mb-0 ${candidate.status ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
+																			<p className={`mb-0 ${candidate.status || candidate.step != '0' ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
 																				{
-																					candidate.status ? 
+																					candidate.status || candidate.step != '0' ? 
 																					'aprovado para próxima fase'
 																					:
 																					candidate.status == null ?
@@ -768,15 +768,15 @@ const JobViewPage = () => {
 																	</figure>
 															</div>
 															<div className="d-flex flex-row gap-4">
-																<Button icon="Check" color="success" isLight={true} isDisable={ (candidate.status == false || candidate.status) }  onClick={()=>aprovedCandidate(candidate, index)}>
+																<Button icon="Check" color="success" isLight={true} isDisable={ (candidate.status == false || candidate.status || candidate.step != '0') }  onClick={()=>aprovedCandidate(candidate, index)}>
 																	aprovar
 																</Button>
-																<Button icon="Visibility" color="info" isLight={true} isDisable={ (candidate.status == false || candidate.status) } 
+																<Button icon="Visibility" color="info" isLight={true} isDisable={ (candidate.status == false || candidate.status || candidate.step != '0') } 
 																	onClick={()=>navigateToCustomer(candidate.cpf)}
 																>
 																	visualizar
 																</Button>
-																{ candidate.status == false || candidate.status ?
+																{ candidate.status == false || candidate.status || candidate.step != '0' ?
 																	<Button icon="Autorenew" color="light" isLight={true} onClick={()=>restoreCandidate(candidate, index)}>
 																		restaurar
 																	</Button>
