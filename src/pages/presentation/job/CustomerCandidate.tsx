@@ -39,7 +39,7 @@ import { toast } from 'react-toastify';
 import PicturePath from '../../../api/patch/Picture';
 import PictureGet from '../../../api/get/Picture';
 import AuthContext from '../../../contexts/authContext';
-import Job_One from '../../../api/get/Job_One';
+import Job_One from '../../../api/get/Job/Job_One';
 import Job from '../../../api/patch/Job';
 const Customer = () => {
 	const { darkModeStatus } = useDarkMode();

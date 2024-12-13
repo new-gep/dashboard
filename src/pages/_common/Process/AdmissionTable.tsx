@@ -17,28 +17,37 @@ import Dropdown, {
 	DropdownMenu,
 	DropdownToggle,
 } from '../../../components/bootstrap/Dropdown';
-import Icon from '../../../components/icon/Icon';
 import OffCanvas, {
 	OffCanvasBody,
 	OffCanvasHeader,
 	OffCanvasTitle,
 } from '../../../components/bootstrap/OffCanvas';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
-import Input from '../../../components/bootstrap/forms/Input';
 import Textarea from '../../../components/bootstrap/forms/Textarea';
-import Checks from '../../../components/bootstrap/forms/Checks';
-import Popovers from '../../../components/bootstrap/Popovers';
-import data from '../../../common/data/dummyEventsData';
-import USERS from '../../../common/data/userDummyData';
 import Mask from '../../../function/Mask';
 import PaginationButtons, { dataPagination, PER_COUNT } from '../../../components/PaginationButtons';
-import useSortableData from '../../../hooks/useSortableData';
 import useDarkMode from '../../../hooks/useDarkMode';
-import Job_Admissional from '../../../api/get/Job_Admissional';
+import Job_Admissional from '../../../api/get/Job/Job_Admissional';
 import AuthContext from '../../../contexts/authContext';
-import Job_One from '../../../api/get/Job_One';
 import Job from '../../../api/patch/Job';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Toasts from '../../../components/bootstrap/Toasts';
+import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
+import CollaboratorFile from '../../../api/get/CollaboratorFile';
+import JobFile from '../../../api/get/Job/Job_File';
+import PicturePath from '../../../api/patch/Picture';
+import Popovers from '../../../components/bootstrap/Popovers';
+import Icon from '../../../components/icon/Icon';
+import Checks from '../../../components/bootstrap/forms/Checks';
+import Input from '../../../components/bootstrap/forms/Input';
+import InputGroup from '../../../components/bootstrap/forms/InputGroup';
+import Badge from '../../../components/bootstrap/Badge';
+import JobPicture from '../../../api/post/Job_Picture';
+import Job_Check_Admissional from '../../../api/get/Job/Job_Check_Admissional';
+import Job_Dynamic from '../../../api/delete/job/job_dynamic';
+import SignedDocument from '../../../components/canva/SignedDocument';
+import PDFSignature from '../../../components/canva/PDFdocument';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -50,20 +59,33 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
     const [stepIcon, setIcon] = useState('LooksOne')
     const { userData } = useContext(AuthContext);
 	const [candidates, setCandidates] = useState<null | any>(null)
+	const [candidatesStep, setCandidatesStep] = useState<null | any>(null)
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 	const [menu, setMenu] = useState<boolean>(false)
-	const [hasUpdate, setHasUpdate] = useState<number>(1)
 	const [manipulating, setManipulating] = useState<null | any>(null)
+	const [manipulatingTable, setManipulatingTable] = useState<null | any>(null)
 	const [titleManipulating, setTitleManipulating] = useState<null | any>(null)
+	const [datesDynamicManipulating, setDatesDynamicManipulating] = useState<null | any>(null)
 	const [controllerBodyManipulating, setControllerBodyManipulating] = useState<null | any>(null)
 	const [SpinnerManipulating, setSpinnerManipulating] = useState<Boolean>(false)
-	
-
-	// BEGIN :: Upcoming Events
+	const [currentPage, setCurrentPage] = useState(1);
+	const [perPage, setPerPage] = useState(PER_COUNT['5']);
 	const [upcomingEventsInfoOffcanvas, setUpcomingEventsInfoOffcanvas] = useState(false);
 	const [upcomingEventsEditOffcanvas, setUpcomingEventsEditOffcanvas] = useState(false);
+	const [openDocument, setOpenDocument]  = useState<boolean>(false);
+	const [typeDocument, setTypeDocument] = useState<any>(null);
+	const [pathDocumentMain, setPathDocumentMain] = useState<any>(null);
+	const [typeDocumentSignature, setTypeDocumentSignature] = useState<any>(null);
+	const [pathDocumentSignature, setPathDocumentSignature] = useState<any>(null);
+	const [view, setView] = useState<any>(null);
+	const [documentAvaliation, setDocumentAvaliation] = useState<string | null>(null);
+	const [loadingStates, setLoadingStates] = useState<{ [cpf: string]: boolean }>({});
+	const [loadingSearchDocument, setLoadingSearchDocument] = useState<boolean>(false);
+	const [allAssignature, setAllAssignature]  = useState<any>(null);
+	const [allDocument, setAllDocument ]  = useState<any>(null);
+	const [modalSignedDocument, setModalSignedDocument ]  = useState<boolean>(false);
+	const [isDynamic, setIsDynamic ]  = useState<boolean>(false);
 
-	// END :: Upcoming Events
 
 	const formik = useFormik({
 		onSubmit<Values>(
@@ -73,59 +95,27 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			return undefined;
 		},
 		initialValues: {
-			customerName: 'Alison Berry',
-			service: 'Exercise Bike',
-			employee: `${USERS.GRACE.name} ${USERS.GRACE.surname}`,
-			location: 'Maryland',
-			date: dayjs().add(1, 'days').format('YYYY-MM-DD'),
-			time: '10:30',
-			note: '',
+			document: '' as any | File, 
+			documentNameAdd: '', 
+			note  : '',
 			notify: true,
 		},
 	});
 
-    const navegationStep = async (navigation:boolean) => {
-        let newStep
-        if(navigation){
-            setStep(step + 1)
-            newStep = step + 1
-        }else{
-            setStep(step - 1)
-            newStep = step - 1
-        }
-        switch (newStep) {
-            case 1:
-                setIcon('LooksOne')
-                setStepTitle('Exame admisisional')
-                break;
-            case 2:
-                setIcon('LooksTwo')
-                setStepTitle('KIT admissional')
-                break;
-            case 3:
-                setIcon('Looks3')
-                setStepTitle('Assinaturas')
-                break;
-            // case 4:
-            //     setIcon('Looks4')
-            //     setStepTitle('')
-            //     break;
-            default:
-                break;
-        }
-    }
-
-
-	const [currentPage, setCurrentPage] = useState(1);
-	const [perPage, setPerPage] = useState(PER_COUNT['5']);
-	const { items, requestSort, getClassNamesFor } = useSortableData(data);
-
 	const handleUpcomingDetails = (note:any) => {
+		setManipulating(null)
 		formik.setFieldValue("note", note)
 		setUpcomingEventsInfoOffcanvas(!upcomingEventsInfoOffcanvas);
 	};
 
 	const handleUpcomingEdit = () => {
+		if(upcomingEventsEditOffcanvas){
+			setDocumentAvaliation(null)
+			setManipulatingTable(null)
+			setPathDocumentMain(null)
+			setTypeDocument(null)
+			setSpinnerManipulating(false)
+		}
 		setUpcomingEventsEditOffcanvas(!upcomingEventsEditOffcanvas);
 	};
 
@@ -139,56 +129,186 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		setManipulating(colaborator)
 	};
 
-	const formSubmitController = async (action:string) => {
-		switch (action) {
-			case 'observation':
-				setSpinnerManipulating(true)
-				const response = await Job_One(manipulating.id)
-				if(response.status == 200){
-					let candidates = response.job.candidates
-					//@ts-ignore
-					candidates.forEach(item => {
-						delete item.picture;
-						delete item.name;
-					});
-					const candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
-					if (candidate) {
-						candidate.observation = formik.values.note;
-					}
-					const params = {
-						candidates:JSON.stringify(candidates)
-					}
-					const update = await Job(params, manipulating.id)
-					if(update.status == 200 ){
-						console.log('salvou')
-						setSpinnerManipulating(false)
-						setHasUpdate(prevState => prevState + 1);
-					}else{
-						console.log('não foi possível salvar a VAGA tabela (job)')
-						setSpinnerManipulating(false)
-					}
-				}else{
-					console.log('não foi possível encontrar a VAGA tabela (job)')
-					setSpinnerManipulating(false)
-			}
-			break
-			
-		}
-		setUpcomingEventsEditOffcanvas(false)
-	};
-
 	const closeMenu = () => {
 		setMenu(false)
 		setManipulating(null)
 	};
 
-	const menuController = (action:string) => {
+	const formSubmitController = async (action:string) => {
 		switch (action) {
+			case 'observation' :
+				setSpinnerManipulating(true)
+				//@ts-ignore
+				const Newcandidates = candidates.map(({ cpf, step, status, verify, observation }) => ({ cpf, step, status, verify, observation }));
+				const candidate = Newcandidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
+				if(candidate){
+					candidate.observation = formik.values.note;
+				}else{
+					setSpinnerManipulating(false)
+					return
+				}
+				const params = {
+					candidates:JSON.stringify(Newcandidates)
+				}
+				const update = await Job(params, manipulating.id)
+				if(update.status == 200 ){
+					const candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
+					candidate.observation = formik.values.note;
+					//@ts-ignore
+					const stepCandidates = candidates.filter(candidate => candidate.step === step);
+					setCandidatesStep(stepCandidates)
+					setSpinnerManipulating(false)
+				}else{
+					setSpinnerManipulating(false)
+					console.log('não foi possível salvar a VAGA tabela (job)')
+				}
+				break	
+			case 'kitAdmission':
+				let document:string;
+				if(documentAvaliation == 'add'){
+					if(!formik.values.document || !formik.values.documentNameAdd){
+						toast(
+								<Toasts
+									icon={ 'Close' }
+									iconColor={ 'danger' }
+									title={ 'Erro!'}
+								>
+									Antes de salvar, é necessário fazer o upload do arquivo e informar o nome que ele deverá ter.
+								</Toasts>,
+								{
+									closeButton: true ,
+									autoClose: 5000 //
+								}
+						)
+						return
+					};
+					setSpinnerManipulating(true);
+					const fileName = formik.values.documentNameAdd
+					.replace(/\s+(.)/g, (match, group1) => group1.toUpperCase()) 
+					.replace(/^\w/, (c) => c.toUpperCase())  
+					.replace(/\s+/g, ""); 
+
+					const paramsJobPicture = {
+						file:formik.values.document,
+						name:'dynamic',
+						id  :manipulatingTable.id,
+						signature:false,
+						dynamic:fileName
+					};
+
+					const response = await JobPicture(paramsJobPicture)
+					if(response.status == 200){
+						setSpinnerManipulating(false)
+						formik.setFieldValue('document', '');
+						formik.setFieldValue('documentNameAdd', '');
+						toast(
+							<Toasts
+								icon={ 'Check' }
+								iconColor={ 'success' }
+								title={ 'Sucesso!'}
+							>
+								O arquivo foi salvo com sucesso.
+							</Toasts>,
+							{
+								closeButton: true ,
+								autoClose: 5000 //
+							}
+						)
+						handleUpcomingEdit()
+						return
+					};
+				}
+				if(!formik.values.document){
+					toast(
+							<Toasts
+								icon={ 'Close' }
+								iconColor={ 'danger' }
+								title={ 'Erro!'}
+							>
+								Antes de salvar, você deve fazer o upload do arquivo
+							</Toasts>,
+							{
+								closeButton: true ,
+								autoClose: 5000 //
+							}
+					)
+					return
+				};
+				setSpinnerManipulating(true);
+				switch (documentAvaliation) {
+					case 'registration_form':
+						document = 'registration'
+						break;
+					case 'experience_contract':
+						document = 'experience'
+						break;
+					case 'hours_extension':
+						document = 'extension'
+						break;
+					case 'hours_compensation':
+						document = 'compensation'
+						break;
+					case 'transport_voucher':
+						document = 'voucher'
+						break;
+				}
+				const paramsJobPicture = {
+					file:formik.values.document,
+					//@ts-ignore
+					name:document,
+					id  :manipulatingTable.id,
+					signature:false
+				};
+				const response = await JobPicture(paramsJobPicture) 
+				if(response.status == 200){
+					const response = await Job_Check_Admissional(manipulatingTable.id)
+					if(response.status == 200){
+						setDatesDynamicManipulating(response.date);
+						const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
+						const allTrue = obligationValues.every(value => value === true); 
+					  
+						if (allTrue) {
+						  updateStatusCandidate(manipulatingTable, true, true);
+						}
+					}
+					setSpinnerManipulating(false)
+					formik.setFieldValue('document', '');
+					toast(
+						<Toasts
+							icon={ 'Check' }
+							iconColor={ 'success' }
+							title={ 'Sucesso!'}
+						>
+							O arquivo foi salvo com sucesso.
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 5000 //
+						}
+					)
+					handleUpcomingEdit()
+					return
+				}
+			break
+		};
+		setSpinnerManipulating(false)
+		handleUpcomingEdit()
+	};
+
+	const menuController = async (action:string) => {
+		let candidate;
+		let params;
+		let update;
+		let Newcandidates;
+		switch (action) {
+			case 'finishAdmission':
+				console.log('finalizando admissão');
+				break;
 			case 'nextStep':
-				
+				updateStatusCandidate(manipulating, null, null, true)
 				break;
 			case 'previousStep':
-				
+				updateStatusCandidate(manipulating, null, null, false)
 				break;
 			case 'profile':
 				navigate(`/sales/Job/Customer/${manipulating.cpf}/${manipulating.id}`);
@@ -214,21 +334,522 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		setMenu(false)
 	};
 
+	const documentController = async (document:any, dynamic?:any, signature?:any) => {
+		setPathDocumentMain(null)
+		setTypeDocument(null)
+		setPathDocumentSignature(null)
+		setTypeDocumentSignature(null)
+		setAllDocument(null)
+		setAllAssignature(null)
+		setLoadingSearchDocument(true)
+		setIsDynamic(false)
+		let responseSignature;
+		let responseDocument;
+		switch (document) {
+			case 'registration_form':
+				setDocumentAvaliation(document)
+				if(signature){
+					responseSignature = await JobFile(manipulatingTable.id, 'registration', '1')
+				}
+				responseDocument = await JobFile(manipulatingTable.id, 'registration', '0');
+				toast(
+					<Toasts
+						icon={ 'Check' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Sucesso!'}
+					>
+						Ficha de Registro
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				);
+				break;
+			case 'experience_contract':
+				setDocumentAvaliation(document)
+				if(signature){
+					responseSignature = await JobFile(manipulatingTable.id, 'experience', '1')
+				}
+				responseDocument = await JobFile(manipulatingTable.id, 'experience', '0');
+				toast(
+					<Toasts
+						icon={ 'Check' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Sucesso!'}
+					>
+						Contrato de Experiencia
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+				break;
+			case 'hours_extension':
+				setDocumentAvaliation(document)
+				if(signature){
+					responseSignature = await JobFile(manipulatingTable.id, 'extension', '1')
+				}
+				responseDocument = await JobFile(manipulatingTable.id, 'extension', '0');
+				toast(
+					<Toasts
+						icon={ 'Check' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Sucesso!'}
+					>
+						Acordo de Prorrogação de Horas
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+				break;
+			case 'hours_compensation':
+				setDocumentAvaliation(document)
+				if(signature){
+					responseSignature = await JobFile(manipulatingTable.id, 'compensation', '1')
+				}
+				responseDocument = await JobFile(manipulatingTable.id, 'compensation', '0');
+				toast(
+					<Toasts
+						icon={ 'Check' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Sucesso!'}
+					>
+						Acordo de Compensação de Horas
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+				break;
+			case 'transport_voucher':
+				setDocumentAvaliation(document)
+				if(signature){
+					responseSignature = await JobFile(manipulatingTable.id, 'voucher', '1')
+				}
+				responseDocument = await JobFile(manipulatingTable.id, 'voucher', '0');
+				toast(
+					<Toasts
+						icon={ 'Check' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Sucesso!'}
+					>
+						Solitação de Vale Transporte
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+				break;
+			case 'dynamic':
+				if(signature){
+					responseDocument = await JobFile(manipulatingTable.id, 'dynamic', '1', dynamic);
+				}
+				responseDocument = await JobFile(manipulatingTable.id, 'dynamic', '0', dynamic);
+				//@ts-ignore
+				const formattedFileName = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2');
+				toast(
+					<Toasts
+						icon={ 'Check' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Sucesso!'}
+					>
+						{formattedFileName}
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+				break
+			case 'add':
+				setDocumentAvaliation('add')
+				break
+			default:
+				break;
+		};
+	
+		if(responseDocument  && responseDocument.status == 200){
+			setAllDocument(responseDocument)
+			setPathDocumentMain(responseDocument.path)
+			setTypeDocument(responseDocument.type)
+		};
+
+		if(responseSignature  && responseSignature.status == 200){
+			setAllAssignature(responseSignature)
+			setPathDocumentSignature(responseSignature.path)
+			setTypeDocumentSignature(responseSignature.type)
+		};
+
+		setLoadingSearchDocument(false)
+	};
+
+	const actionController = async (candidate:any) => {
+		let response;
+		switch (candidate.step) {
+			case 1:
+				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
+				setManipulatingTable(candidate)
+				response = await CollaboratorFile(candidate.cpf, 'medical_examination');
+				if(response.status == 200){
+					setDocumentAvaliation('medical_examination')
+					setPathDocumentMain(response.path)
+					setTypeDocument(response.type)
+					setOpenDocument(true)
+					setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
+					return
+				}
+				toast(
+					<Toasts
+						icon={ 'Close' }
+						iconColor={ 'danger' }
+						title={ 'Erro!'}
+					>
+						O candidato ainda não enviou o exame admissional.
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
+				break;
+			case 2:
+				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
+				setDocumentAvaliation(null)
+				response = await Job_Check_Admissional(candidate.id)
+				if(response.status == 200){
+					setDatesDynamicManipulating(response.date)
+					const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
+					const allTrue = obligationValues.every(value => value === true); 
+					if (allTrue) {
+						updateStatusCandidate(candidate, true, true);
+					}
+				}
+				setManipulatingTable(candidate)
+				setControllerBodyManipulating('kitAdmission');
+				setTitleManipulating('Gerencie seu Kit Admissional');
+				handleUpcomingEdit();
+				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
+				break;
+			case 3:
+				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
+				setManipulatingTable(candidate)
+				response = await Job_Check_Admissional(candidate.id)
+				if(response.status == 200){
+					setDatesDynamicManipulating(response.date)
+					console.log(response.date)
+					// console.log(response.date)
+				};
+				setControllerBodyManipulating('signature');
+				setTitleManipulating('Gerencie as Assinaturas');
+				handleUpcomingEdit();
+				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
+				break;
+		}
+	};
+
+	const navegationStep = async (navigation:boolean) => {
+        let newStep
+        if(navigation){
+            setStep(step + 1)
+            newStep = step + 1
+        }else{
+            setStep(step - 1)
+            newStep = step - 1
+        }
+		//@ts-ignore
+		const stepCandidates = candidates.filter(candidate => candidate.step === newStep);
+		setCandidatesStep(stepCandidates)
+        switch (newStep) {
+            case 1:
+                setIcon('LooksOne')
+                setStepTitle('Exame admisisional')
+				
+                break;
+            case 2:
+                setIcon('LooksTwo')
+                setStepTitle('KIT admissional')
+                break;
+            case 3:
+                setIcon('Looks3')
+                setStepTitle('Assinaturas')
+                break;
+            // case 4:
+            //     setIcon('Looks4')
+            //     setStepTitle('')
+            //     break;
+            default:
+                break;
+        }
+    };
+
+	const AvaliationPicture = async (avaliation:boolean) => {
+		try{
+			const params = {
+				status : avaliation ? 'approved': 'reproved',
+				picture: view == 'signature' ? `signature_${documentAvaliation}`: documentAvaliation,
+				id_user: userData.id
+			}
+			const response:any = await PicturePath(params, manipulatingTable.cpf);
+			console.log(response)
+			if(response.status == 200){
+				switch (manipulatingTable.step) {
+					case 1:
+						if(avaliation){
+							updateStatusCandidate(manipulatingTable, true, true)
+							toast(
+								<Toasts
+									icon={ 'Check' }
+									iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+									title={ 'Sucesso!'}
+								>
+									Exame admissional Aprovado com sucesso
+								</Toasts>,
+								{
+									closeButton: true ,
+									autoClose: 5000 //
+								}
+							)
+						}else{
+							updateStatusCandidate(manipulatingTable, null, false)
+							toast(
+								<Toasts
+									icon={ 'Check' }
+									iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+									title={ 'Sucesso!'}
+								>
+									Exame admissional Rejeitado com sucesso
+								</Toasts>,
+								{
+									closeButton: true ,
+									autoClose: 5000 //
+								}
+							)
+						}
+						setOpenDocument(false)
+						return;
+					case 2:
+						
+						break;
+					case 3:
+						toast(
+							<Toasts
+								icon={ 'Check' }
+								iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+								title={ 'Sucesso!'}
+							>
+								Assinatura aprovada com sucesso
+							</Toasts>,
+							{
+								closeButton: true ,
+								autoClose: 5000 //
+							}
+						)
+						setOpenDocument(false)
+						break;
+					default:
+						console.log('step indefinido, ou manipulado não setado')
+						break;
+				}
+			}else{
+
+			}
+		}catch(e){
+			console.log('erro:', e)
+			toast(
+				<Toasts
+					icon={ 'Close' }
+					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={ 'Erro!'}
+				>
+					Erro ao atualizar documento do candidato, tente mais tarde e verifique sua internet.
+				</Toasts>,
+				{
+					closeButton: true ,
+					autoClose: 5000 //
+				}
+			)
+		}
+	};
+
+	const deleteDocumentDynamic = async () => {
+		const response = await Job_Dynamic(documentAvaliation, manipulatingTable.id);
+		if(response.status == 200){
+			handleUpcomingEdit();
+			toast(
+				<Toasts
+					icon={ 'Check' }
+					iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={ 'Sucesso!'}
+				>
+					Documento deletado com sucesso!
+				</Toasts>,
+				{
+					closeButton: true ,
+					autoClose: 5000 //
+				}
+			)
+			return
+		}
+		toast(
+			<Toasts
+				icon={ 'Close' }
+				iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+				title={ 'Erro!'}
+			>
+				Erro ao deletar documento, tente mais tarde e verifique sua internet.
+			</Toasts>,
+			{
+				closeButton: true ,
+				autoClose: 5000 //
+			}
+		)
+	};
+
+	const updateStatusCandidate = async (dates:any, verify:any, status:any, isStep:any = undefined) => {
+
+		//@ts-ignore
+		const Newcandidates = candidates.map(({ cpf, step, status, verify, observation }) => ({ cpf, step, status, verify, observation }));
+		let candidate       = Newcandidates.find((item: { cpf: string | undefined; }) => item.cpf === dates.cpf);
+		if(candidate){
+			if(isStep){
+				if(!candidate.verify || !candidate.status){
+					toast(
+						<Toasts
+							icon={ 'Close' }
+							iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={ 'Erro!'}
+						>
+							Aprove o candidato antes de avançar de etapa.
+						</Toasts>,
+						{
+							closeButton: true ,
+							autoClose: 5000 //
+						}
+					)
+					return
+				};
+				
+			}
+			candidate.verify = verify
+			candidate.status = status
+			if(isStep){
+				candidate.step = candidate.step + 1;
+			};
+			if(isStep == false){
+				candidate.step = candidate.step - 1;
+			};
+		}else{
+			toast(
+				<Toasts
+					icon={ 'Close' }
+					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={ 'Erro!'}
+				>
+					Erro ao atualizar o status do candidato, tente mais tarde.
+				</Toasts>,
+				{
+					closeButton: true ,
+					autoClose: 5000 //
+				}
+			)
+			setMenu(false)
+			return
+		}
+		const params = {
+			candidates:JSON.stringify(Newcandidates)
+		}
+		const update = await Job(params, dates.id)
+		if(update.status == 200 ){
+			candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === dates.cpf);
+			if(isStep){
+				candidate.step = candidate.step + 1;
+				candidate.verify = null
+				candidate.status = null
+			}else if(isStep == false){
+				candidate.step = candidate.step - 1;
+				candidate.verify = null
+				candidate.status = null
+			}else{
+				candidate.verify = verify
+				candidate.status = status
+			};
+			//@ts-ignore
+			const stepCandidates = candidates.filter(candidate => candidate.step === step);
+			setCandidatesStep(stepCandidates)
+			if(isStep === undefined){
+				return
+			}
+			toast(
+				<Toasts
+					icon={ 'Check' }
+					iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={ 'Sucesso!'}
+				>
+					{  isStep ?
+						'Candidato avançou para próxima etapa.'
+						:
+						'Candidato regrediu para etapa anterior.'
+					}
+				</Toasts>,
+				{
+					closeButton: true ,
+					autoClose: 5000 //
+				}
+			)
+			setMenu(false)
+		}else{
+			toast(
+				<Toasts
+					icon={ 'Close' }
+					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={ 'Erro!'}
+				>
+					Erro ao atualizar o status do candidato internamente, verifique sua internet.
+				</Toasts>,
+				{
+					closeButton: true ,
+					autoClose: 5000 //
+				}
+			)
+			setMenu(false)
+		}
+	};
+
+	const generateDocumentSignature = async () => {
+		if(isDynamic){
+			setIsDynamic(true)
+		}
+		setModalSignedDocument(true);
+	};
+
 	useEffect(()=>{
         const fetchData = async () => {
             const response = await Job_Admissional(userData.cnpj);
 			if(response.status == 200){
 				setCandidates(response.candidates)
+				//@ts-ignore
+				const stepOneCandidates = response.candidates.filter(candidate => candidate.step === 1);
+				setCandidatesStep(stepOneCandidates)
 				return
-			}
+			};
         }
         if(userData && userData.cnpj){
-            fetchData()
+            fetchData();
         }
-    },[userData, hasUpdate])
+    },[userData]);
+
+
 
 	return (
 		<section className='h-100'>
+
 			{menu && (
 				<ul 
 					id="context-menu"
@@ -248,6 +869,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					}}
 				>
 					<li >
+					{ step < 3 ?
 						<Button
 							icon='Check'
 							color='dark'
@@ -256,8 +878,18 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						>
 							Avançar Etapa
 						</Button>
+						:
+						<Button
+							icon='Check'
+							color='danger'
+							isLink={true}
+							onClick={()=>menuController('finishAdmission')}
+						>
+							Finalizar admissão
+						</Button>
+					}
 					</li>
-					{ step !== 1 &&
+					{ step > 1 &&
 						<li>
 							<Button
 								icon='KeyboardReturn'
@@ -312,6 +944,98 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				</ul>
 			)}
 			
+			<Modal isOpen={openDocument} setIsOpen={setOpenDocument} size={`lg`}>
+				<ModalHeader>
+					<div>
+						<h1 className='mb-0 p-0'>Documento</h1>
+						<p className='mt-0 p-0'>Avalie o documento</p>
+						{manipulatingTable && <span className='text-warning'>{manipulatingTable.name}</span>}
+					</div>
+				</ModalHeader>
+				<ModalBody>
+					{ view == 'signature' ?
+						<>
+							{typeDocumentSignature == 'pdf' ?
+								<iframe
+									title="Conteúdo incorporado da página"
+									src={pathDocumentSignature}
+									className="rounded-md left-5"
+									style={{ height: "500px", width: '100%', borderRadius: '10px' }}
+								/>
+								:
+								typeDocumentSignature == 'picture' ?
+								<div className='d-flex gap-4'>
+									<img
+										title="Documento"
+										src={pathDocumentSignature}
+										className="rounded-md left-5"
+										style={{ height: "500px", width: '100%', borderRadius: '10px' }}
+									/>
+								</div>
+								:
+								<div>
+									<h3>O Candidato ainda não enviou o documento.</h3>
+								</div>
+							}
+						</>
+						:
+						view == 'documentSignature' ?
+							// <SignedDocument document={allDocument} assignature={allAssignature} />
+							// <PDFSignature document={allDocument} assignature={allAssignature} />
+							<></>
+						:
+						<>
+							{typeDocument == 'pdf' ?
+								<iframe
+									title="Conteúdo incorporado da página"
+									src={pathDocumentMain}
+									className="rounded-md left-5"
+									style={{ height: "500px", width: '100%', borderRadius: '10px' }}
+								/>
+								:
+								typeDocument == 'picture' ?
+								<div className='d-flex gap-4'>
+									<img
+										title="Documento"
+										src={pathDocumentMain}
+										className="rounded-md left-5"
+										style={{ height: "500px", width: '100%', borderRadius: '10px' }}
+									/>
+								</div>
+								:
+								<div>
+									<h3>O Candidato ainda não enviou o documento.</h3>
+								</div>
+							}
+						</>
+
+					}
+				</ModalBody>
+				<ModalFooter>
+					{ (typeDocument && pathDocumentMain && step != 3 ) || (view == 'signature' && step == 3 && typeDocumentSignature && pathDocumentSignature) &&
+						<div className='d-flex gap-4'>
+							<Button
+								isLight={true}
+								color='danger'
+								onClick={()=>AvaliationPicture(false)}
+								// size='lg'
+							>
+								Recusar
+							</Button>
+							<Button
+								isLight={true}
+								color='success'
+								onClick={()=>AvaliationPicture(true)}
+								// size='lg'
+							>
+								Aprovar
+							</Button>
+						</div>
+					}
+				</ModalFooter>
+			</Modal>
+
+			{manipulatingTable && <SignedDocument nameDocument={documentAvaliation} id={manipulatingTable.id} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allAssignature} />}
 
 			<Card stretch={isFluid} onClick={closeMenu}>
 				<CardHeader borderSize={1}>
@@ -335,7 +1059,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								<CardTitle tag='div' className='h4'>
 									{stepTitle}
 								</CardTitle>
-								
 							</CardLabel>
 							{step != 3 &&
 								<Button
@@ -365,6 +1088,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				</CardHeader>
 				<CardBody className='table-responsive' isScrollable={isFluid} onClick={closeMenu}>
 					{ candidates ?
+					<>
 						<table className='table table-modern' onClick={closeMenu}>
 							<thead>
 								<tr>
@@ -379,7 +1103,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								</tr>
 							</thead>
 							<tbody>
-								{dataPagination(candidates, currentPage, perPage).map((item) => (
+								{ dataPagination(candidatesStep, currentPage, perPage).map((item) => (
 									<tr key={item.id}  onContextMenu={(e) => toggleMenu(e, item)} >
 										<td>
 											<Button
@@ -453,44 +1177,92 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 											<DropdownToggle hasIcon={false}>
 												<Button
 													isLink
-													color={item.status ? 'success' : item.status == null ? 'warning' : 'danger'}
+													color={item.status && item.verify ?  'success' : item.status == null && item.verify == null  ? 'warning'   : item.status == false && item.verify == null  ? 'light' : 'danger'}
 													icon='Circle'
 													className='text-nowrap'>
-													{item.status ? 'Aprovado' : item.status == null ? 'Em espera' : 'Reprovado'}
+													{item.status && item.verify       ?  'Aprovado' : item.status == null && item.verify == null ? 'Em espera' : item.status == false && item.verify == null  ? 'Rejeitado': 'Reprovado'}
 												</Button>
 											</DropdownToggle>
 										</td>
 										<td>
+										{ item.step == 1 ?
+												<Button
+													isOutline={!darkModeStatus}
+													color='dark'
+													isLight={darkModeStatus}
+													className={classNames('text-nowrap col-12 ' , {
+														'border-light': !darkModeStatus,
+													})}
+													icon={!loadingStates[item.cpf] ? 'PhotoLibrary' : 'ImageSearch'}
+													onClick={
+														()=>{
+															actionController(item)
+														}}>
+													{!loadingStates[item.cpf] ?
+													'Visualizar'
+													:
+													'Buscando'
+													}
+												</Button>
+											:
+											item.step == 2 ?
+												<Button
+													isOutline={!darkModeStatus}
+													color='dark'
+													isLight={darkModeStatus}
+													className={classNames( 'text-nowrap col-12', {
+														'border-light': !darkModeStatus,
+													})}
+													icon={!loadingStates[item.cpf] ? 'LibraryBooks' : 'ImageSearch'}
+													onClick={
+														()=>{
+															actionController(item)
+													}}>
+													{!loadingStates[item.cpf] ?
+													'Gerenciar'
+													:
+													'Buscando'
+													}
+												</Button>
+												
+											:
 											<Button
 												isOutline={!darkModeStatus}
 												color='dark'
 												isLight={darkModeStatus}
-												className={classNames('text-nowrap', {
+												className={classNames('text-nowrap col-12', {
 													'border-light': !darkModeStatus,
 												})}
-												icon='PhotoLibrary'
-												onClick={handleUpcomingEdit}>
-												Visualizar
+												icon={!loadingStates[item.cpf] ? 'PhotoLibrary': 'ImageSearch'}
+												onClick={()=>actionController(item)}>
+												{!loadingStates[item.cpf] ?
+													'Gerenciar'
+													:
+													'Buscando'
+												}
 											</Button>
+										}
 										</td>
 									</tr>
 								))}
 							</tbody>
 						</table>
+
+						<PaginationButtons
+							data={candidatesStep}
+							label='candidatos'
+							setCurrentPage={setCurrentPage}
+							currentPage={currentPage}
+							perPage={perPage}
+							setPerPage={setPerPage}
+						/>
+					</>	
 					:
 						<div>
 							<h2 className='fw-bold'>Nenhuma admissão em andamento</h2>
 						</div>
 					}
 				</CardBody>
-				<PaginationButtons
-					data={items}
-					label='items'
-					setCurrentPage={setCurrentPage}
-					currentPage={currentPage}
-					perPage={perPage}
-					setPerPage={setPerPage}
-				/>
 			</Card>
 
 			<OffCanvas
@@ -522,47 +1294,477 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			</OffCanvas>
 
 			<OffCanvas
-				setOpen={setUpcomingEventsEditOffcanvas}
+				setOpen={handleUpcomingEdit}
 				isOpen={upcomingEventsEditOffcanvas}
 				titleId='upcomingEdit'
 				isBodyScroll
+				isBackdrop={false}
 				placement='end'>
-				<OffCanvasHeader setOpen={setUpcomingEventsEditOffcanvas}>
+				<OffCanvasHeader setOpen={handleUpcomingEdit}>
 					<OffCanvasTitle id='upcomingEdit'>
 						{titleManipulating}
 					</OffCanvasTitle>
 				</OffCanvasHeader>
 				<OffCanvasBody>
-					<div className='row g-4'>
-						{/* <div className='col-6'>
-							<FormGroup id='date' label='Date'>
-								<Input
-									onChange={formik.handleChange}
-									value={formik.values.date}
-									type='date'
-								/>
-							</FormGroup>
-						</div> */}
-						{ manipulating &&
+
+					<div className='row g-5'>
+						{ controllerBodyManipulating == 'kitAdmission' &&
+							<>
+
+								<span>
+									Abaixo, selecione seus arquivos, e envie para o candidato.
+								</span>
+									
+								<div className='col-12'>
+									<Dropdown>
+										<DropdownToggle>
+											<Button color='light' isLight icon='FolderOpen' className='col-12'>
+												Selecione um Documento
+											</Button>
+										</DropdownToggle>
+										<DropdownMenu breakpoint='xxl'>
+												<DropdownItem>
+													<Button 
+															onClick={()=>documentController('add')}
+														>
+															<Icon icon='AddCircle' /> Adicionar Documento
+													</Button>
+												</DropdownItem>
+
+											<DropdownItem isHeader>Obrigatórios</DropdownItem>
+										
+											<DropdownItem>
+														<Button
+															onClick={()=>documentController('registration_form')}
+														>
+															<Icon 
+																color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.registration) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.registration)? 'success' : 'warning'}
+																icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.registration) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.registration)? 'Check' : 'Info'} 
+															/> 
+															Ficha de Registro
+														</Button>
+											</DropdownItem>
+
+											<DropdownItem>
+														<Button 
+															onClick={()=>documentController('experience_contract')}
+														>
+															<Icon 
+																color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.experience) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.experience)? 'success': 'warning'}
+																icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.experience) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.experience)? 'Check'  : 'Info'} 
+															/> 
+															Contrato de Experiência
+														</Button>
+											</DropdownItem>
+
+											<DropdownItem>
+														<Button
+															onClick={()=>documentController('hours_extension')}
+														>
+															<Icon 
+																color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.extension) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.extension) ? 'success' : 'warning'}
+																icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.extension) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.extension) ? 'Check' : 'Info'} 
+															/>  
+															Acordo de Prorrogação de Horas
+														</Button>
+											</DropdownItem>
+
+											<DropdownItem>
+														<Button 
+															onClick={()=>documentController('hours_compensation')}
+														>
+															<Icon 
+																color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.compensation) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.compensation) ? 'success' : 'warning'}
+																icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.compensation) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.compensation) ? 'Check' : 'Info'} 
+															/> 
+															Acordo de Compensação de Horas
+														</Button>
+											</DropdownItem>
+
+											<DropdownItem>
+														<Button 
+															onClick={()=>documentController('transport_voucher')}
+														>
+															<Icon 
+																color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.voucher) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.voucher) ? 'success' : 'warning'} 
+																icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.voucher) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.voucher) ? 'Check' : 'Info'} 
+															/> 
+															Solicitação de Vale Trasnsporte
+														</Button>
+											</DropdownItem>
+												
+											<DropdownItem isDivider />
+
+											<DropdownItem isText>Documentos Adicionais</DropdownItem>
+												
+											
+
+											<>
+												{datesDynamicManipulating && datesDynamicManipulating.dynamic &&
+													Object.keys(datesDynamicManipulating.dynamic.document).map((key) => {
+														const fileName = datesDynamicManipulating.dynamic.document[key];
+														const formattedFileName = fileName.replace(/([a-z])([A-Z])/g, '$1 $2');
+														return (
+															<DropdownItem key={key}>
+															<Button 
+															onClick={() => {
+																setDocumentAvaliation(datesDynamicManipulating.dynamic.document[key])
+																documentController('dynamic', datesDynamicManipulating.dynamic.document[key])
+															}}
+															>
+																<Icon color='warning' icon="Check" /> {formattedFileName}
+															</Button>
+															</DropdownItem>
+														);
+													})
+												}
+											</>
+
+										</DropdownMenu>
+									</Dropdown>
+								</div>
+
+								
+								{documentAvaliation &&
+									( loadingSearchDocument  ?
+										<div> 
+											<h1>Ops, peraí que o documento tá se escondendo...</h1>
+												<Spinner />
+										</div>
+										:
+										<>
+											{ manipulatingTable && ( documentAvaliation != 'add') && 
+												<div className='col-12'>
+													<FormGroup id='customerName' 
+													label={ 
+														documentAvaliation == 'registration_form'  ? 'Ficha de Registro'       :
+														documentAvaliation == 'experience_contract'? 'Contrato de Experiencia' :
+														documentAvaliation == 'hours_extension'    ? 'Acordo de Prorrogação de Horas' :
+														documentAvaliation == 'hours_compensation' ? 'Acordo de Compensação de Horas' : 
+														documentAvaliation == 'transport_voucher'  ? 'Solitação de Vale Transporte'   : 
+														documentAvaliation.replace(/([a-z])([A-Z])/g, '$1 $2')
+													}
+													>
+														<InputGroup>
+															<Input 
+																type='file'
+																onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+																	const file = event.target.files?.[0]; // Pega o primeiro arquivo selecionado
+																	if (file) {
+																	formik.setFieldValue('document', file); // Atualiza o valor no Formik
+																	}
+																}}
+															/>
+																<Button isOutline color='light' icon={pathDocumentMain ? 'Autorenew' : 'CloudUpload'}>
+																	{pathDocumentMain ? 'Edit' : 'Upload'}
+																</Button>
+														</InputGroup>
+													</FormGroup>
+												</div>
+											}
+
+											{ manipulatingTable && documentAvaliation == 'add' && 
+												<>
+													<FormGroup id='customerName' label={'Nome do novo documento'}>
+															<Input
+																id='documentNameAdd'
+																type='text'
+																value={formik.values.documentNameAdd}
+																className='text-capitalize'
+																onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+																	formik.setFieldValue('documentNameAdd', event.target.value);
+																}}
+															/>
+													</FormGroup>
+
+													<FormGroup id='customerName'>
+														<InputGroup>
+															<Input 
+																type='file'
+																onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+																	const file = event.target.files?.[0];
+																	if (file) {
+																	formik.setFieldValue('document', file);
+																	}
+																}}
+															/>
+																<Button isOutline color='light' icon={pathDocumentMain ? 'Autorenew' : 'CloudUpload'}>
+																	{pathDocumentMain ? 'Edit' : 'Upload'}
+																</Button>
+														</InputGroup>
+													</FormGroup>
+												</>
+											}
+
+											{ pathDocumentMain && typeDocument && 
+												<div className='col-12'>
+													<FormGroup label='Visualizar' className='gap-2 d-flex flex-column'>
+														<div>
+															<Button 
+																	isLink={true}
+																	icon='Description'
+																	color='info'
+																	onClick={()=>{
+																		setView('document')
+																		setOpenDocument(true)
+																	}}
+																>
+																	Documento
+															</Button>
+														</div>
+													</FormGroup>
+													{
+														step == 2 && !['registration_form', 'experience_contract', 'hours_extension', 'hours_compensation', 'transport_voucher'].includes(documentAvaliation) &&
+														<FormGroup>
+															<div>
+																<div>
+																	<Button 
+																		isLink={true}
+																		onClick={deleteDocumentDynamic}
+																		icon='Delete'
+																		color='danger'
+																	>
+																		Deletar
+																	</Button>
+																</div>
+															</div>
+														</FormGroup>
+													}
+												</div>
+											}
+										</>
+									)
+								}
+
+							</>
+						}
+
+						{ controllerBodyManipulating == 'signature' &&
+							<>
+								<span>
+									Abaixo, selecione seus arquivos, confira as assinaturas e gere seu documento assinado. 
+								</span>
+
+								<div className='col-12'>
+									<Dropdown>
+										<DropdownToggle>
+											<Button color='light' isLight icon='FolderOpen' className='col-12'>
+												Selecione um Documento
+											</Button>
+										</DropdownToggle>
+										<DropdownMenu breakpoint='xxl'>
+										
+											<DropdownItem>
+												<Button
+															onClick={()=>documentController('registration_form', '', true)}
+														>
+															<Icon 
+																color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'registration_form') ? 'success' : 'warning'}
+																icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'registration_form') ? 'Check' : 'Info'} 
+															/> 
+															Ficha de Registro
+												</Button>
+											</DropdownItem>
+
+											<DropdownItem>
+												<Button 
+															onClick={()=>documentController('experience_contract', '', true)}
+														>
+															<Icon 
+																color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'experience_contract') ? 'success': 'warning'}
+																icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'experience_contract') ? 'Check'  : 'Info'} 
+															/> 
+															Contrato de Experiência
+												</Button>
+											</DropdownItem>
+
+											<DropdownItem>
+												<Button
+															onClick={()=>documentController('hours_extension', '', true)}
+														>
+															<Icon 
+																color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'hours_extension') ? 'success' : 'warning'}
+																icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'hours_extension') ?  'Check' : 'Info'} 
+															/>  
+															Acordo de Prorrogação de Horas
+												</Button>
+											</DropdownItem>
+
+											<DropdownItem>
+														<Button 
+															onClick={()=>documentController('hours_compensation', '', true)}
+														>
+															<Icon 
+																color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'hours_compensation') ? 'success' : 'warning'}
+																icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'hours_compensation') ? 'Check' : 'Info'} 
+															/> 
+															Acordo de Compensação de Horas
+														</Button>
+											</DropdownItem>
+
+											<DropdownItem>
+														<Button 
+															onClick={()=>documentController('transport_voucher', '', true)}
+														>
+															<Icon 
+																color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'transport_voucher') ? 'success' : 'warning'} 
+																icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'transport_voucher') ? 'Check' : 'Info'} 
+															/> 
+															Solicitação de Vale Trasnsporte
+														</Button>
+											</DropdownItem>
+												
+											<DropdownItem isDivider />
+
+											<DropdownItem isText>Documentos Adicionais</DropdownItem>
+												
+											<>
+												{datesDynamicManipulating && datesDynamicManipulating.dynamic &&
+													Object.keys(datesDynamicManipulating.dynamic.document).map((key) => {
+														const fileName = datesDynamicManipulating.dynamic.document[key];
+														const formattedFileName = fileName.replace(/([a-z])([A-Z])/g, '$1 $2');
+														return (
+															<DropdownItem key={key}>
+															<Button 
+															onClick={() => {
+																setDocumentAvaliation(datesDynamicManipulating.dynamic.document[key])
+																documentController('dynamic', datesDynamicManipulating.dynamic.document[key])
+																console.log(datesDynamicManipulating.dynamic.document[key])
+																setIsDynamic(true)
+															}}
+															>
+																<Icon 
+																	color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === datesDynamicManipulating.dynamic.document[key]) ? 'success' : 'warning'} 
+																	icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'transport_voucher') ? 'Check' : 'Info'} 
+																/> 
+																{formattedFileName}
+															</Button>
+															</DropdownItem>
+														);
+													})
+												}
+											</>
+
+										</DropdownMenu>
+									</Dropdown>
+								</div>
+
+								{ documentAvaliation && (
+									loadingSearchDocument  ? 
+										<div> 
+											<h1>Ops, peraí que o documento tá se escondendo...</h1>
+											<Spinner />
+										</div>
+										:
+										<>
+												{ documentAvaliation &&
+													<h5>
+															{
+																documentAvaliation == 'registration_form'  ? 'Ficha de Registro'       :
+																documentAvaliation == 'experience_contract'? 'Contrato de Experiencia' :
+																documentAvaliation == 'hours_extension'    ? 'Acordo de Prorrogação de Horas' :
+																documentAvaliation == 'hours_compensation' ? 'Acordo de Compensação de Horas' : 
+																documentAvaliation == 'transport_voucher'  ? 'Solitação de Vale Transporte'   : 
+																documentAvaliation == 'view' ?  '' : documentAvaliation.replace(/([a-z])([A-Z])/g, '$1 $2')
+															}
+													</h5>
+												}
+
+												{ documentAvaliation &&
+													<>
+														<FormGroup label='Visualizar' className='gap-2 d-flex flex-column'>
+															<div>
+																<Button 
+																	isLink={true}
+																	icon='Description'
+																	color='info'
+																	onClick={()=>{
+																		setView('document')
+																		setOpenDocument(true)
+																	}}
+																>
+																	Documento
+																</Button>
+															</div>
+															<div>
+																<Button 
+																	isLink={true}
+																	icon='Mode'
+																	color='storybook'
+																	onClick={()=>{
+																		setView('signature')
+																		setOpenDocument(true)
+																	}}
+																>
+																	Assinatura
+																</Button>
+															</div>
+															<>   
+															{datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === documentAvaliation.toLowerCase()) &&
+																	<div>
+																		<Button 
+																			isLink={true}
+																			icon='Verified'
+																			color='warning'
+																			onClick={()=>{
+																				setView('signature')
+																				setOpenDocument(true)
+																			}}
+																		>
+																			Documento Assinado
+																		</Button>
+																	</div>
+																}
+															</>
+														</FormGroup>
+
+														{ datesDynamicManipulating && ( datesDynamicManipulating.signature[documentAvaliation.split('_')[0]] || datesDynamicManipulating.signature[documentAvaliation.split('_')[1]]) &&
+															<FormGroup label='Gerar'>
+																<div>
+																	<Button 
+																		isLink={true}
+																		icon='LibraryAdd'
+																		color='success'
+																		onClick={()=>{
+																			generateDocumentSignature()
+																		}}
+																	>
+																		Documento Assinado
+																	</Button>
+																</div>
+															</FormGroup>
+														}
+
+														
+													</>
+												}
+										</>
+									)
+								}
+							</>
+						}
+
+						{ controllerBodyManipulating == 'observation' &&
 							<div className='col-12'>
-							<Card isCompact borderSize={2} shadow='none' className='mb-0'>
-								<CardHeader>
-									<CardLabel>
-										<CardTitle>Observação</CardTitle>
-									</CardLabel>
-								</CardHeader>
-								<CardBody >
-									<FormGroup id='note' label={manipulating.name}>
-										<Textarea
-											onChange={formik.handleChange}
-											value={formik.values.note}
-											style={{height:'200px'}}
-										/>
-									</FormGroup>
-								</CardBody>
-							</Card>
+								<Card isCompact borderSize={2} shadow='none' className='mb-0'>
+									<CardHeader>
+										<CardLabel>
+											<CardTitle>Observação</CardTitle>
+										</CardLabel>
+									</CardHeader>
+									<CardBody >
+										<FormGroup id='note' label={manipulating.name}>
+											<Textarea
+												onChange={formik.handleChange}
+												value={formik.values.note}
+												style={{height:'200px'}}
+											/>
+										</FormGroup>
+									</CardBody>
+								</Card>
 							</div>
 						}
+
 						{/* <div className='col-12'>
 							<Card isCompact borderSize={2} shadow='none' className='mb-0'>
 								<CardHeader>
@@ -597,23 +1799,26 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							</Card>
 						</div> */}
 					</div>
+
 				</OffCanvasBody>
-				<div className='row m-0'>
-					<div className='col-12 p-3'>
-						<Button
-							color='info'
-							className='w-100'
-							onClick={()=>formSubmitController(controllerBodyManipulating)}>
-							{ SpinnerManipulating ?
-								<Spinner 
-									isSmall={true}
-								/>
-								:
-								'Salvar'
-							}
-						</Button>
+				{ (controllerBodyManipulating == 'kitAdmissional' && loadingSearchDocument || controllerBodyManipulating == 'observation') &&
+					<div className='row m-0'>
+						<div className='col-12 p-3'>
+							<Button
+								color='info'
+								className='w-100'
+								onClick={()=>formSubmitController(controllerBodyManipulating)}>
+								{ SpinnerManipulating ?
+									<Spinner 
+										isSmall={true}
+									/>
+									:
+									'Salvar'
+								}
+							</Button>
+						</div>
 					</div>
-				</div>
+				}
 			</OffCanvas>
 		</section>
 	);
@@ -623,3 +1828,5 @@ AdmissionTable.defaultProps = {
 };
 
 export default AdmissionTable;
+
+

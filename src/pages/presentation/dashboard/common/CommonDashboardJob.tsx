@@ -27,7 +27,7 @@ import useDarkMode from '../../../../hooks/useDarkMode';
 import { demoPagesMenu } from '../../../../menu';
 import Chart from '../../../../components/extras/Chart';
 import Badge from '../../../../components/bootstrap/Badge';
-import Job_Open from '../../../../api/get/Job_Open';
+import Job_Open from '../../../../api/get/Job/Job_Open';
 import AuthContext from '../../../../contexts/authContext';
 import { AbstractPicture } from '../../../../constants/abstract';
 import Mask from '../../../../function/Mask';

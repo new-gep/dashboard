@@ -150,6 +150,7 @@ const OffCanvas: FC<IOffCanvasProps> = ({
 	isOpen,
 	setOpen,
 	isRightPanel,
+
 	tag: Tag,
 	...props
 }) => {

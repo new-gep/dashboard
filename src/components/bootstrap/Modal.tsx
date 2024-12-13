@@ -62,7 +62,7 @@ export const ModalHeader = forwardRef<HTMLDivElement, IModalHeaderProps>(
 				{setIsOpen && (
 					<button
 						type='button'
-						className='btn-close'
+						className='btn-close me-4'
 						data-bs-dismiss='modal'
 						aria-label='Close'
 						onClick={() => setIsOpen(false)}

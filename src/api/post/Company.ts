@@ -26,5 +26,4 @@ export default async function Company(dates: PropsCreateCompany){
     }catch(e){
         console.log(e) 
     }
-    
 };

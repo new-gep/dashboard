@@ -35,8 +35,8 @@ import showNotification from '../../../components/extras/showNotification';
 import useDarkMode from '../../../hooks/useDarkMode';
 import { AbstractPicture } from '../../../constants/abstract';
 import Mask from '../../../function/Mask';
-import Job_One from '../../../api/get/Job_One';
-import JobDelete from '../../../api/delete/job';
+import Job_One from '../../../api/get/Job/Job_One';
+import JobDelete from '../../../api/delete/job/job';
 import JobUpdate from '../../../api/patch/Job';
 import Textarea from '../../../components/bootstrap/forms/Textarea';
 import Select from '../../../components/bootstrap/forms/Select';
@@ -281,8 +281,9 @@ const JobViewPage = () => {
 			const updatedCandidates:any = [...candidates];
 			updatedCandidates[index] = {
 				...updatedCandidates[index],
-				status: null, 
-				step  : '1',
+				status: null,
+				verify: null, 
+				step  : 1,
 			};
 			setCandidates(updatedCandidates);
 			//@ts-ignore

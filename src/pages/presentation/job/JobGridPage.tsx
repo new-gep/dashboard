@@ -35,10 +35,10 @@ import AuthContext from '../../../contexts/authContext';
 import Job from '../../../api/post/Job';
 import Mask from '../../../function/Mask';
 import Toasts from '../../../components/bootstrap/Toasts';
-import Job_Open from '../../../api/get/Job_Open';
-import Job_One from '../../../api/get/Job_One';
+import Job_Open from '../../../api/get/Job/Job_Open';
+import Job_One from '../../../api/get/Job/Job_One';
 import JobUpdate from '../../../api/patch/Job';
-import JobDelete from '../../../api/delete/job';
+import JobDelete from '../../../api/delete/job/job';
 import { toast } from 'react-toastify';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
 import { isArray } from 'util';
@@ -397,7 +397,6 @@ const ProductsGridPage = () => {
 						setData(response.job)
 						break;
 					default:
-					console.log('aq')
 						break;
 				}
 			};

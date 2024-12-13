@@ -213,10 +213,13 @@ interface IItemWrapperProps {
 }
 const ItemWrapper = forwardRef<HTMLLIElement, IItemWrapperProps>(
 	({ children, className, ...props }, ref) => {
+
+
 		return (
 			<li
 				ref={ref}
 				className={classNames('dropdown-item-wrapper', className)}
+				
 				// eslint-disable-next-line react/jsx-props-no-spreading
 				{...props}>
 				{children}
@@ -238,9 +241,10 @@ interface IDropdownItemProps extends HTMLAttributes<HTMLLIElement> {
 	isHeader?: boolean;
 	isDivider?: boolean;
 	isText?: boolean;
+	isClose?:boolean;
 }
 export const DropdownItem = forwardRef<HTMLLIElement, IDropdownItemProps>(
-	({ children, isHeader, isDivider, isText, ...props }, ref) => {
+	({ children, isClose ,isHeader, isDivider, isText, ...props }, ref) => {
 		if (isHeader) {
 			return (
 				// eslint-disable-next-line react/jsx-props-no-spreading
@@ -285,9 +289,10 @@ export const DropdownItem = forwardRef<HTMLLIElement, IDropdownItemProps>(
 				</ItemWrapper>
 			);
 		}
+		
 		return (
 			// eslint-disable-next-line react/jsx-props-no-spreading
-			<ItemWrapper ref={ref} {...props}>
+			<ItemWrapper ref={ref} {...props} >
 				{cloneElement(
 					// @ts-ignore
 					typeof children === 'string' ? <span>{children}</span> : children,
