@@ -6,7 +6,7 @@ import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Button from '../../../components/bootstrap/Button';
 import { mainMenu } from '../../../menu';
-import AdmissionTable from '../../_common/Process/AdmissionTable';
+import DemissionTable from '../../_common/Process/DemissionTable';
 import useDarkMode from '../../../hooks/useDarkMode';
 import Job_Admissional from '../../../api/get/Job/Job_Admissional';
 import AuthContext from '../../../contexts/authContext';
@@ -20,7 +20,6 @@ const AppointmentList = () => {
 	const fetchData = async () => {
 		const response = await Job_Admissional(userData.cnpj)
 		if(response.status == 200){
-			console.log(response)
 			setCount(response.counts)
 			setLoader(true)
 		}
@@ -72,7 +71,7 @@ const AppointmentList = () => {
 			<Page container='fluid'>
 				<div className='row h-100'>
 					<div className='col-12'>
-						<AdmissionTable isFluid />
+						<DemissionTable isFluid />
 					</div>
 				</div>
 			</Page>

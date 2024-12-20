@@ -37,7 +37,7 @@ import CollaboratorFile from '../../../api/get/CollaboratorFile';
 import Toasts from '../../../components/bootstrap/Toasts';
 import { toast } from 'react-toastify';
 import PicturePath from '../../../api/patch/Picture';
-import PictureGet from '../../../api/get/Picture';
+import PictureGet from '../../../api/get/picture/Picture';
 import AuthContext from '../../../contexts/authContext';
 import Job_One from '../../../api/get/Job/Job_One';
 import Job from '../../../api/patch/Job';

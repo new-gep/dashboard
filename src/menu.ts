@@ -96,7 +96,7 @@ export const mainMenu = {
 			dismissal: {
 				id: 'dismissal',
 				text: 'Demissão',
-				path: 'list-pages/fluid-list',
+				path: 'dismissal/fluid-list',
 				icon: 'DoorBack',
 			},
 		},

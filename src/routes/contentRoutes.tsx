@@ -57,6 +57,7 @@ const APP = {
 	},
 	PROCESS:{
 		ADMISSION: lazy(() => import('../pages/presentation/process/AdmissionList')),
+		DISMISSAL: lazy(() => import('../pages/presentation/process/DemissionList')),
 	},
 	JOB: {
 		TRANSACTIONS: lazy(() => import('../pages/presentation/job/TransActionsPage')),
@@ -315,6 +316,10 @@ const presentation: RouteProps[] = [
 	{
 		path: mainMenu.process.subMenu.admission.path,
 		element: <APP.PROCESS.ADMISSION />,
+	},
+	{
+		path: mainMenu.process.subMenu.dismissal.path,
+		element: <APP.PROCESS.DISMISSAL />,
 	},
 
 	/**

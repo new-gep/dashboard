@@ -3,7 +3,7 @@ interface PropsUploadJob {
     file: File    | string,
     name: string | null,
     id  : number  | null,
-    dynamic?:string
+    dynamic?:string | null;
 };
 export default async function Job_DocumentSignature(propsUploadJob:PropsUploadJob) {
     if(!propsUploadJob.name){

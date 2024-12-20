@@ -1,31 +1,39 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import Button from '../bootstrap/Button';
 import Job_DocumentSignature from '../../api/post/Job_DocumentSignature';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../bootstrap/Modal';
-import { FabricImage, Canvas, } from 'fabric';
+// import { Canvas, FabricImage } from 'fabric';
+import * as fabric from 'fabric';
 import { toast } from 'react-toastify';
 import Toasts from '../bootstrap/Toasts';
 import Spinner from '../bootstrap/Spinner';
+import Company from '../../api/get/Company/Signature';
+import { Input } from '../icon/material-icons';
+import Icon from '../icon/Icon';
+import AuthContext from '../../contexts/authContext';
 
 interface Props {
   document: any;
   nameDocument:string | null;
   assignature: any;
-  dynamic?:string;
+  dynamic:boolean;
   modal:boolean,
   setModal:any,
-  id: number
+  id: number,
+  closeAfterSave?:any
 }
 
-export default function SignedDocument({modal, setModal ,document, assignature, nameDocument, dynamic, id}: Props) {
+export default function SignedDocument({modal, setModal ,document, assignature, nameDocument, dynamic, id, closeAfterSave}: Props) {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLCanvasElement>(null);
+  const { userData } = useContext(AuthContext);
+  const [canvas, setCanvas] = useState<any>(null);
   const [loader, setLoader] = useState(false)
+  const inputFile = useRef(null);
 
-
-  async function loadImage(base64: any): Promise<FabricImage> {
+  async function loadImage(base64: any): Promise<any> {
     try {
-      const imagemFabric = await FabricImage.fromURL(
+      const imagemFabric = await fabric.FabricImage.fromURL(
         base64,
         { crossOrigin: 'anonymous' }
       );
@@ -40,50 +48,165 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
     const canvasElement = canvasRef.current;
     if(canvasElement){
       setLoader(true)
-      if(dynamic && nameDocument){
-        const fileName = nameDocument
-					.replace(/\s+(.)/g, (match, group1) => group1.toUpperCase()) 
-					.replace(/^\w/, (c) => c.toUpperCase())  
-					.replace(/\s+/g, ""); 
-          console.log(fileName)
-          return
-      };
       const dataURL = canvasElement.toDataURL('png',100);
       const PropsUploadJob = {
         file:dataURL,
-        name:nameDocument,
+        name:dynamic ? 'dynamic': nameDocument ,
         id  :id,
-        dynamic:dynamic
+        dynamic:dynamic ? nameDocument : null
       };
       const response = await Job_DocumentSignature(PropsUploadJob)
-     if(response.status == 200){
-      setLoader(false)
-      setModal(false)
+      if(response.status == 200){
+        await closeAfterSave();
+        setModal(false)
+        toast(
+          <Toasts
+            icon={ 'Check' }
+            iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+            title={ '🥳 Parabéns! '}
+          >
+            Sucesso ao gerar documento assinado.
+          </Toasts>,
+          {
+            closeButton: true ,
+            autoClose: 5000 //
+          }
+        )
+        setLoader(false);
+        return
+      };
       toast(
         <Toasts
-          icon={ 'Check' }
-          iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-          title={ '🥳 Parabéns! '}
+          icon={ 'Close' }
+          iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+          title={ 'Erro! '}
         >
-          Sucesso ao gerar documento assinado.
+          Erro ao gerar documento assinado.
         </Toasts>,
         {
           closeButton: true ,
           autoClose: 5000 //
         }
       )
-     }
+      setLoader(false)
     }
   };
 
+  const findSignature = async () => {
+    try{
+      const response = await Company(userData.cnpj);
+      if(response.status == 200){
+        const signature = await loadImage(response.path)
+        signature.set({
+          borderColor: 'black',
+          cornerColor: 'black',
+          cornerStrokeColor: 'black',
+          cornerSize: 10, // Tamanho do manipulador para redimensionamento
+        });
+        const canvasWidth = canvas.getWidth();
+        const canvasHeight = canvas.getHeight();
+        signature.left = (canvasWidth - signature.width! * signature.scaleX!) / 2;
+        signature.top = (canvasHeight - signature.height! * signature.scaleY!) / 2;      
+        signature.scaleToWidth(200);
+        canvas.add(signature);
+        canvas.renderAll();
+        toast(
+          <Toasts
+            icon={ 'Check' }
+            iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+            title={ 'Sucesso! '}
+          >
+            Sucesso, encontramos sua assinatura!
+          </Toasts>,
+          {
+            closeButton: true ,
+            autoClose: 5000 //
+          }
+        )
+        return
+      };
+      toast(
+        <Toasts
+          icon={ 'Close' }
+          iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+          title={ 'Erro! '}
+        >
+          Erro, não encontramos sua assinatura!
+        </Toasts>,
+        {
+          closeButton: true ,
+          autoClose: 5000 //
+        }
+      );
+    }catch(e){
+      console.log(e)
+      console.log('erro inesperado')
+    }
+  };
+
+  const openInput = async () =>{
+    //@ts-ignore
+    inputFile.current.click();
+  };
+
+  const handleUpSignature = (event:any) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Faça algo com o arquivo aqui (upload, pré-visualização, etc.)
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        //@ts-ignore
+        const base64 = e.explicitOriginalTarget.result;
+        const newSingature = await loadImage(base64)
+        newSingature.set({
+          borderColor: 'black',
+          cornerColor: 'black',
+          cornerStrokeColor: 'black',
+          cornerSize: 10, // Tamanho do manipulador para redimensionamento
+        });
+        const canvasWidth = canvas.getWidth();
+        const canvasHeight = canvas.getHeight();
+        newSingature.left = (canvasWidth - newSingature.width! * newSingature.scaleX!) / 2;
+        newSingature.top = (canvasHeight - newSingature.height! * newSingature.scaleY!) / 2;      
+        newSingature.scaleToWidth(200);
+        canvas.add(newSingature);
+        canvas.renderAll();
+      };
+      reader.readAsDataURL(file);
+      
+    }
+  };
+
+  const handleKeyDown = (event:any) => {
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      removeSelectedObject();
+    }
+  };
+
+  const removeSelectedObject = () => {
+    // Obtém o objeto atualmente selecionado no canvas
+    const activeObject = canvas.getActiveObject();
+    
+    // Verifica se há um objeto selecionado
+    if (activeObject) {
+      // Remove o objeto do canvas
+      canvas.remove(activeObject);
+      // Re-renderiza o canvas para refletir a mudança
+      canvas.renderAll();
+    } else {
+      // Exibe uma mensagem se nenhum objeto estiver selecionado
+      alert('Por favor, selecione um objeto para remover.');
+    }
+  };
 
   useEffect(() => {
-    console.log(assignature)
-    console.log(document)
+    window.document.addEventListener('keydown', handleKeyDown);
+
     const fetchData = async () => {
       try {
-        if (assignature && document && canvasRef.current && sectionRef.current) {
-          const canvas = new Canvas(canvasRef.current);
+        if (assignature && document && sectionRef.current && canvasRef.current) {
+          const canvas = new fabric.Canvas(canvasRef.current);
+          setCanvas(canvas)
           const sectionWidth = sectionRef.current.offsetWidth;
           const sectionHeight = sectionRef.current.offsetHeight;
           const canvasWidth = sectionWidth * 0.9;
@@ -129,63 +252,91 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
           canvas.add(canvaDocument);
           canvas.add(canvaSignature);
           canvas.renderAll();
-        }
+          
+          return () => {
+            window.document.removeEventListener('keydown', handleKeyDown);
+            canvas.dispose();
+          };
+        };
+        
       } catch (e) {
         console.log('Erro ao configurar o canvas:', e);
       }
     }
     fetchData();
-  }, [document, assignature, modal]);
-  
+  }, [document, assignature, modal, sectionRef.current, canvasRef.current]);
+
+
   return (
-    <Modal isOpen={modal} setIsOpen={setModal} fullScreen={true}>
-      <ModalHeader setIsOpen={setModal} >
-        <div className='d-flex align-items-center justify-content-center'>
-          <h2>Documento e Assinatura</h2>
-        </div>
-      </ModalHeader>
-      <ModalBody>
-        <>
-          { document && assignature ?
-          <>
-            <section className='rounded-lg d-flex align-items-center justify-content-center p-5'  ref={sectionRef} >
-              <canvas
-                className='rounded'
-                ref={canvasRef} 
-              />
-            </section>
-          </>
-          :
-          <h5>Buscando as informações</h5>
-          }
-        </>
-      </ModalBody>
-      <ModalFooter>
-        <div className='col-12 d-flex justify-content-end mt-2'>
-          { loader ?
+    <>
+      <Modal isOpen={modal} setIsOpen={setModal} fullScreen={true}>
+        <ModalHeader setIsOpen={setModal} >
+          <div className='d-flex align-items-center justify-content-center'>
+            <h2>Documento e Assinatura</h2>
+          </div>
+        </ModalHeader>
+        <ModalBody>
+            <>
+              <section className='rounded-lg d-flex align-items-center justify-content-center p-5'  ref={sectionRef} >
+                <canvas
+                  className='rounded'
+                  ref={canvasRef} 
+                />
+              </section>
+            </>
+        </ModalBody>
+        <ModalFooter>
+          <div className='col-12 d-flex justify-content-end mt-2 gap-4'>
+            <input
+              type="file"
+              id="upload-file" // Importante: o id deve corresponder ao htmlFor do label
+              ref={inputFile}
+              onChange={handleUpSignature}
+              className='d-none' // Esconde o input file
+            />
             <Button
-              
-              color='primary'
+              color='warning'
+              icon={'Search'}
+              isLink={true} 
+              className='d-flex gap-2 align-items-center'
+              onClick={findSignature}
+            >
+              Buscar Assinatura
+            </Button>
+            <Button
+              onClick={openInput}
+              isLink={true} 
+              color='info'
+              icon={'Upload'}
               className='d-flex gap-2 align-items-center'
             >
-              <Spinner 
-                isSmall={true}
-              />
-              
-              Gerando documento assinado
+              Carregar Assinatura
             </Button>
-          :
+            { loader ?
+              <Button
+                
+                color='primary'
+                className='d-flex gap-2 align-items-center'
+              >
+                <Spinner 
+                  isSmall={true}
+                />
+                
+                Gerando documento assinado
+              </Button>
+            :
             <Button
-            isLight={true}
-            icon='LibraryAdd'
-            color='primary'
-            onClick={saveImage}
-          >
-            Gerar documento assinado
-            </Button>
-          }
-        </div>
-      </ModalFooter>
-    </Modal>
+              isLight={true}
+              icon='LibraryAdd'
+              color='primary'
+              onClick={saveImage}
+            >
+              Gerar documento assinado
+              </Button>
+            }
+          </div>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 }

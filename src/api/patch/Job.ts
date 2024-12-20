@@ -10,6 +10,7 @@ interface PropsUpdateJob {
     salary?: string;
     time  ?: JSON;
     user_create?: string;
+    CPF_collaborator?:string;
     CNPJ_company?:string;
 };
 

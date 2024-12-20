@@ -51,11 +51,11 @@ import Signatures from '../../../api/get/picture/Signatures';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
-const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
+const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 	const navigate = useNavigate();
 
-    const [step, setStep] = useState(1)
+    const [step, setStep]     = useState(1)
     const [stepTitle, setStepTitle] = useState('Exame admisisional')
     const [stepIcon, setIcon] = useState('LooksOne')
     const { userData } = useContext(AuthContext);
@@ -581,9 +581,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					setTypeDocument(response.type)
 					setOpenDocument(true)
 					setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-					setTimeout(() => {
-						console.log(typeDocument && pathDocumentMain && step != 3 )
-					}, 2000)
 					return
 				}
 				toast(
@@ -667,6 +664,8 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 	const navegationStep = async (navigation:boolean) => {
         let newStep
+        setPathDocumentMain(null)
+        setTypeDocument(null)
         if(navigation){
             setStep(step + 1)
             newStep = step + 1
@@ -1035,9 +1034,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
         const fetchData = async () => {
             const response = await Job_Admissional(userData.cnpj);
 			if(response.status == 200){
-				//@ts-ignore
-				const removeStep0 = response.candidates.filter(candidate => candidate.step !== 0);
-				setCandidates(removeStep0)
+				setCandidates(response.candidates)
 				//@ts-ignore
 				const stepOneCandidates = response.candidates.filter(candidate => candidate.step === 1);
 				setCandidatesStep(stepOneCandidates)
@@ -1237,8 +1234,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					}
 				</ModalBody>
 				<ModalFooter>
-					{ ((typeDocument && pathDocumentMain && step != 3 ) || 
-					  (view == 'signature' && step == 3 && typeDocumentSignature && pathDocumentSignature)) &&
+					{ (typeDocument && pathDocumentMain && step != 3 ) || (view == 'signature' && step == 3 && typeDocumentSignature && pathDocumentSignature) &&
 						<div className='d-flex gap-4'>
 							<Button
 								isLight={true}
@@ -1265,12 +1261,12 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 			<Card stretch={isFluid} onClick={closeMenu}>
 				<CardHeader borderSize={1}>
-					<CardLabel icon='InsertChart' iconColor='info'>
+					<CardLabel icon='InsertChart' iconColor='danger'>
 						<CardTitle tag='div' className='h5'>
-							Processo de Admissão
+							Processo de Demissão
 						</CardTitle>
 					</CardLabel>
-					{ candidates && candidates.length > 0 &&
+					{ candidates  && candidates.length > 0 &&
 						<div className='d-flex align-items-center justify-content-center gap-2'>
 							
 							{ step != 1 &&
@@ -1490,7 +1486,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					</>	
 					:
 					<div>
-						<h2 className='fw-bold'>Nenhuma admissão em andamento</h2>
+						<h2 className='fw-bold'>Nenhuma demissão em andamento</h2>
 					</div>
 					}
 				</CardBody>
@@ -2061,10 +2057,10 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		</section>
 	);
 };
-AdmissionTable.defaultProps = {
+DemissionTable.defaultProps = {
 	isFluid: false,
 };
 
-export default AdmissionTable;
+export default DemissionTable;
 
 

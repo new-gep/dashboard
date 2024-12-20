@@ -338,6 +338,7 @@ const JobViewPage = () => {
 			updatedCandidates[index] = {
 				...updatedCandidates[index],
 				status: null, // Definindo o status como reprovado
+				step:0
 			};
 			setCandidates(updatedCandidates);
 			//@ts-ignore
