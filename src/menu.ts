@@ -38,12 +38,12 @@ export const dashboardPagesMenu = {
 		icon: 'Home',
 		subMenu: null,
 	},
-	// vaga: {
-	// 	id: 'Vaga',
-	// 	text: 'Vaga',
-	// 	path: 'sales/grid',
-	// 	icon: 'Work',
-	// },
+	collaborator: {
+		id: 'collaborator',
+		text: 'Colaboradores',
+		path: 'collaborator',
+		icon: 'Groups',
+	},
 	// dashboardProject: {
 	// 	id: 'dashboardProject',
 	// 	text: 'Dashboard Projects',

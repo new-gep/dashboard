@@ -30,10 +30,10 @@ import PaginationButtons, {
 import CustomerEditModal from '../crm/CustomerEditModal';
 import { getColorNameWithIndex } from '../../../common/data/enumColors';
 import useDarkMode from '../../../hooks/useDarkMode';
-import Collaborator from '../../../api/get/Collaborator';
+import Collaborator from '../../../api/get/collaborator/Collaborator';
 import Mask from '../../../function/Mask';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
-import CollaboratorFile from '../../../api/get/CollaboratorFile';
+import CollaboratorFile from '../../../api/get/collaborator/CollaboratorFile';
 import Toasts from '../../../components/bootstrap/Toasts';
 import { toast } from 'react-toastify';
 import PicturePath from '../../../api/patch/Picture';

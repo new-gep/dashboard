@@ -55,6 +55,9 @@ const APP = {
 		GRID: lazy(() => import('../pages/presentation/knowledge/KnowledgeGridPage')),
 		VIEW: lazy(() => import('../pages/presentation/knowledge/KnowledgeViewPage')),
 	},
+	COLLABORATOR:{
+		INDEX: lazy(() => import('../pages/presentation/collaborator/CollaboratorPage')),
+	},
 	PROCESS:{
 		ADMISSION: lazy(() => import('../pages/presentation/process/AdmissionList')),
 		DISMISSAL: lazy(() => import('../pages/presentation/process/DemissionList')),
@@ -320,6 +323,13 @@ const presentation: RouteProps[] = [
 	{
 		path: mainMenu.process.subMenu.dismissal.path,
 		element: <APP.PROCESS.DISMISSAL />,
+	},
+	/**
+	 * App > Collaborator
+	 */
+	{
+		path: dashboardPagesMenu.collaborator.path,
+		element: <APP.COLLABORATOR.INDEX />,
 	},
 
 	/**

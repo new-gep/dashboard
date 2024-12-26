@@ -34,7 +34,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Toasts from '../../../components/bootstrap/Toasts';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
-import CollaboratorFile from '../../../api/get/CollaboratorFile';
+import CollaboratorFile from '../../../api/get/collaborator/CollaboratorFile';
 import JobFile from '../../../api/get/Job/Job_File';
 import PicturePath from '../../../api/patch/Picture';
 import Popovers from '../../../components/bootstrap/Popovers';
