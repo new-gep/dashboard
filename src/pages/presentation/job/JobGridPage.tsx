@@ -42,9 +42,11 @@ import JobDelete from '../../../api/delete/job/job';
 import { toast } from 'react-toastify';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
 import { isArray } from 'util';
+import Checks from '../../../components/bootstrap/forms/Checks';
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 interface IValues {
 	image   :any;
+	PCD     : string;
 	function: string;
 	salary  : any;
 	time    : any;
@@ -58,6 +60,7 @@ interface IValues {
 interface Ijob {
 	user_create ?: any;
 	image:string;
+	PCD     : string;
 	function: string;
 	salary  : any;
 	time    : any;
@@ -72,6 +75,7 @@ interface Ijob {
 interface IjobUpdate {
 	image  :string;
 	function: string;
+	PCD     : string;
 	salary  : any;
 	journey: any;
 	time    : any;
@@ -99,7 +103,6 @@ const validate = (values: IValues) => {
 
         errors.time = 'Horário mínimo é 1 digito';
 	} else if (values.time.length > 3) {
-
         errors.time = 'Horário máximo é 3 digitos';
     }
 	if (!values.journey) {
@@ -127,6 +130,7 @@ const ProductsGridPage = () => {
 	const formik = useFormik({
 		initialValues: {
 			function: '',
+			PCD     : '0',
 			salary  : '',
 			time    : '',
 			journey : '',
@@ -373,6 +377,7 @@ const ProductsGridPage = () => {
 		if (editItem) {
 			formik.setValues({
 			function: editItem.function,
+			PCD     : editItem.PCD,
 			salary  : editItem.salary,
 			time    : editItem.time.time,
 			journey : editItem.time.journey,
@@ -477,6 +482,7 @@ const ProductsGridPage = () => {
 							<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
 								<CommonGridJobItem
 									id={item.id}
+									isPCD={item.PCD}
 									image={item.image}
 									title_job={item.function}
 									candidates={item.candidates}
@@ -582,6 +588,9 @@ const ProductsGridPage = () => {
 						<CardBody>
 							<div className='row g-4'>
 								<div className='col-12'>
+									-
+								</div>
+								<div className='col-12'>
 									<FormGroup id='function' label='Função' isFloating>
 										<Input
 											className='text-capitalize'
@@ -624,7 +633,6 @@ const ProductsGridPage = () => {
 											validFeedback='Ótimo!'
 										/>
 									</FormGroup>
-
 								</div>
 								<div className='col-12'>
 									<FormGroup id='journey'>

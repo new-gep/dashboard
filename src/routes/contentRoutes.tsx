@@ -60,6 +60,9 @@ const APP = {
 		INDEX: lazy(() => import('../pages/presentation/collaborator/CollaboratorPage')),
 		PROFILE: lazy(() => import('../pages/presentation/collaborator/CollaboratorProfilePage')),
 	},
+	COMPANY:{
+		PROFILE: lazy(() => import('../pages/presentation/company/CompanyProfile')),
+	},
 	PROCESS:{
 		ADMISSION: lazy(() => import('../pages/presentation/process/AdmissionList')),
 		DISMISSAL: lazy(() => import('../pages/presentation/process/DemissionList')),
@@ -332,6 +335,13 @@ const presentation: RouteProps[] = [
 	{
 		path: dashboardPagesMenu.collaborator.path,
 		element: <APP.COLLABORATOR.INDEX />,
+	},
+	/**
+	 * App > Company
+	 */
+	{
+		path: dashboardPagesMenu.companyProfile.path,
+		element: <APP.COMPANY.PROFILE />,
 	},
 
 	{

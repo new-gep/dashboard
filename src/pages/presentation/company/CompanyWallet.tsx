@@ -10,13 +10,14 @@ import Card, {
 	CardHeader,
 	CardLabel,
 	CardTitle,
-} from '../../components/bootstrap/Card';
-import Button from '../../components/bootstrap/Button';
-import Modal, { ModalBody, ModalHeader, ModalTitle } from '../../components/bootstrap/Modal';
-import FormGroup from '../../components/bootstrap/forms/FormGroup';
-import Input from '../../components/bootstrap/forms/Input';
-import ReactCreditCardsContainer from '../../components/extras/ReactCreditCardsContainer';
-import useDarkMode from '../../hooks/useDarkMode';
+} from '../../../components/bootstrap/Card';
+import Button from '../../../components/bootstrap/Button';
+import Modal, { ModalBody, ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
+import FormGroup from '../../../components/bootstrap/forms/FormGroup';
+import Input from '../../../components/bootstrap/forms/Input';
+import ReactCreditCardsContainer from '../../../components/extras/ReactCreditCardsContainer';
+import useDarkMode from '../../../hooks/useDarkMode';
+
 
 const validate = (values: {
 	name: string;
@@ -64,7 +65,7 @@ const validate = (values: {
 	return errors;
 };
 
-const CommonMyWallet = () => {
+const CompanyWallet = () => {
 	const { darkModeStatus } = useDarkMode();
 
 	const [cardList, setCardList] = useState<
@@ -342,4 +343,4 @@ const CommonMyWallet = () => {
 	);
 };
 
-export default CommonMyWallet;
+export default CompanyWallet;

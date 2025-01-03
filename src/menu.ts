@@ -38,6 +38,12 @@ export const dashboardPagesMenu = {
 		icon: 'Home',
 		subMenu: null,
 	},
+	companyProfile: {
+		id: 'companyProfile',
+		text: 'Perfil',
+		path: 'company/profile',
+		icon: 'CorporateFare',
+	},
 	collaborator: {
 		id: 'collaborator',
 		text: 'Colaboradores',

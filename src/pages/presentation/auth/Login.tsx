@@ -115,6 +115,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const handleSingIn = async () => {
+		const dates = datesSingIn;
+		if(!signInPassword){
+			dates.password = ''
+		};
 		const response = await User(datesSingIn)
 		switch (response.status) {
 			case 200:

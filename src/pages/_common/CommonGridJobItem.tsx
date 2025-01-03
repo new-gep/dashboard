@@ -32,6 +32,7 @@ interface ICommonGridJobItemProps {
 	candidates:any
 	editAction: any;
 	deleteAction: any;
+	isPCD : string;
 }
 const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 	id,
@@ -39,7 +40,8 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 	title_job,
 	editAction,
 	deleteAction,
-	candidates
+	candidates,
+	isPCD
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 
@@ -49,10 +51,10 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 			<CardHeader>
 				<CardLabel>
 					<CardTitle tag='div' className='h5'>
-						{title_job}{' '}
+						<span className='text-capitalize'>{title_job}{' '}</span>
 					</CardTitle>
 					<CardSubTitle tag='div' className='h6'>
-						#{id}
+						#{id} { isPCD == '1' && <Icon icon='AccessibleForward'/> }
 					</CardSubTitle>
 				</CardLabel>
 				<CardActions>
