@@ -27,7 +27,7 @@ import PaginationButtons, {
 	dataPagination,
 	PER_COUNT,
 } from '../../../components/PaginationButtons';
-import CustomerEditModal from '../crm/CustomerEditModal';
+import CustomerEditModal from '../example/crm/CustomerEditModal';
 import { getColorNameWithIndex } from '../../../common/data/enumColors';
 import useDarkMode from '../../../hooks/useDarkMode';
 import Collaborator from '../../../api/get/collaborator/Collaborator';

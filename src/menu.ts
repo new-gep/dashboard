@@ -44,6 +44,7 @@ export const dashboardPagesMenu = {
 		path: 'collaborator',
 		icon: 'Groups',
 	},
+
 	// dashboardProject: {
 	// 	id: 'dashboardProject',
 	// 	text: 'Dashboard Projects',
@@ -72,35 +73,6 @@ export const dashboardPagesMenu = {
 	// 	icon: 'sticky_note_2',
 	// 	subMenu: null,
 	// },
-};
-
-export const mainMenu = {
-	process: {
-		id: 'processPages',
-		text: 'DP Digital',
-		path: 'process-pages',
-		icon: 'Dvr',
-		subMenu: {
-			job: {
-				id  : 'Job',
-				text: 'Vaga',
-				path: 'sales/grid',
-				icon: 'Work',
-			},
-			admission: {
-				id: 'admission',
-				text: 'Admissão',
-				path: 'admission/fluid-list',
-				icon: 'ManageAccounts',
-			},
-			dismissal: {
-				id: 'dismissal',
-				text: 'Demissão',
-				path: 'dismissal/fluid-list',
-				icon: 'DoorBack',
-			},
-		},
-	}
 };
 
 export const demoPagesMenu = {
@@ -1084,4 +1056,44 @@ export const productsExampleMenu = {
 	companyB: { id: 'companyB', text: 'Company B', path: '/', subMenu: null },
 	companyC: { id: 'companyC', text: 'Company C', path: '/', subMenu: null },
 	companyD: { id: 'companyD', text: 'Company D', path: '/', subMenu: null },
+};
+
+// 
+
+export const secondaryPath = {
+	collaboratorProfile: {
+		id: 'collaboratorProfile',
+		text: 'Perfil',
+		path: 'collaborator/profile/:cpf',
+		hide: true,
+	},
+};
+
+export const mainMenu = {
+	process: {
+		id: 'processPages',
+		text: 'DP Digital',
+		path: 'process-pages',
+		icon: 'Dvr',
+		subMenu: {
+			job: {
+				id  : 'Job',
+				text: 'Vaga',
+				path: 'sales/grid',
+				icon: 'Work',
+			},
+			admission: {
+				id: 'admission',
+				text: 'Admissão',
+				path: 'admission/fluid-list',
+				icon: 'ManageAccounts',
+			},
+			dismissal: {
+				id: 'dismissal',
+				text: 'Demissão',
+				path: 'dismissal/fluid-list',
+				icon: 'DoorBack',
+			},
+		},
+	}
 };

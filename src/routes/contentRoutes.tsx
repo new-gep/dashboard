@@ -6,37 +6,38 @@ import {
 	demoPagesMenu,
 	gettingStartedPagesMenu,
 	pageLayoutTypesPagesMenu,
-	mainMenu
+	mainMenu,
+	secondaryPath
 } from '../menu';
 import Login from '../pages/presentation/auth/Login';
 
 const LANDING = {
-	DASHBOARD: lazy(() => import('../pages/presentation/dashboard/DashboardPage')),
-	DASHBOARD_BOOKING: lazy(() => import('../pages/presentation/dashboard/DashboardBookingPage')),
+	DASHBOARD: lazy(() => import('../pages/presentation/example/dashboard/DashboardPage')),
+	DASHBOARD_BOOKING: lazy(() => import('../pages/presentation/example/dashboard/DashboardBookingPage')),
 	SUMMARY: lazy(() => import('../pages/presentation/SummaryPage')),
 };
 const SINGLE = {
-	BOXED: lazy(() => import('../pages/presentation/single-pages/SingleBoxedPage')),
-	FLUID: lazy(() => import('../pages/presentation/single-pages/SingleFluidPage')),
+	BOXED: lazy(() => import('../pages/presentation/example/single-pages/SingleBoxedPage')),
+	FLUID: lazy(() => import('../pages/presentation/example/single-pages/SingleFluidPage')),
 };
 const LIST = {
-	BOXED: lazy(() => import('../pages/presentation/demo-pages/ListBoxedPage')),
-	FLUID: lazy(() => import('../pages/presentation/demo-pages/ListFluidPage')),
+	BOXED: lazy(() => import('../pages/presentation/example/demo-pages/ListBoxedPage')),
+	FLUID: lazy(() => import('../pages/presentation/example/demo-pages/ListFluidPage')),
 };
 const GRID = {
-	BOXED: lazy(() => import('../pages/presentation/demo-pages/GridBoxedPage')),
-	FLUID: lazy(() => import('../pages/presentation/demo-pages/GridFluidPage')),
+	BOXED: lazy(() => import('../pages/presentation/example/demo-pages/GridBoxedPage')),
+	FLUID: lazy(() => import('../pages/presentation/example/demo-pages/GridFluidPage')),
 };
 const EDIT = {
-	MODERN: lazy(() => import('../pages/presentation/demo-pages/EditModernPage')),
-	BOXED: lazy(() => import('../pages/presentation/demo-pages/EditBoxedPage')),
-	FLUID: lazy(() => import('../pages/presentation/demo-pages/EditFluidPage')),
-	WIZARD: lazy(() => import('../pages/presentation/demo-pages/EditWizardPage')),
-	IN_CANVAS: lazy(() => import('../pages/presentation/demo-pages/EditInCanvasPage')),
-	IN_MODAL: lazy(() => import('../pages/presentation/demo-pages/EditInModalPage')),
+	MODERN: lazy(() => import('../pages/presentation/example/demo-pages/EditModernPage')),
+	BOXED: lazy(() => import('../pages/presentation/example/demo-pages/EditBoxedPage')),
+	FLUID: lazy(() => import('../pages/presentation/example/demo-pages/EditFluidPage')),
+	WIZARD: lazy(() => import('../pages/presentation/example/demo-pages/EditWizardPage')),
+	IN_CANVAS: lazy(() => import('../pages/presentation/example/demo-pages/EditInCanvasPage')),
+	IN_MODAL: lazy(() => import('../pages/presentation/example/demo-pages/EditInModalPage')),
 };
 const PRICING = {
-	PRICING_TABLE: lazy(() => import('../pages/presentation/pricing/PricingTablePage')),
+	PRICING_TABLE: lazy(() => import('../pages/presentation/example/pricing/PricingTablePage')),
 };
 
 const AUTH = {
@@ -45,18 +46,19 @@ const AUTH = {
 const APP = {
 	PROJECT_MANAGEMENT: {
 		PROJECTS_LIST: lazy(
-			() => import('../pages/presentation/project-management/ProjectManagementsList'),
+			() => import('../pages/presentation/example/project-management/ProjectManagementsList'),
 		),
 		PROJECT: lazy(
-			() => import('../pages/presentation/project-management/ProjectManagementsProject'),
+			() => import('../pages/presentation/example/project-management/ProjectManagementsProject'),
 		),
 	},
 	KNOWLEDGE: {
-		GRID: lazy(() => import('../pages/presentation/knowledge/KnowledgeGridPage')),
-		VIEW: lazy(() => import('../pages/presentation/knowledge/KnowledgeViewPage')),
+		GRID: lazy(() => import('../pages/presentation/example/knowledge/KnowledgeGridPage')),
+		VIEW: lazy(() => import('../pages/presentation/example/knowledge/KnowledgeViewPage')),
 	},
 	COLLABORATOR:{
 		INDEX: lazy(() => import('../pages/presentation/collaborator/CollaboratorPage')),
+		PROFILE: lazy(() => import('../pages/presentation/collaborator/CollaboratorProfilePage')),
 	},
 	PROCESS:{
 		ADMISSION: lazy(() => import('../pages/presentation/process/AdmissionList')),
@@ -70,29 +72,29 @@ const APP = {
 		VALIDATION_CANDIDATE: lazy(() => import('../pages/presentation/job/CustomerCandidate'))
 	},
 	APPOINTMENT: {
-		CALENDAR: lazy(() => import('../pages/presentation/appointment/CalendarPage')),
-		EMPLOYEE_LIST: lazy(() => import('../pages/presentation/appointment/EmployeeList')),
-		EMPLOYEE_VIEW: lazy(() => import('../pages/presentation/appointment/EmployeePage')),
-		APPOINTMENT_LIST: lazy(() => import('../pages/presentation/appointment/AppointmentList')),
+		CALENDAR: lazy(() => import('../pages/presentation/example/appointment/CalendarPage')),
+		EMPLOYEE_LIST: lazy(() => import('../pages/presentation/example/appointment/EmployeeList')),
+		EMPLOYEE_VIEW: lazy(() => import('../pages/presentation/example/appointment/EmployeePage')),
+		APPOINTMENT_LIST: lazy(() => import('../pages/presentation/example/appointment/AppointmentList')),
 	},
 	CRM: {
-		CRM_DASHBOARD: lazy(() => import('../pages/presentation/crm/CrmDashboard')),
-		CUSTOMERS: lazy(() => import('../pages/presentation/crm/CustomersList')),
-		CUSTOMER: lazy(() => import('../pages/presentation/crm/Customer')),
+		CRM_DASHBOARD: lazy(() => import('../pages/presentation/example/crm/CrmDashboard')),
+		CUSTOMERS: lazy(() => import('../pages/presentation/example/crm/CustomersList')),
+		CUSTOMER: lazy(() => import('../pages/presentation/example/crm/Customer')),
 	},
 	CHAT: {
-		WITH_LIST: lazy(() => import('../pages/presentation/chat/WithListChatPage')),
-		ONLY_LIST: lazy(() => import('../pages/presentation/chat/OnlyListChatPage')),
+		WITH_LIST: lazy(() => import('../pages/presentation/example/chat/WithListChatPage')),
+		ONLY_LIST: lazy(() => import('../pages/presentation/example/chat/OnlyListChatPage')),
 	},
 };
 const PAGE_LAYOUTS = {
-	HEADER_SUBHEADER: lazy(() => import('../pages/presentation/page-layouts/HeaderAndSubheader')),
-	HEADER: lazy(() => import('../pages/presentation/page-layouts/OnlyHeader')),
-	SUBHEADER: lazy(() => import('../pages/presentation/page-layouts/OnlySubheader')),
-	CONTENT: lazy(() => import('../pages/presentation/page-layouts/OnlyContent')),
-	BLANK: lazy(() => import('../pages/presentation/page-layouts/Blank')),
-	ASIDE: lazy(() => import('../pages/presentation/aside-types/DefaultAsidePage')),
-	MINIMIZE_ASIDE: lazy(() => import('../pages/presentation/aside-types/MinimizeAsidePage')),
+	HEADER_SUBHEADER: lazy(() => import('../pages/presentation/example/page-layouts/HeaderAndSubheader')),
+	HEADER: lazy(() => import('../pages/presentation/example/page-layouts/OnlyHeader')),
+	SUBHEADER: lazy(() => import('../pages/presentation/example/page-layouts/OnlySubheader')),
+	CONTENT: lazy(() => import('../pages/presentation/example/page-layouts/OnlyContent')),
+	BLANK: lazy(() => import('../pages/presentation/example/page-layouts/Blank')),
+	ASIDE: lazy(() => import('../pages/presentation/example/aside-types/DefaultAsidePage')),
+	MINIMIZE_ASIDE: lazy(() => import('../pages/presentation/example/aside-types/MinimizeAsidePage')),
 };
 
 const CONTENT = {
@@ -330,6 +332,11 @@ const presentation: RouteProps[] = [
 	{
 		path: dashboardPagesMenu.collaborator.path,
 		element: <APP.COLLABORATOR.INDEX />,
+	},
+
+	{
+		path: secondaryPath.collaboratorProfile.path,
+		element: <APP.COLLABORATOR.PROFILE />,
 	},
 
 	/**
