@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import Card, {
@@ -27,12 +27,20 @@ import SubHeader, {
 import Avatar from '../../../components/Avatar';
 import User1Webp from '../../../assets/img/wanna/wanna2.webp';
 import User1Img from '../../../assets/img/wanna/wanna2.png';
+import CompanyLogoDefault from '../../../assets/img/companyLogoDefault.png';
 import CompanyWallet from './CompanyWallet';
 // import editPasswordValidate from './helper/editPasswordValidate';
 import showNotification from '../../../components/extras/showNotification';
 import Icon from '../../../components/icon/Icon';
 import { demoPagesMenu } from '../../../menu';
-
+import useDarkMode from '../../../hooks/useDarkMode';
+import GetCompanyDocument from '../../../api/get/company/Document';
+import AuthContext from '../../../contexts/authContext';
+import { toast } from 'react-toastify';
+import Toasts from '../../../components/bootstrap/Toasts';
+import PostCompanyDocument from '../../../api/post/company/Document';
+import Spinner from '../../../components/bootstrap/Spinner';
+import GetCompanyFindOne from '../../../api/get/company/FindOne';
 interface IPreviewItemProps {
 	title: string;
 	value: any | any[];
@@ -148,12 +156,21 @@ const validate = (values: IValues) => {
 };
 const CompanyPage = () => {
 	const navigate = useNavigate();
+	const { userData } = useContext(AuthContext);
+	const { themeStatus, darkModeStatus } = useDarkMode();
+	const [companyDates, setCompanyDates] = useState<null | any>(null);
+	const [logoPath, setLogoPath] = useState<null | string>(null);
+	const [signaturePath, setSignaturePath] = useState<null | string>(null);
+	const [newSignaturePath, setNewSignaturePath] = useState<null | any>(null);
+
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const TABS = {
 		ACCOUNT_DETAIL: 'Informação',
 		SIGNATURE: 'Assinatura',
 		MY_WALLET: 'Carteira',
 	};
+
 	const [activeTab, setActiveTab] = useState(TABS.ACCOUNT_DETAIL);
 
 	const notificationTypes = [
@@ -189,68 +206,103 @@ const CompanyPage = () => {
 		},
 	});
 
-	const formikPassword = useFormik({
-		initialValues: {
-			currentPassword: '',
-			newPassword: '',
-			confirmPassword: '',
-		},
-		// validate: editPasswordValidate,
-		onSubmit: () => {
-			showNotification(
-				<span className='d-flex align-items-center'>
-					<Icon icon='Info' size='lg' className='me-1' />
-					<span>Updated Successfully</span>
-				</span>,
-				"The user's password have been successfully updated.",
+	const clickSignature = async () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.click();
+		}
+	};
+
+	const uploadSignature = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const files = event.target.files;
+		if (files && files.length > 0) {
+			const file = files[0];
+			if (file.type.startsWith('image/')) {
+				setNewSignaturePath(file);
+				const imageUrl = URL.createObjectURL(file);
+				setSignaturePath(imageUrl);
+				return;
+			} else {
+				toast(
+					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+						Selecione <b>apenas</b> arquivo de imagem.
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 3000,
+					},
+				);
+			}
+		}
+	};
+
+	const saveSignature = async () => {
+		const PropsUpload = {
+			file: newSignaturePath,
+			document: 'Signature',
+			cnpj: userData.cnpj,
+		};
+
+		const response = await PostCompanyDocument(PropsUpload);
+		console.log(response)
+		if (response.status !== 200) {
+			toast(
+				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+					Algo deu errado, tente mais tarde.
+				</Toasts>,
+				{
+					closeButton: true,
+					autoClose: 3000,
+				},
 			);
-		},
-	});
+			return;
+		}
+
+		toast(
+			<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
+				Assinatura registrada com sucesso.
+			</Toasts>,
+			{
+				closeButton: true,
+				autoClose: 3000,
+			},
+		);
+	};
+
+	useEffect(() => {
+		const fetchData = async () => {
+			if (userData) {
+				const response = await GetCompanyFindOne(userData.cnpj);
+				if (response.status == 200) {
+					setCompanyDates(response.company)
+					setLogoPath(response.logo)
+					setSignaturePath(response.signature)
+				};
+			}
+		};
+		fetchData();
+	}, [userData]);
 
 	return (
 		<PageWrapper title={demoPagesMenu.editPages.subMenu.editWizard.text}>
 			<SubHeader>
 				<SubHeaderLeft>
-					<Avatar srcSet={User1Webp} src={User1Img} size={32} />
-					<span>
-						<strong>Timothy J. Doe</strong>
-					</span>
+					<Avatar src={CompanyLogoDefault} size={32} />
+					{ companyDates &&
+						<span>
+							<strong>{companyDates.company_name}</strong>
+						</span>
+					}
 					<span className='text-muted'>Company</span>
 				</SubHeaderLeft>
-				<SubHeaderRight>
-					<Button
-						color='dark'
-						isLight
-						icon='Add'
-						onClick={() => {
-							setActiveTab(TABS.ACCOUNT_DETAIL);
-							formik.setValues({
-								firstName: '',
-								lastName: '',
-								displayName: '',
-								emailAddress: '',
-								phoneNumber: '',
-								addressLine: '',
-								addressLine2: '',
-								city: '',
-								state: '',
-								zip: '',
-								emailNotification: [''],
-								pushNotification: [''],
-							});
-						}}>
-						Add New
-					</Button>
-				</SubHeaderRight>
 			</SubHeader>
 			<Page>
 				<div className='row h-100 pb-3'>
 					<div className='col-lg-4 col-md-6'>
 						<Card stretch>
 							<CardHeader>
-								<CardLabel icon='AccountCircle'>
+								<CardLabel icon='CorporateFare'>
 									<CardTitle tag='div' className='h5'>
-										User Information
+										Informações da Empresa
 									</CardTitle>
 								</CardLabel>
 							</CardHeader>
@@ -268,7 +320,7 @@ const CompanyPage = () => {
 									</div>
 									<div className='col-12'>
 										<Button
-											icon='LocalPolice'
+											icon='Edit'
 											color='info'
 											className='w-100 p-3'
 											isLight={TABS.SIGNATURE !== activeTab}
@@ -288,17 +340,7 @@ const CompanyPage = () => {
 									</div>
 								</div>
 							</CardBody>
-							<CardFooter>
-								<CardFooterLeft className='w-100'>
-									<Button
-										icon='Delete'
-										color='danger'
-										isLight
-										className='w-100 p-3'>
-										Delete User
-									</Button>
-								</CardFooterLeft>
-							</CardFooter>
+							
 						</Card>
 					</div>
 					<div className='col-lg-8 col-md-6'>
@@ -315,7 +357,17 @@ const CompanyPage = () => {
 										<CardBody>
 											<div className='row g-4 align-items-center'>
 												<div className='col-xl-auto'>
-													<Avatar srcSet={User1Webp} src={User1Img} />
+													{/* <Avatar src={CompanyLogoDefault} /> */}
+													<div style={{width:80, height:80}} className={`rounded-circle  ${darkModeStatus ? 'bg-white' : 'bg-info'}`}>
+														<img 
+															className='position-absolute'
+															style={{top:'5px', left:'14px'}}
+															width={87}
+															height={87}
+															src={CompanyLogoDefault}
+															alt="Company Logo"
+														/>
+													</div>
 												</div>
 												<div className='col-xl'>
 													<div className='row g-4'>
@@ -327,17 +379,18 @@ const CompanyPage = () => {
 															/>
 														</div>
 														<div className='col-auto'>
-															<Button
-																color='dark'
-																isLight
-																icon='Delete'>
-																Delete Avatar
-															</Button>
+															{ logoPath &&
+																<Button
+																	color='dark'
+																	isLight
+																	icon='Delete'>
+																	Delete Logo
+																</Button>
+															}
 														</div>
 														<div className='col-12'>
 															<p className='lead text-muted'>
-																Avatar helps your teammates get to
-																know you.
+																A logo da sua empresa ajudará a te identificar.
 															</p>
 														</div>
 													</div>
@@ -669,100 +722,74 @@ const CompanyPage = () => {
 							</Wizard>
 						)}
 						{TABS.SIGNATURE === activeTab && (
-							<Card
-								stretch
-								tag='form'
-								noValidate
-								onSubmit={formikPassword.handleSubmit}>
+							<Card stretch>
 								<CardHeader>
-									<CardLabel icon='LocalPolice' iconColor='info'>
+									<CardLabel icon='Edit' iconColor='info'>
 										<CardTitle>{TABS.SIGNATURE}</CardTitle>
 									</CardLabel>
 								</CardHeader>
 								<CardBody className='pb-0' isScrollable>
 									<div className='row g-4'>
-										<div className='col-12'>
-											<FormGroup
-												id='currentPassword'
-												label='Current password'
-												isFloating>
-												<Input
-													type='password'
-													placeholder='Current password'
-													autoComplete='current-password'
-													onChange={formikPassword.handleChange}
-													value={formikPassword.values.currentPassword}
-												/>
-											</FormGroup>
-										</div>
-										<div className='col-12'>
-											<FormGroup
-												id='newPassword'
-												label='New password'
-												isFloating>
-												<Input
-													type='password'
-													placeholder='New password'
-													autoComplete='new-password'
-													onChange={formikPassword.handleChange}
-													onBlur={formikPassword.handleBlur}
-													value={formikPassword.values.newPassword}
-													isValid={formikPassword.isValid}
-													isTouched={formikPassword.touched.newPassword}
-													invalidFeedback={
-														formikPassword.errors.newPassword
-													}
-													validFeedback='Looks good!'
-												/>
-											</FormGroup>
-										</div>
-										<div className='col-12'>
-											<FormGroup
-												id='confirmPassword'
-												label='Confirm new password'
-												isFloating>
-												<Input
-													type='password'
-													placeholder='Confirm new password'
-													autoComplete='new-password'
-													onChange={formikPassword.handleChange}
-													onBlur={formikPassword.handleBlur}
-													value={formikPassword.values.confirmPassword}
-													isValid={formikPassword.isValid}
-													isTouched={
-														formikPassword.touched.confirmPassword
-													}
-													invalidFeedback={
-														formikPassword.errors.confirmPassword
-													}
-													validFeedback='Looks good!'
-												/>
-											</FormGroup>
-										</div>
+										<Card
+											className={` ${signaturePath && 'bg-white overflow-hidden'}`}>
+											<CardBody
+												className='d-flex justify-content-center align-items-center'
+												style={{ height: '300px' }}>
+												{signaturePath ? (
+													<div className='rounded h-50 w-50 d-flex justify-content-center align-items-center'>
+														<img
+															src={signaturePath}
+															alt='Assinatura da empresa'
+															className='mx-auto d-block img-fluid mb-3 w-100'
+														/>
+													</div>
+												) : (
+													<div
+														className='shadow-3d-up-hover w-full h-100 d-flex justify-content-center align-items-center cursor-pointer'
+														onClick={clickSignature}>
+														<div>
+															<h1 className='m-0 p-0'>
+																Adicione sua Assinatura{' '}
+																<Icon icon='AddCircle' />
+															</h1>
+															Não há assinaturas ativas
+														</div>
+													</div>
+												)}
+											</CardBody>
+											<input
+												type='file'
+												ref={fileInputRef}
+												accept='image/*'
+												className='d-none'
+												onChange={uploadSignature}
+											/>
+										</Card>
 									</div>
 								</CardBody>
 								<CardFooter>
 									<CardFooterLeft>
-										<Button
-											color='info'
-											isLink
-											type='reset'
-											onClick={formikPassword.resetForm}>
-											Reset
-										</Button>
+										{signaturePath && (
+											<Button
+												color='info'
+												isLink
+												type='reset'
+												onClick={clickSignature}>
+												Atualizar Assinatura
+											</Button>
+										)}
 									</CardFooterLeft>
 									<CardFooterRight>
-										<Button
-											type='submit'
-											icon='Save'
-											color='info'
-											isOutline
-											isDisable={
-												!formikPassword.isValid &&
-												!!formikPassword.submitCount
-											}>
-											Save
-										</Button>
+										{newSignaturePath && (
+											<Button
+												type='submit'
+												icon='Save'
+												color='info'
+												isOutline
+												onClick={saveSignature}>
+												Salvar
+											</Button>
+										)}
 									</CardFooterRight>
 								</CardFooter>
 							</Card>

@@ -35,7 +35,7 @@ import showNotification from '../../../components/extras/showNotification';
 import useDarkMode from '../../../hooks/useDarkMode';
 import { AbstractPicture } from '../../../constants/abstract';
 import Mask from '../../../function/Mask';
-import Job_One from '../../../api/get/Job/Job_One';
+import Job_One from '../../../api/get/job/Job_One';
 import JobDelete from '../../../api/delete/job/job';
 import JobUpdate from '../../../api/patch/Job';
 import Textarea from '../../../components/bootstrap/forms/Textarea';

@@ -17,7 +17,7 @@ import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks'
 import SERVICES from '../../../common/data/serviceDummyData';
 import { demoPagesMenu, secondaryPath } from '../../../menu';
 import useTourStep from '../../../hooks/useTourStep';
-import JobCollaboratorCompany from '../../../api/get/Job/Job_Collaborator_Company';
+import JobCollaboratorCompany from '../../../api/get/job/Job_Collaborator_Company';
 import AuthContext from '../../../contexts/authContext';
 import Mask from '../../../function/Mask';
 
@@ -41,32 +41,17 @@ const CollaboratorList = () => {
 		},
 	});
 
-	const searchUsers = Object.keys(USERS)
-		.filter(
-			(key) =>
-				USERS[key].username
-					.toLowerCase()
-					.includes(formik.values.searchInput.toLowerCase()) ||
-				USERS[key].name.toLowerCase().includes(formik.values.searchInput.toLowerCase()) ||
-				USERS[key].surname
-					.toLowerCase()
-					.includes(formik.values.searchInput.toLowerCase()) ||
-				USERS[key].position.toLowerCase().includes(formik.values.searchInput.toLowerCase()),
-		)
-		.filter((key2) => (formik.values.available ? USERS[key2].isOnline : key2))
-		.map((i) => USERS[i]);
-
-    const fetchData = async () => {
-        const response = await JobCollaboratorCompany(userData.cnpj)
-		setCollaboratorCompany(response.collaborator)
-		setTimeout(() => {
-			setLoader(false)
-		}, 2000);
-
-    };
-
+	
     useEffect(() => {
-        if(userData){
+		const fetchData = async () => {
+			const response = await JobCollaboratorCompany(userData.cnpj)
+			setCollaboratorCompany(response.collaborator)
+			setTimeout(() => {
+				setLoader(false)
+			}, 2000);
+	
+		};
+		if(userData){
             fetchData()
         };
     }, [userData]);

@@ -7,7 +7,7 @@ import * as fabric from 'fabric';
 import { toast } from 'react-toastify';
 import Toasts from '../bootstrap/Toasts';
 import Spinner from '../bootstrap/Spinner';
-import Company from '../../api/get/Company/Signature';
+import GetCompanyDocument from '../../api/get/company/Document';
 import { Input } from '../icon/material-icons';
 import Icon from '../icon/Icon';
 import AuthContext from '../../contexts/authContext';
@@ -94,7 +94,7 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
 
   const findSignature = async () => {
     try{
-      const response = await Company(userData.cnpj);
+      const response = await GetCompanyDocument(userData.cnpj,'signature');
       if(response.status == 200){
         const signature = await loadImage(response.path)
         signature.set({

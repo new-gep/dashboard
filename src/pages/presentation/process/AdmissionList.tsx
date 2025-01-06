@@ -8,7 +8,7 @@ import Button from '../../../components/bootstrap/Button';
 import { mainMenu } from '../../../menu';
 import AdmissionTable from '../../_common/Process/AdmissionTable';
 import useDarkMode from '../../../hooks/useDarkMode';
-import Job_Admissional from '../../../api/get/Job/Job_Admissional';
+import Job_Admissional from '../../../api/get/job/Job_Admissional';
 import AuthContext from '../../../contexts/authContext';
 
 const AppointmentList = () => {
