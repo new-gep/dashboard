@@ -1,5 +1,6 @@
 import React, { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import Card, {
 	CardBody,
@@ -41,10 +42,13 @@ import Toasts from '../../../components/bootstrap/Toasts';
 import PostCompanyDocument from '../../../api/post/company/Document';
 import Spinner from '../../../components/bootstrap/Spinner';
 import GetCompanyFindOne from '../../../api/get/company/FindOne';
+import PatchCompanyDefault from '../../../api/patch/company/Default';
+import DeleteCompanyFile from '../../../api/delete/company/File';
 interface IPreviewItemProps {
 	title: string;
 	value: any | any[];
 }
+
 const PreviewItem: FC<IPreviewItemProps> = ({ title, value }) => {
 	return (
 		<>
@@ -55,105 +59,74 @@ const PreviewItem: FC<IPreviewItemProps> = ({ title, value }) => {
 };
 
 interface IValues {
-	firstName: string;
-	lastName: string;
-	displayName: string;
-	emailAddress: string;
-	addressLine: string;
-	phoneNumber: string;
-	addressLine2: string;
-	city: string;
+	cnpj: string;
+	company_name: string;
+	state_registration: string;
+	municipal_registration: string;
+
+	email: string;
+	phone: string;
+	responsible: string;
+
+	street: string;
+	number: string;
+	district: string;
+	city : string;
 	state: string;
-	zip: string;
-	emailNotification: string[];
-	pushNotification: string[];
-	currentPassword?: string;
-	newPassword?: string;
-	confirmPassword?: string;
-}
-const validate = (values: IValues) => {
-	const errors: IValues = {
-		firstName: '',
-		lastName: '',
-		displayName: '',
-		emailAddress: '',
-		currentPassword: '',
-		newPassword: '',
-		confirmPassword: '',
-		addressLine: '',
-		addressLine2: '',
-		phoneNumber: '',
-		city: '',
-		state: '',
-		zip: '',
-		emailNotification: [],
-		pushNotification: [],
-	};
-	if (!values.firstName) {
-		errors.firstName = 'Required';
-	} else if (values.firstName.length < 3) {
-		errors.firstName = 'Must be 3 characters or more';
-	} else if (values.firstName.length > 20) {
-		errors.firstName = 'Must be 20 characters or less';
-	}
+	uf   : string;
+	zip  : string;
 
-	if (!values.lastName) {
-		errors.lastName = 'Required';
-	} else if (values.lastName.length < 3) {
-		errors.lastName = 'Must be 3 characters or more';
-	} else if (values.lastName.length > 20) {
-		errors.lastName = 'Must be 20 characters or less';
-	}
-
-	if (!values.displayName) {
-		errors.displayName = 'Required';
-	} else if (values.displayName.length > 30) {
-		errors.displayName = 'Must be 20 characters or less';
-	}
-
-	if (!values.emailAddress) {
-		errors.emailAddress = 'Required';
-	} else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.emailAddress)) {
-		errors.emailAddress = 'Invalid email address';
-	}
-
-	if (values.currentPassword) {
-		if (!values.newPassword) {
-			errors.newPassword = 'Please provide a valid password.';
-		} else {
-			errors.newPassword = '';
-
-			if (values.newPassword.length < 8 || values.newPassword.length > 32) {
-				errors.newPassword +=
-					'The password must be at least 8 characters long, but no more than 32. ';
-			}
-			if (!/[0-9]/g.test(values.newPassword)) {
-				errors.newPassword +=
-					'Require that at least one digit appear anywhere in the string. ';
-			}
-			if (!/[a-z]/g.test(values.newPassword)) {
-				errors.newPassword +=
-					'Require that at least one lowercase letter appear anywhere in the string. ';
-			}
-			if (!/[A-Z]/g.test(values.newPassword)) {
-				errors.newPassword +=
-					'Require that at least one uppercase letter appear anywhere in the string. ';
-			}
-			if (!/[!@#$%^&*)(+=._-]+$/g.test(values.newPassword)) {
-				errors.newPassword +=
-					'Require that at least one special character appear anywhere in the string. ';
-			}
-		}
-
-		if (!values.confirmPassword) {
-			errors.confirmPassword = 'Please provide a valid password.';
-		} else if (values.newPassword !== values.confirmPassword) {
-			errors.confirmPassword = 'Passwords do not match.';
-		}
-	}
-
-	return errors;
 };
+
+const validationSchema = Yup.object().shape({
+	cnpj: Yup.string()
+	  .matches(/^\d{14}$/, 'CNPJ deve ter 14 números')
+	  .required('CNPJ é obrigatório'),
+	company_name: Yup.string()
+	  .min(3, 'Razão Social deve ter pelo menos 3 caracteres')
+	  .max(100, 'Razão Social deve ter no máximo 100 caracteres')
+	  .required('Razão Social é obrigatória'),
+	state_registration: Yup.string()
+	  .max(20, 'Inscrição Estadual deve ter no máximo 20 caracteres')
+	  .required('Inscrição Municipal é obrigatória'),
+	municipal_registration: Yup.string()
+	  .max(20, 'Inscrição Municipal deve ter no máximo 20 caracteres')
+	  .required('Inscrição Municipal é obrigatória'),
+	email: Yup.string()
+	  .email('E-mail inválido')
+	  .required('E-mail é obrigatório'),
+	phone: Yup.string()
+	  .matches(/^\d{10,11}$/, 'Telefone deve ter entre 10 e 11 números')
+	  .required('Telefone é obrigatório'),
+	responsible: Yup.string()
+	  .min(3, 'Responsável deve ter pelo menos 3 caracteres')
+	  .max(50, 'Responsável deve ter no máximo 50 caracteres')
+	  .required('Responsável é obrigatório'),
+	street: Yup.string()
+	  .min(3, 'Logradouro deve ter pelo menos 3 caracteres')
+	  .max(100, 'Logradouro deve ter no máximo 100 caracteres')
+	  .required('Logradouro é obrigatório'),
+	number: Yup.string()
+	  .matches(/^\d*$/, 'Número deve ser numérico'), // Não obrigatório, mas deve ser numérico
+	district: Yup.string()
+	  .min(3, 'Bairro deve ter pelo menos 3 caracteres')
+	  .max(50, 'Bairro deve ter no máximo 50 caracteres')
+	  .required('Bairro é obrigatório'),
+	city: Yup.string()
+	  .min(3, 'Cidade deve ter pelo menos 3 caracteres')
+	  .max(50, 'Cidade deve ter no máximo 50 caracteres')
+	  .required('Cidade é obrigatória'),
+	state: Yup.string()
+	  .required('Estado é obrigatório'),
+	uf: Yup.string()
+	  .matches(/^[A-Z]{2}$/, 'UF deve ter exatamente 2 letras maiúsculas')
+	  .required('UF é obrigatório'),
+	zip: Yup.string()
+	  .matches(/^\d{8}$/, 'CEP deve ter exatamente 8 números')
+	  .required('CEP é obrigatório'),
+});
+  
+
 const CompanyPage = () => {
 	const navigate = useNavigate();
 	const { userData } = useContext(AuthContext);
@@ -161,6 +134,7 @@ const CompanyPage = () => {
 	const [companyDates, setCompanyDates] = useState<null | any>(null);
 	const [logoPath, setLogoPath] = useState<null | string>(null);
 	const [signaturePath, setSignaturePath] = useState<null | string>(null);
+	const [newLogoPathh, setNewLogoPath] = useState<any>(null);
 	const [newSignaturePath, setNewSignaturePath] = useState<null | any>(null);
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -173,28 +147,29 @@ const CompanyPage = () => {
 
 	const [activeTab, setActiveTab] = useState(TABS.ACCOUNT_DETAIL);
 
-	const notificationTypes = [
-		{ id: 1, name: 'New Order' },
-		{ id: 2, name: 'New Customer' },
-		{ id: 3, name: 'Order Status' },
-	];
 
 	const formik = useFormik({
 		initialValues: {
-			firstName: 'John',
-			lastName: 'Doe',
-			displayName: 'johndoe',
-			emailAddress: 'johndoe@site.com',
-			phoneNumber: '',
-			addressLine: '',
-			addressLine2: '',
+			cnpj: '',
+			company_name: '',
+			state_registration: '',
+			municipal_registration: '',
+
+			email: '',
+			phone: '',
+			responsible: '',
+
+			isVisible: '',
+
+			street: '',
+			number: '',
+			district: '',
 			city: '',
 			state: '',
+			uf: '',
 			zip: '',
-			emailNotification: ['2'],
-			pushNotification: ['1', '2', '3'],
 		},
-		validate,
+		validationSchema: validationSchema,
 		onSubmit: () => {
 			showNotification(
 				<span className='d-flex align-items-center'>
@@ -242,8 +217,7 @@ const CompanyPage = () => {
 			cnpj: userData.cnpj,
 		};
 
-		const response = await PostCompanyDocument(PropsUpload);
-		console.log(response)
+		let response = await PostCompanyDocument(PropsUpload);
 		if (response.status !== 200) {
 			toast(
 				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
@@ -255,11 +229,61 @@ const CompanyPage = () => {
 				},
 			);
 			return;
-		}
+		};
 
+		
+	};
+	
+	const uploadLogo = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const files = event.target.files;
+		if (files && files.length > 0) {
+			const file = files[0];
+			// Define o arquivo no estado
+			
+			// Validação do tipo de arquivo
+			if (file.type.startsWith('image/')) {
+				setNewLogoPath(file);
+				const imageUrl = URL.createObjectURL(file);
+				// Define o URL da imagem no estado
+				setLogoPath(imageUrl);
+				return;
+			} else {
+				// Exibe um toast em caso de erro
+				toast(
+					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+						Selecione <b>apenas</b> arquivo de imagem.
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 3000,
+					},
+				);
+			}
+	
+			// Opcional: Resetar o input file após processamento
+			event.target.value = ''; // Permite resetar o campo caso necessário
+		}
+	};
+
+	const removeLogo = async () => {
+		const response = await DeleteCompanyFile(`company/${userData.cnpj}/Logo`)
+		if(response.status == 200){
+			toast(
+				<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
+					Logo deletada com sucesso
+				</Toasts>,
+				{
+					closeButton: true,
+					autoClose: 3000,
+				},
+			);
+			setLogoPath(null)
+			setNewLogoPath(null)
+			return
+		}
 		toast(
-			<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
-				Assinatura registrada com sucesso.
+			<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+				Erro ao tentar deletar sua logo, tente mais tarde
 			</Toasts>,
 			{
 				closeButton: true,
@@ -268,15 +292,68 @@ const CompanyPage = () => {
 		);
 	};
 
+	const updateCompany = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		try{
+			if(newLogoPathh){ 
+				console.log('caiu aqui')
+				const PropsUpload = {
+					file: newLogoPathh,
+					document: 'Logo',
+					cnpj: userData.cnpj,
+				};
+				const response = await PostCompanyDocument(PropsUpload);
+				if (response.status !== 200) {
+					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+						Algo deu errado, não foi possível atualizar a <b>Logo</b>.
+					</Toasts>
+					return
+				};
+			}
+			const response = await PatchCompanyDefault(formik.values, userData.cnpj) 
+			if(response.status == 200){
+				toast(
+					<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
+						{response.message}
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 3000,
+					},
+				);
+				return
+			}else{
+				toast(
+					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+						{response.message}
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 3000,
+					},
+				);
+			}
+
+		}catch(e){
+			<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+				Algo deu errado, tente mais tarde.
+			</Toasts>
+		}
+
+	};
+
 	useEffect(() => {
 		const fetchData = async () => {
 			if (userData) {
 				const response = await GetCompanyFindOne(userData.cnpj);
 				if (response.status == 200) {
-					setCompanyDates(response.company)
-					setLogoPath(response.logo)
-					setSignaturePath(response.signature)
-				};
+					formik.setValues(response.company);
+					formik.setFieldValue('cnpj', response.company.CNPJ);
+					formik.setFieldValue('zip', response.company.zip_code);
+					setCompanyDates(response.company);
+					setLogoPath(response.logo);
+					setSignaturePath(response.signature);
+				}
 			}
 		};
 		fetchData();
@@ -286,12 +363,12 @@ const CompanyPage = () => {
 		<PageWrapper title={demoPagesMenu.editPages.subMenu.editWizard.text}>
 			<SubHeader>
 				<SubHeaderLeft>
-					<Avatar src={CompanyLogoDefault} size={32} />
-					{ companyDates &&
+					{ logoPath ? <Avatar src={logoPath} size={32} /> : <Avatar src={CompanyLogoDefault} size={32} /> }
+					{companyDates && (
 						<span>
 							<strong>{companyDates.company_name}</strong>
 						</span>
-					}
+					)}
 					<span className='text-muted'>Company</span>
 				</SubHeaderLeft>
 			</SubHeader>
@@ -340,7 +417,6 @@ const CompanyPage = () => {
 									</div>
 								</div>
 							</CardBody>
-							
 						</Card>
 					</div>
 					<div className='col-lg-8 col-md-6'>
@@ -350,24 +426,29 @@ const CompanyPage = () => {
 								stretch
 								color='info'
 								noValidate
-								onSubmit={formik.handleSubmit}
+								onSubmit={(e: React.FormEvent<HTMLFormElement>) => updateCompany(e)}
 								className='shadow-3d-info'>
-								<WizardItem id='step1' title='Account Detail'>
+								<WizardItem id='step1' title='Detalhes da Empresa'>
 									<Card>
 										<CardBody>
 											<div className='row g-4 align-items-center'>
 												<div className='col-xl-auto'>
-													{/* <Avatar src={CompanyLogoDefault} /> */}
-													<div style={{width:80, height:80}} className={`rounded-circle  ${darkModeStatus ? 'bg-white' : 'bg-info'}`}>
-														<img 
-															className='position-absolute'
-															style={{top:'5px', left:'14px'}}
-															width={87}
-															height={87}
-															src={CompanyLogoDefault}
-															alt="Company Logo"
-														/>
-													</div>
+													{ logoPath ?
+														<Avatar src={logoPath}  />
+														:
+														<div
+															style={{ width: 122, height: 122 }}
+															className={`rounded-circle  ${darkModeStatus ? 'bg-white' : 'bg-info'}`}>
+															<img
+																className='position-absolute'
+																style={{ top: '0px', left: '16px' }}
+																width={122}
+																height={122}
+																src={CompanyLogoDefault}
+																alt='Company Logo'
+															/>
+														</div>
+													}
 												</div>
 												<div className='col-xl'>
 													<div className='row g-4'>
@@ -376,21 +457,25 @@ const CompanyPage = () => {
 																type='file'
 																autoComplete='photo'
 																ariaLabel='Upload image file'
+																onChange={uploadLogo}
 															/>
 														</div>
 														<div className='col-auto'>
-															{ logoPath &&
+															{logoPath && (
 																<Button
 																	color='dark'
 																	isLight
-																	icon='Delete'>
-																	Delete Logo
+																	icon='Delete'
+																	onClick={removeLogo}
+																>
+																	Deletar
 																</Button>
-															}
+															)}
 														</div>
 														<div className='col-12'>
 															<p className='lead text-muted'>
-																A logo da sua empresa ajudará a te identificar.
+																A logo da sua empresa ajudará a te
+																identificar.
 															</p>
 														</div>
 													</div>
@@ -402,67 +487,78 @@ const CompanyPage = () => {
 									<Card>
 										<CardHeader>
 											<CardLabel icon='Edit' iconColor='warning'>
-												<CardTitle>Personal Information</CardTitle>
+												<CardTitle>Informação e Detalhes</CardTitle>
 											</CardLabel>
 										</CardHeader>
 										<CardBody className='pt-0'>
 											<div className='row g-4'>
 												<div className='col-md-6'>
-													<FormGroup
-														id='firstName'
-														label='First Name'
-														isFloating>
+													<FormGroup id='cnpj' label='CNPJ' isFloating>
 														<Input
-															placeholder='First Name'
-															autoComplete='additional-name'
+															placeholder='CNPJ'
+															disabled={true}
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
-															value={formik.values.firstName}
+															value={formik.values.cnpj}
 															isValid={formik.isValid}
-															isTouched={formik.touched.firstName}
+															isTouched={formik.touched.cnpj}
 															invalidFeedback={
-																formik.errors.firstName
+																formik.errors.cnpj
 															}
-															validFeedback='Looks good!'
+															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
 												</div>
 												<div className='col-md-6'>
 													<FormGroup
-														id='lastName'
-														label='Last Name'
+														id='state_registration'
+														label='Inscrição Estadual'
 														isFloating>
 														<Input
-															placeholder='Last Name'
-															autoComplete='family-name'
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
-															value={formik.values.lastName}
+															value={formik.values.state_registration}
 															isValid={formik.isValid}
-															isTouched={formik.touched.lastName}
-															invalidFeedback={formik.errors.lastName}
-															validFeedback='Looks good!'
+															isTouched={formik.touched.state_registration}
+															invalidFeedback={formik.errors.state_registration}
+															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
 												</div>
-												<div className='col-12'>
+												<div className='col-md-6'>
 													<FormGroup
-														id='displayName'
-														label='Display Name'
+														id='company_name'
+														label='Nome da Empresa'
 														isFloating
-														formText='This will be how your name will be displayed in the account section and in reviews'>
+														formText='Será com essas informações que sua empresa será exibida.'>
 														<Input
-															placeholder='Display Name'
-															autoComplete='username'
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
-															value={formik.values.displayName}
+															value={formik.values.company_name}
 															isValid={formik.isValid}
-															isTouched={formik.touched.displayName}
+															isTouched={formik.touched.company_name}
 															invalidFeedback={
-																formik.errors.displayName
+																formik.errors.company_name
 															}
-															validFeedback='Looks good!'
+															validFeedback='Ótimo!'
+														/>
+													</FormGroup>
+												</div>
+												<div className='col-md-6'>
+													<FormGroup
+														id='municipal_registration'
+														label='Inscrição Municipal'
+														isFloating>
+														<Input
+															onChange={formik.handleChange}
+															onBlur={formik.handleBlur}
+															value={formik.values.municipal_registration}
+															isValid={formik.isValid}
+															isTouched={formik.touched.municipal_registration}
+															invalidFeedback={
+																formik.errors.municipal_registration
+															}
+															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
 												</div>
@@ -473,36 +569,54 @@ const CompanyPage = () => {
 									<Card className='mb-0'>
 										<CardHeader>
 											<CardLabel icon='MarkunreadMailbox' iconColor='success'>
-												<CardTitle>Contact Information</CardTitle>
+												<CardTitle>Contato</CardTitle>
 											</CardLabel>
 										</CardHeader>
 										<CardBody className='pt-0'>
 											<div className='row g-4'>
 												<div className='col-12'>
 													<FormGroup
-														id='phoneNumber'
-														label='Phone Number'
+														id='responsible'
+														label='Responsável'
 														isFloating>
 														<Input
-															placeholder='Phone Number'
-															type='tel'
-															autoComplete='tel'
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
-															value={formik.values.phoneNumber}
+															value={formik.values.responsible}
 															isValid={formik.isValid}
-															isTouched={formik.touched.phoneNumber}
+															isTouched={formik.touched.responsible}
 															invalidFeedback={
-																formik.errors.phoneNumber
+																formik.errors.responsible
 															}
-															validFeedback='Looks good!'
+															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
 												</div>
 												<div className='col-12'>
 													<FormGroup
-														id='emailAddress'
-														label='Email address'
+														id='phone'
+														label='Telefone'
+														isFloating>
+														<Input
+															placeholder='Phone'
+															type='tel'
+															autoComplete='tel'
+															onChange={formik.handleChange}
+															onBlur={formik.handleBlur}
+															value={formik.values.phone}
+															isValid={formik.isValid}
+															isTouched={formik.touched.phone}
+															invalidFeedback={
+																formik.errors.phone
+															}
+															validFeedback='Ótimo!'
+														/>
+													</FormGroup>
+												</div>
+												<div className='col-12'>
+													<FormGroup
+														id='email'
+														label='Email'
 														isFloating>
 														<Input
 															type='email'
@@ -510,13 +624,13 @@ const CompanyPage = () => {
 															autoComplete='email'
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
-															value={formik.values.emailAddress}
+															value={formik.values.email}
 															isValid={formik.isValid}
-															isTouched={formik.touched.emailAddress}
+															isTouched={formik.touched.email}
 															invalidFeedback={
-																formik.errors.emailAddress
+																formik.errors.email
 															}
-															validFeedback='Looks good!'
+															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
 												</div>
@@ -524,42 +638,58 @@ const CompanyPage = () => {
 										</CardBody>
 									</Card>
 								</WizardItem>
-								<WizardItem id='step2' title='Address'>
+								<WizardItem id='step2' title='Endereço'>
 									<div className='row g-4'>
 										<div className='col-lg-12'>
 											<FormGroup
-												id='addressLine'
-												label='Address Line'
+												id='street'
+												label='Rua'
 												isFloating>
 												<Input
 													onChange={formik.handleChange}
 													onBlur={formik.handleBlur}
-													value={formik.values.addressLine}
+													value={formik.values.street}
 													isValid={formik.isValid}
-													isTouched={formik.touched.addressLine}
-													invalidFeedback={formik.errors.addressLine}
-													validFeedback='Looks good!'
+													isTouched={formik.touched.street}
+													invalidFeedback={formik.errors.street}
+													validFeedback='Ótimo!'
 												/>
 											</FormGroup>
 										</div>
-										<div className='col-lg-12'>
+										<div className='col-lg-8'>
 											<FormGroup
-												id='addressLine2'
-												label='Address Line 2'
+												id='district'
+												label='Bairro'
 												isFloating>
 												<Input
 													onChange={formik.handleChange}
 													onBlur={formik.handleBlur}
-													value={formik.values.addressLine2}
+													value={formik.values.district}
 													isValid={formik.isValid}
-													isTouched={formik.touched.addressLine2}
-													invalidFeedback={formik.errors.addressLine2}
-													validFeedback='Looks good!'
+													isTouched={formik.touched.district}
+													invalidFeedback={formik.errors.district}
+													validFeedback='Ótimo!'
+												/>
+											</FormGroup>
+										</div>
+										<div className='col-lg-4'>
+											<FormGroup
+												id='number'
+												label='Número'
+												isFloating>
+												<Input
+													onChange={formik.handleChange}
+													onBlur={formik.handleBlur}
+													value={formik.values.number}
+													isValid={formik.isValid}
+													isTouched={formik.touched.number}
+													invalidFeedback={formik.errors.number}
+													validFeedback='Ótimo!'
 												/>
 											</FormGroup>
 										</div>
 										<div className='col-lg-6'>
-											<FormGroup id='city' label='City' isFloating>
+											<FormGroup id='city' label='Cidade' isFloating>
 												<Input
 													onChange={formik.handleChange}
 													onBlur={formik.handleBlur}
@@ -567,20 +697,52 @@ const CompanyPage = () => {
 													isValid={formik.isValid}
 													isTouched={formik.touched.city}
 													invalidFeedback={formik.errors.city}
-													validFeedback='Looks good!'
+													validFeedback='Ótimo!'
 												/>
 											</FormGroup>
 										</div>
 										<div className='col-md-3'>
-											<FormGroup id='state' label='State' isFloating>
+											<FormGroup id='state' label='UF' isFloating>
 												<Select
-													ariaLabel='State'
-													placeholder='Choose...'
+													ariaLabel='UF'
+													placeholder='UF'
 													list={[
-														{ value: 'usa', text: 'USA' },
-														{ value: 'ca', text: 'Canada' },
+														{ value: 'Acre', text: 'AC' },
+														{ value: 'Alagoas', text: 'AL' },
+														{ value: 'Amapá', text: 'AP' },
+														{ value: 'Amazonas', text: 'AM' },
+														{ value: 'Bahia', text: 'BA' },
+														{ value: 'Ceará', text: 'CE' },
+														{ value: 'Distrito Federal', text: 'DF' },
+														{ value: 'Espírito Santo', text: 'ES' },
+														{ value: 'Goiás', text: 'GO' },
+														{ value: 'Maranhão', text: 'MA' },
+														{ value: 'Mato Grosso', text: 'MT' },
+														{ value: 'Mato Grosso do Sul', text: 'MS' },
+														{ value: 'Minas Gerais', text: 'MG' },
+														{ value: 'Pará', text: 'PA' },
+														{ value: 'Paraíba', text: 'PB' },
+														{ value: 'Paraná', text: 'PR' },
+														{ value: 'Pernambuco', text: 'PE' },
+														{ value: 'Piauí', text: 'PI' },
+														{ value: 'Rio de Janeiro', text: 'RJ' },
+														{ value: 'Rio Grande do Norte', text: 'RN' },
+														{ value: 'Rio Grande do Sul', text: 'RS' },
+														{ value: 'Rondônia', text: 'RO' },
+														{ value: 'Roraima', text: 'RR' },
+														{ value: 'Santa Catarina', text: 'SC' },
+														{ value: 'São Paulo', text: 'SP' },
+														{ value: 'Sergipe', text: 'SE' },
+														{ value: 'Tocantins', text: 'TO' },
 													]}
-													onChange={formik.handleChange}
+													onChange={(event: React.SyntheticEvent<HTMLSelectElement>) => {
+														const selectedOption = (event.target as HTMLSelectElement).selectedOptions[0];
+														const state = selectedOption.getAttribute('value');
+														const UF = selectedOption.textContent;
+														formik.setFieldValue('state', state);
+														formik.setFieldValue('uf'   , UF);
+
+													}}
 													onBlur={formik.handleBlur}
 													value={formik.values.state}
 													isValid={formik.isValid}
@@ -590,7 +752,7 @@ const CompanyPage = () => {
 											</FormGroup>
 										</div>
 										<div className='col-md-3'>
-											<FormGroup id='zip' label='Zip' isFloating>
+											<FormGroup id='zip' label='CEP' isFloating>
 												<Input
 													onChange={formik.handleChange}
 													onBlur={formik.handleBlur}
@@ -603,112 +765,96 @@ const CompanyPage = () => {
 										</div>
 									</div>
 								</WizardItem>
-								<WizardItem id='step3' title='Notifications'>
+								<WizardItem id='step3' title='Visibilidade'>
 									<div className='row g-4'>
 										<div className='col-12'>
 											<FormGroup>
-												<Label htmlFor='emailNotification'>
-													Email Notifications
+												<Label htmlFor='Visualização dos candidatos'>
+													Visualização da sua empresa
 												</Label>
 												<ChecksGroup>
-													{notificationTypes.map((cat) => (
 														<Checks
 															type='switch'
-															key={cat.id}
-															id={`emailNotification-${cat.id.toString()}`}
-															name='emailNotification'
-															label={cat.name}
-															value={cat.id}
-															onChange={formik.handleChange}
-															checked={formik.values.emailNotification.includes(
-																cat.id.toString(),
-															)}
+															id={`isVisible`}
+															name='isVisible'
+															label={'Anônimo'}
+															checked={formik.values.isVisible == '1' ? true : false}
+															value={formik.values.isVisible}
+															onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+																const value = event.target.checked ? '1' : '0'; // Define '1' para true e '0' para false
+																formik.setFieldValue('isVisible', value); // Atualiza o campo no Formik
+															}}
 														/>
-													))}
 												</ChecksGroup>
+												
 											</FormGroup>
 										</div>
 										<div className='col-12'>
-											<FormGroup>
-												<Label htmlFor='pushNotification'>
-													Push Notifications
-												</Label>
-												<ChecksGroup>
-													{notificationTypes.map((cat) => (
-														<Checks
-															type='switch'
-															key={cat.id}
-															id={cat.id.toString()}
-															name='pushNotification'
-															label={cat.name}
-															value={cat.id}
-															onChange={formik.handleChange}
-															checked={formik.values.pushNotification.includes(
-																cat.id.toString(),
-															)}
-														/>
-													))}
-												</ChecksGroup>
-											</FormGroup>
+											<p>
+												Ao optar pelo  <span className='fw-bold'>anonimato</span>, as informações da sua empresa serão ocultadas de candidatos e outras empresas, o que pode dificultar sua identificação.
+											</p>
 										</div>
 									</div>
 								</WizardItem>
-								<WizardItem id='step4' title='Preview'>
+								<WizardItem id='step4' title='Visualização Geral'>
 									<div className='row g-3'>
 										<div className='col-9 offset-3'>
-											<h3 className='mt-4'>Account Detail</h3>
-											<h4 className='mt-4'>Personal Information</h4>
+											<h3 className='mt-4'>Review</h3>
+											<h4 className='mt-4'>Informação e Detalhes</h4>
 										</div>
 										<PreviewItem
-											title='First Name'
-											value={formik.values.firstName}
+											title='CNPJ'
+											value={formik.values.cnpj}
 										/>
 										<PreviewItem
-											title='Last Name'
-											value={formik.values.lastName}
+											title='Inscrição Municipal'
+											value={formik.values.municipal_registration}
 										/>
 										<PreviewItem
-											title='Display Name'
-											value={formik.values.displayName}
+											title='Inscrição Estadual'
+											value={formik.values.state_registration}
+										/>
+										<PreviewItem
+											title='Nome da Empresa'
+											value={formik.values.company_name}
 										/>
 										<div className='col-9 offset-3'>
-											<h4 className='mt-4'>Contact Information</h4>
+											<h4 className='mt-4'>Contato</h4>
 										</div>
 										<PreviewItem
-											title='Phone Number'
-											value={formik.values.phoneNumber}
+											title='Responsável'
+											value={formik.values.responsible}
 										/>
 										<PreviewItem
-											title='Email Address'
-											value={formik.values.emailAddress}
+											title='Telefone'
+											value={formik.values.phone}
+										/>
+										<PreviewItem
+											title='Email'
+											value={formik.values.email}
 										/>
 										<div className='col-9 offset-3'>
-											<h3 className='mt-4'>Address</h3>
+											<h3 className='mt-4'>Endereço</h3>
 										</div>
 										<PreviewItem
-											title='Address Line'
-											value={formik.values.addressLine}
+											title='Rua'
+											value={formik.values.street}
 										/>
 										<PreviewItem
-											title='Address Line 2'
-											value={formik.values.addressLine2}
+											title='Bairro'
+											value={formik.values.district}
 										/>
-										<PreviewItem title='City' value={formik.values.city} />
-										<PreviewItem title='State' value={formik.values.state} />
-										<PreviewItem title='ZIP' value={formik.values.zip} />
+										<PreviewItem title='UF' value={formik.values.uf} />
+										<PreviewItem title='Número' value={formik.values.number} />
+										<PreviewItem title='Estado' value={formik.values.state} />
+										<PreviewItem title='Cidade' value={formik.values.city} />
+										<PreviewItem title='CEP' value={formik.values.zip} />
+
 										<div className='col-9 offset-3'>
-											<h4 className='mt-4'>Notification</h4>
+											<h4 className='mt-4'>Visibilidade</h4>
 										</div>
-										<PreviewItem
-											title='Email Notifications'
-											value={notificationTypes.map(
-												(cat) =>
-													formik.values.emailNotification.includes(
-														cat.id.toString(),
-													) && `${cat.name}, `,
-											)}
-										/>
-										<PreviewItem
+										<PreviewItem title='Anônimato' value={formik.values.isVisible == '1' ? 'Sim' : 'Não'} />
+										{/* <PreviewItem
 											title='Push Notifications'
 											value={notificationTypes.map(
 												(cat) =>
@@ -716,7 +862,7 @@ const CompanyPage = () => {
 														cat.id.toString(),
 													) && `${cat.name}, `,
 											)}
-										/>
+										/> */}
 									</div>
 								</WizardItem>
 							</Wizard>

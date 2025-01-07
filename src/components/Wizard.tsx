@@ -63,7 +63,7 @@ const Wizard: FC<IWizardProps> = ({ children, onSubmit, isHeader, color, stretch
 
 	const prevBtn = !!activeItemIndex && (
 		<Button color={color} isLink onClick={() => setActiveItemIndex(activeItemIndex - 1)}>
-			Previous
+			Voltar
 		</Button>
 	);
 
@@ -75,14 +75,14 @@ const Wizard: FC<IWizardProps> = ({ children, onSubmit, isHeader, color, stretch
 				color={color}
 				isLight
 				onClick={() => setActiveItemIndex(activeItemIndex + 1)}>
-				Next
+				Próximo
 			</Button>
 			<Button
 				className={classNames({ 'd-none': childCount !== activeItemIndex + 1 })}
 				aria-hidden={childCount !== activeItemIndex + 1}
 				type='submit'
 				color={color}>
-				Submit
+				Finalizar 
 			</Button>
 		</>
 	);
