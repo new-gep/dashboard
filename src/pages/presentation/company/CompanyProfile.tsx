@@ -44,6 +44,7 @@ import Spinner from '../../../components/bootstrap/Spinner';
 import GetCompanyFindOne from '../../../api/get/company/FindOne';
 import PatchCompanyDefault from '../../../api/patch/company/Default';
 import DeleteCompanyFile from '../../../api/delete/company/File';
+
 interface IPreviewItemProps {
 	title: string;
 	value: any | any[];
@@ -146,7 +147,6 @@ const CompanyPage = () => {
 	};
 
 	const [activeTab, setActiveTab] = useState(TABS.ACCOUNT_DETAIL);
-
 
 	const formik = useFormik({
 		initialValues: {
