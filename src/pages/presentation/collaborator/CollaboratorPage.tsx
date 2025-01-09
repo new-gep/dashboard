@@ -21,6 +21,7 @@ import JobCollaboratorCompany from '../../../api/get/job/Job_Collaborator_Compan
 import AuthContext from '../../../contexts/authContext';
 import Mask from '../../../function/Mask';
 
+
 const CollaboratorList = () => {
     useTourStep(18);
     const { userData } = useContext(AuthContext);

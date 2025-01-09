@@ -357,14 +357,14 @@ const Customer = () => {
 					</Button>
 				</SubHeaderLeft>
 			</SubHeader>
-			<Modal isOpen={openDocument} setIsOpen={closeModal} size={`lg`}>
+			<Modal isOpen={openDocument} setIsOpen={closeModal} size={`xl`}>
 				<ModalHeader>
 					<div>
 						<h1 className='mb-0 p-0'>Documento</h1>
 						<p className='mt-0 p-0'>Avalie o documento {typeDocument == 'children' && 'dos filhos'}</p>
 					</div>
 				</ModalHeader>
-				<ModalBody>
+				<ModalBody >
 					{ typeDocument == 'pdf' &&
 						<iframe
 						   title="Conteúdo incorporado da página"

@@ -39,9 +39,23 @@ import useTourStep from '../../../hooks/useTourStep';
 import Collaborator from '../../../api/get/collaborator/Collaborator';
 import Mask from '../../../function/Mask';
 import Job_One from '../../../api/get/job/Job_One';
+import DossieAdmission from './dossie/Admission';
+import DossieDocument from './dossie/Document';
+import DossiePayStub from './dossie/PayStub';
+import DossiePoint from './dossie/Points';
+import DossieResignation from './dossie/Resignation';
+
+
 const CollaboratorProfilePage = () => {
 	useTourStep(19);
-
+	const TABS = {
+		COLLABORATOR: 'Documento',
+		ADMISSION: 'Admissão',
+		RESIGNATION: 'Demissão',
+		PAYSTUB: 'Holerite',
+		POINT: 'Ponto',
+	};
+	const [activeTab, setActiveTab] = useState(TABS.COLLABORATOR);
 	const { darkModeStatus } = useDarkMode();
 	const { cpf } = useParams();
 	const [collaborator, setCollaborator] = useState<any>(null);
@@ -58,11 +72,9 @@ const CollaboratorProfilePage = () => {
 
 					const responseJob = await Job_One(response.collaborator.id_work);
 					if (responseJob.status == 200) {
-						console.log(responseJob.job);
-						console.log('time:', responseJob.job.time.time);
 						setJob(responseJob.job);
 					}
-				}
+				};
 			}
 		};
 		fetchData();
@@ -159,17 +171,10 @@ const CollaboratorProfilePage = () => {
 						<span className='display-4 fw-bold me-3'>
 							{collaborator && collaborator.name}
 						</span>
-						{/* <span className='border border-success border-2 text-success fw-bold px-3 py-2 rounded'>
-							{'data posição'}
-						</span> */}
 						<span>
-							<Button
-								icon='DoorFront'
-								color='danger'
-								isOutline={true}
-								size={'lg'}
-							>Desligar</Button>
-							{/* <Icon icon='DoorFront' color='danger' size={'3x'}/> */}
+							<Button icon='DoorFront' color='danger' isOutline={true} size={'lg'}>
+								Desligar
+							</Button>
 						</span>
 					</div>
 					<div className='row'>
@@ -207,6 +212,27 @@ const CollaboratorProfilePage = () => {
 																	)}
 															</div>
 														</div>
+													</div>
+												</div>
+												<div className='col-12'>
+													<div className='d-flex align-items-center'>
+														<div className='flex-shrink-0'>
+															<Icon
+																icon=' VolunteerActivism'
+																size='3x'
+																color='info'
+															/>
+														</div>
+														<div className='flex-grow-1 ms-3'>
+															<div className='fw-bold fs-5 mb-0'>
+																{collaborator &&
+																	collaborator.marriage == '1' ? 'Sim' : 'Não'
+																}
+															</div>
+															<div className='text-muted'>
+																Casado(a)
+															</div>
+														</div> 
 													</div>
 												</div>
 												<div className='col-12'>
@@ -415,109 +441,7 @@ const CollaboratorProfilePage = () => {
 												</div>
 											</div>
 										</div>
-									</div>
-								</CardBody>
-							</Card>
-							<Card>
-								<CardHeader>
-									<CardLabel icon='ShowChart' iconColor='secondary'>
-										<CardTitle tag='div' className='h5'>
-											Statics
-										</CardTitle>
-									</CardLabel>
-									<CardActions>
-										Only in <strong>{dayjs().format('MMM')}</strong>.
-									</CardActions>
-								</CardHeader>
-								<CardBody>
-									<div className='row g-4 align-items-center'>
-										<div className='col-xl-6'>
-											<div
-												className={classNames(
-													'd-flex align-items-center rounded-2 p-3',
-													{
-														'bg-l10-warning': !darkModeStatus,
-														'bg-lo25-warning': darkModeStatus,
-													},
-												)}>
-												<div className='flex-shrink-0'>
-													<Icon
-														icon='DoneAll'
-														size='3x'
-														color='warning'
-													/>
-												</div>
-												<div className='flex-grow-1 ms-3'>
-													<div className='fw-bold fs-3 mb-0'>15</div>
-													<div className='text-muted mt-n2 truncate-line-1'>
-														Completed tasks
-													</div>
-												</div>
-											</div>
-										</div>
-										<div className='col-xl-6'>
-											<div
-												className={classNames(
-													'd-flex align-items-center rounded-2 p-3',
-													{
-														'bg-l10-info': !darkModeStatus,
-														'bg-lo25-info': darkModeStatus,
-													},
-												)}>
-												<div className='flex-shrink-0'>
-													<Icon icon='Savings' size='3x' color='info' />
-												</div>
-												<div className='flex-grow-1 ms-3'>
-													<div className='fw-bold fs-3 mb-0'>1,280</div>
-													<div className='text-muted mt-n2 truncate-line-1'>
-														Earning
-													</div>
-												</div>
-											</div>
-										</div>
-										<div className='col-xl-6'>
-											<div
-												className={classNames(
-													'd-flex align-items-center rounded-2 p-3',
-													{
-														'bg-l10-primary': !darkModeStatus,
-														'bg-lo25-primary': darkModeStatus,
-													},
-												)}>
-												<div className='flex-shrink-0'>
-													<Icon
-														icon='Celebration'
-														size='3x'
-														color='primary'
-													/>
-												</div>
-												<div className='flex-grow-1 ms-3'>
-													<div className='fw-bold fs-3 mb-0'>76</div>
-													<div className='text-muted mt-n2 truncate-line-1'>
-														Occupancy
-													</div>
-												</div>
-											</div>
-										</div>
-										<div className='col-xl-6'>
-											<div
-												className={classNames(
-													'd-flex align-items-center rounded-2 p-3',
-													{
-														'bg-l10-success': !darkModeStatus,
-														'bg-lo25-success': darkModeStatus,
-													},
-												)}>
-												<div className='flex-shrink-0'>
-													<Icon icon='Timer' size='3x' color='success' />
-												</div>
-												<div className='flex-grow-1 ms-3'>
-													<div className='fw-bold fs-3 mb-0'>42</div>
-													<div className='text-muted mt-n2'>Hours</div>
-												</div>
-											</div>
-										</div>
-									</div>
+									</div> 
 								</CardBody>
 							</Card>
 						</div>
@@ -529,7 +453,7 @@ const CollaboratorProfilePage = () => {
 											Dossiê
 										</CardTitle>
 									</CardLabel>
-									<CardActions>
+									{/* <CardActions>
 										<Dropdown>
 											<DropdownToggle>
 												<Button color='info' icon='Compare' isLight>
@@ -553,141 +477,96 @@ const CollaboratorProfilePage = () => {
 												</DropdownItem>
 											</DropdownMenu>
 										</Dropdown>
-									</CardActions>
+									</CardActions> */}
 								</CardHeader>
-								<CardBody>
-									<div className='row g-4'>
-										<div className='col-md-6'>
-											<Card
-												className={`bg-l${
-													darkModeStatus ? 'o25' : '25'
-												}-primary bg-l${
-													darkModeStatus ? 'o50' : '10'
-												}-primary-hover transition-base rounded-2 mb-4`}
-												shadow='sm'>
-												<CardHeader className='bg-transparent'>
-													<CardLabel>
-														<CardTitle tag='div' className='h5'>
-															Customer Happiness
-														</CardTitle>
-													</CardLabel>
-												</CardHeader>
-												<CardBody>
-													<div className='d-flex align-items-center pb-3'>
-														<div className='flex-shrink-0'>
-															<Icon
-																icon='EmojiEmotions'
-																size='4x'
-																color='primary'
-															/>
-														</div>
-														<div className='flex-grow-1 ms-3'>
-															<div className='fw-bold fs-3 mb-0'>
-																100%
-																<span className='text-info fs-5 fw-bold ms-3'>
-																	0
-																	<Icon icon='TrendingFlat' />
-																</span>
-															</div>
-															<div className='text-muted'>
-																Compared to ($5000 last year)
-															</div>
-														</div>
-													</div>
-												</CardBody>
-											</Card>
-											<Card
-												className={`bg-l${
-													darkModeStatus ? 'o25' : '25'
-												}-danger bg-l${
-													darkModeStatus ? 'o50' : '10'
-												}-danger-hover transition-base rounded-2 mb-0`}
-												shadow='sm'>
-												<CardHeader className='bg-transparent'>
-													<CardLabel>
-														<CardTitle tag='div' className='h5'>
-															Injury
-														</CardTitle>
-													</CardLabel>
-												</CardHeader>
-												<CardBody>
-													<div className='d-flex align-items-center pb-3'>
-														<div className='flex-shrink-0'>
-															<Icon
-																icon='Healing'
-																size='4x'
-																color='danger'
-															/>
-														</div>
-														<div className='flex-grow-1 ms-3'>
-															<div className='fw-bold fs-3 mb-0'>
-																1
-																<span className='text-danger fs-5 fw-bold ms-3'>
-																	-50%
-																	<Icon icon='TrendingDown' />
-																</span>
-															</div>
-															<div className='text-muted'>
-																Compared to (2 last week)
-															</div>
-														</div>
-													</div>
-												</CardBody>
-											</Card>
-										</div>
-										<div className='col-md-6'>
-											<Card
-												className={`bg-l${
-													darkModeStatus ? 'o25' : '25'
-												}-success bg-l${
-													darkModeStatus ? 'o50' : '10'
-												}-success-hover transition-base rounded-2 mb-0`}
-												stretch
-												shadow='sm'>
-												<CardHeader className='bg-transparent'>
-													<CardLabel>
-														<CardTitle tag='div' className='h5'>
-															Daily Occupancy
-														</CardTitle>
-													</CardLabel>
-												</CardHeader>
-												<CardBody className='pt-0'>
-													<Chart
-														className='d-flex justify-content-center'
-														series={dayHours.series}
-														options={dayHours.options}
-														type={dayHours.options.chart?.type}
-														height={dayHours.options.chart?.height}
-														width={dayHours.options.chart?.width}
-													/>
-													<div className='d-flex align-items-center pb-3'>
-														<div className='flex-shrink-0'>
-															<Icon
-																icon='Timer'
-																size='4x'
-																color='success'
-															/>
-														</div>
-														<div className='flex-grow-1 ms-3'>
-															<div className='fw-bold fs-3 mb-0'>
-																~22H
-																<span className='text-success fs-5 fw-bold ms-3'>
-																	+12.5%
-																	<Icon icon='TrendingUp' />
-																</span>
-															</div>
-															<div className='text-muted'>
-																Compared to (~19H 30M last week)
-															</div>
-														</div>
-													</div>
-												</CardBody>
-											</Card>
-										</div>
-									</div>
+
+								<CardBody className='d-flex gap-5' style={{height:'400px'}}>
+									{/* BUTTON */}
+									<Card stretch className='col-4'>
+										<CardBody isScrollable className='h-100'>
+											<div className='row g-3 '>
+												<div className='col-12'>
+													<Button
+														icon='AttachFile'
+														color='info'
+														className='w-100 p-3'
+														isLight={TABS.COLLABORATOR !== activeTab}
+														onClick={() =>
+															setActiveTab(TABS.COLLABORATOR)
+														}>
+														{TABS.COLLABORATOR}
+													</Button>
+												</div>
+												<div className='col-12'>
+													<Button
+														icon='check'
+														color='success'
+														className='w-100 p-3'
+														isLight={TABS.ADMISSION !== activeTab}
+														onClick={() =>
+															setActiveTab(TABS.ADMISSION)
+														}>
+														{TABS.ADMISSION}
+													</Button>
+												</div>
+												<div className='col-12'>
+													<Button
+														icon='close'
+														color='danger'
+														className='w-100 p-3'
+														isLight={TABS.RESIGNATION !== activeTab}
+														onClick={() =>
+															setActiveTab(TABS.RESIGNATION)
+														}>
+														{TABS.RESIGNATION}
+													</Button>
+												</div>
+												<div className='col-12'>
+													<Button
+														icon='AttachMoney'
+														color='warning'
+														className='w-100 p-3'
+														isLight={TABS.PAYSTUB !== activeTab}
+														onClick={() => setActiveTab(TABS.PAYSTUB)}>
+														{TABS.PAYSTUB}
+													</Button>
+												</div>
+												<div className='col-12'>
+													<Button
+														icon='LocationOn'
+														color='secondary'
+														className='w-100 p-3'
+														isLight={TABS.POINT !== activeTab}
+														onClick={() => setActiveTab(TABS.POINT)}>
+														{TABS.POINT}
+													</Button>
+												</div>
+											</div>
+										</CardBody>
+									</Card>
+									{/* TABS */}
+									<Card stretch className='col-7	'>
+										<CardBody isScrollable>
+											{TABS.COLLABORATOR === activeTab && (
+												<DossieDocument collaborator={collaborator}/>
+											)}
+											{TABS.ADMISSION === activeTab && (
+												<DossieAdmission/>
+											)}
+											{TABS.PAYSTUB === activeTab && (
+												<DossiePayStub/>
+											)}
+											{TABS.POINT === activeTab && (
+												<DossiePoint/>
+											)}
+											{TABS.RESIGNATION === activeTab && (
+												<DossieResignation/>
+											)}
+										</CardBody>
+									</Card>
 								</CardBody>
 							</Card>
-							<Card>
+							{/* <Card>
 								<CardHeader>
 									<CardLabel icon='Task' iconColor='danger'>
 										<CardTitle>
@@ -800,7 +679,7 @@ const CollaboratorProfilePage = () => {
 										</Alert>
 									)}
 								</CardBody>
-							</Card>
+							</Card> */}
 						</div>
 					</div>
 				</Page>
