@@ -44,6 +44,7 @@ import DossieDocument from './dossie/Document';
 import DossiePayStub from './dossie/PayStub';
 import DossiePoint from './dossie/Points';
 import DossieResignation from './dossie/Resignation';
+import ModalDemission from './modalDemission';
 
 
 const CollaboratorProfilePage = () => {
@@ -61,6 +62,7 @@ const CollaboratorProfilePage = () => {
 	const [collaborator, setCollaborator] = useState<any>(null);
 	const [picture, setPicture] = useState<any>(null);
 	const [job, setJob] = useState<any>(null);
+	const [modalDemission, setModalDemission] = useState<any>(null);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -80,66 +82,11 @@ const CollaboratorProfilePage = () => {
 		fetchData();
 	}, [cpf]);
 
-	const [dayHours] = useState<IChartOptions>({
-		series: [
-			{
-				data: [8, 12, 15, 20, 15, 22, 9],
-			},
-		],
-		options: {
-			colors: [process.env.REACT_APP_SUCCESS_COLOR],
-			chart: {
-				type: 'radar',
-				width: 200,
-				height: 200,
-				sparkline: {
-					enabled: true,
-				},
-			},
-			xaxis: {
-				categories: [
-					'Monday',
-					'Tuesday',
-					'Wednesday',
-					'Thursday',
-					'Friday',
-					'Saturday',
-					'Sunday',
-				],
-				// convertedCatToNumeric: false,
-			},
-			tooltip: {
-				theme: 'dark',
-				fixed: {
-					enabled: false,
-				},
-				x: {
-					show: true,
-				},
-				y: {
-					title: {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						formatter(seriesName) {
-							return 'Hours';
-						},
-					},
-				},
-			},
-			stroke: {
-				curve: 'smooth',
-				width: 2,
-			},
-			plotOptions: {
-				radar: {
-					polygons: {
-						strokeColors: `${COLORS.SUCCESS.code}50`,
-						strokeWidth: '1',
-						connectorColors: `${COLORS.SUCCESS.code}50`,
-					},
-				},
-			},
-		},
-	});
+	const startDemission = () => {
+		setModalDemission(true)
+	};
+
+
 
 	const userTasks = dummyEventsData.filter((f) => f.assigned.username === 'CPF.username');
 
@@ -167,12 +114,15 @@ const CollaboratorProfilePage = () => {
 			</SubHeader>
 			{1 > 0 ? (
 				<Page>
+					<ModalDemission collaborator={collaborator} job={job} openModal={modalDemission} closeModal={setModalDemission} />
 					<div className='pt-3 pb-5 d-flex align-items-center justify-content-between'>
 						<span className='display-4 fw-bold me-3'>
 							{collaborator && collaborator.name}
 						</span>
 						<span>
-							<Button icon='DoorFront' color='danger' isOutline={true} size={'lg'}>
+							<Button icon='DoorFront' color='danger' isOutline={true} size={'lg'}
+								onClick={startDemission}
+							>
 								Desligar
 							</Button>
 						</span>
@@ -551,7 +501,7 @@ const CollaboratorProfilePage = () => {
 												<DossieDocument collaborator={collaborator}/>
 											)}
 											{TABS.ADMISSION === activeTab && (
-												<DossieAdmission/>
+												<DossieAdmission job={job}/>
 											)}
 											{TABS.PAYSTUB === activeTab && (
 												<DossiePayStub/>

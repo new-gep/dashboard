@@ -588,7 +588,16 @@ const ProductsGridPage = () => {
 						<CardBody>
 							<div className='row g-4'>
 								<div className='col-12'>
-									-
+									<Checks
+										isInline
+										type={'switch'}
+										label={'PCD'}
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+											const isChecked = event.target.checked;
+											formik.setFieldValue('PCD', isChecked ? '1' : '0');
+										}}
+										checked={formik.values.PCD == '1' ? true : false}
+									/>
 								</div>
 								<div className='col-12'>
 									<FormGroup id='function' label='Função' isFloating>

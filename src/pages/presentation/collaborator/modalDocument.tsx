@@ -103,7 +103,7 @@ export default function ModalDocument({typeDocument, pathDocumentMain, pathDocum
                 )}
             </ModalBody>
             <ModalFooter>
-                {(typeDocument == 'pdf' || typeDocument == 'picture') && (
+                {/* {(typeDocument == 'pdf' || typeDocument == 'picture') && (
                     <div className='d-flex gap-4'>
                         <Button
                             isLight={true}
@@ -122,7 +122,7 @@ export default function ModalDocument({typeDocument, pathDocumentMain, pathDocum
                             Aprovar
                         </Button>
                     </div>
-                )}
+                )} */}
                 {typeDocument == 'children' && typeChildren == null && (
                     <Button
                         isLight={true}

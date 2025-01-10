@@ -94,6 +94,7 @@ const Customer = () => {
 			}
 			const response = await PicturePath(params,cpf);
 			if(response.status == 200){
+				
 	
 				const index = AllPicture.findIndex(
 					(item: any) =>
@@ -104,7 +105,9 @@ const Customer = () => {
 				if (index !== -1) {
 					AllPicture[index].status =  avaliation ? 'approved': 'reproved'; // Atualiza diretamente o status
 					setAllPicture([...AllPicture]); // Cria uma nova referência para atualizar o estado
-				}
+				};
+
+
 				// AllPicture.some((item: any) =>item.picture.toLowerCase() === "cnh" && item.status === "reproved")
 				closeModal()
 				toast(
@@ -135,7 +138,7 @@ const Customer = () => {
 					closeButton: true ,
 					autoClose: 5000 //
 				}
-			)
+			);
 		}
 	};
 
@@ -285,19 +288,23 @@ const Customer = () => {
 	const aprovedProfile = async () => {
 		try{
 			if(jobId && Array.isArray(AllPicture)){
-				const isValid = AllPicture.every(item => item.status === "approved")
+				let pictures = AllPicture;
+				pictures = pictures.filter(pic => pic.picture !== 'CNH' && pic.picture !== 'Voter_Registration');
+				const isValid = pictures.every(item => item.status === "approved")
 				if(!isValid){
 					return
 				}
-				const response = await Job_One(jobId)
+				console.log('aqui xx ')
+				const response = await Job_One(jobId)		
 				if(response.status == 200){
 					let candidates = response.job.candidates
 					//@ts-ignore
 					candidates.forEach(item => {
 						delete item.picture;
 						delete item.name;
-					 });
-					const candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === cpf);
+					});
+					console.log('cadidatos', candidates)
+					const candidate = candidates.find((item:any) => item.cpf.toString() == cpf);
 					if (candidate) {
 						candidate.verify = true;
 					}
@@ -339,6 +346,7 @@ const Customer = () => {
 
 	useEffect(()=>{
 		if(AllPicture){
+			console.log('dentro do fetch')
 			aprovedProfile();
 		}
 	},[AllPicture])
@@ -670,22 +678,38 @@ const Customer = () => {
 									// className='bg-warning'
 									isLight={true}
 									icon={
-										AllPicture && Array.isArray(AllPicture) ?
-											AllPicture.some(item => item.status === "reproved")
-											? "GppBad"
-											:  AllPicture.every(item => item.status === "approved")
-											? "GppGood"
+										AllPicture && Array.isArray(AllPicture)
+											? (() => {
+												let pictures = [...AllPicture];
+												pictures = pictures.filter(
+													pic => pic.picture !== 'CNH' && pic.picture !== 'Voter_Registration'
+												);
+												if (pictures.some(item => item.status === "reproved")) {
+													return "GppBad";
+												} else if (pictures.every(item => item.status === "approved")) {
+													return "GppGood";
+												} else {
+													return "GppMaybe";
+												}
+											})()
 											: "GppMaybe"
-										: "GppMaybe" 
 									}
 									color={
-										AllPicture && Array.isArray(AllPicture) ?
-											AllPicture.some(item => item.status === "reproved")
-											? "danger"
-											:  AllPicture.every(item => item.status === "approved")
-											? "success"
+										AllPicture && Array.isArray(AllPicture)
+											? (() => {
+												let pictures = [...AllPicture];
+												pictures = pictures.filter(
+													pic => pic.picture !== 'CNH' && pic.picture !== 'Voter_Registration'
+												);
+												if (pictures.some(item => item.status === "reproved")) {
+													return "danger";
+												} else if (pictures.every(item => item.status === "approved")) {
+													return "success";
+												} else {
+													return "warning";
+												}
+											})()
 											: "warning"
-										: "warning" 
 									}
 								>
 
