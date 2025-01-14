@@ -37,7 +37,7 @@ const AppointmentList = () => {
 						<div className='d-flex gap-2 p-3'>
 						<div className="d-flex flex-column align-items-center justify-content-center">
 							<Icon icon='looksOne' size='2x' />
-							<span className='text-muted'>{count && count.step1 ? count.step2 : '0'}</span>
+							<span className='text-muted'>{count && count.step1 ? count.step1 : '0'}</span>
 						</div>
 						<Icon icon='Maximize' className='mt-3' size='2x' /> 
 						<div className="d-flex flex-column align-items-center justify-content-center ">

@@ -20,11 +20,15 @@ export default function DossieAdmission(datesJob: any) {
 	const searchDocument = async (type:string, document: string) => {
 		let response;
         if(type == 'obligation'){
-            response = await JobFile(jobId, document, '1');
+			response = await JobFile(jobId, document, '1');
         }else{
             response = await JobFile(jobId, 'dynamic', '1', document);
-            console.log('dynamic', response)
         }
+		if(document == 'medical'){
+			setTypeDocument(response.type)
+			setPathDocumentMain(response.path)
+			return
+		}
 		setTypeDocument(response.typeDocumentSignature);
 		switch (response.typeDocumentSignature) {
 			case 'pdf':
@@ -39,6 +43,7 @@ export default function DossieAdmission(datesJob: any) {
 				}
 				break;
 		}
+
 		setModal(true);
 	};
 
@@ -56,6 +61,8 @@ export default function DossieAdmission(datesJob: any) {
 						return 'Acordo de Compensação de Horas';
 					case 'voucher':
 						return 'Solitação de Vale Transporte';
+					case 'medical':
+						return 'Exame Admissional'
 				}
 				break;
 			case 'dynamic':

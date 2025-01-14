@@ -15,12 +15,12 @@ const AppointmentList = () => {
 	const { themeStatus } = useDarkMode();
 	const { userData } = useContext(AuthContext);
 	const [count, setCount] = useState<any>(null)
-	const [laoder, setLoader] = useState<boolean>(false)
+	const [loader, setLoader] = useState<boolean>(false)
 	
 	const fetchData = async () => {
 		const response = await Job_Admissional(userData.cnpj)
 		if(response.status == 200){
-			console.log(response)
+			console.log(response.counts)
 			setCount(response.counts)
 			setLoader(true)
 		}
@@ -34,11 +34,11 @@ const AppointmentList = () => {
 		<PageWrapper title={mainMenu.process.subMenu.admission.text} >
 			<SubHeader>
 				<SubHeaderLeft>
-					{laoder &&
+					{loader &&
 						<div className='d-flex gap-2 p-3'>
 						<div className="d-flex flex-column align-items-center justify-content-center">
 							<Icon icon='looksOne' size='2x' />
-							<span className='text-muted'>{count && count.step1 ? count.step2 : '0'}</span>
+							<span className='text-muted'>{count && count.step1 ? count.step1 : '0'}</span>
 						</div>
 						<Icon icon='Maximize' className='mt-3' size='2x' /> 
 						<div className="d-flex flex-column align-items-center justify-content-center ">

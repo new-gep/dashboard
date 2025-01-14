@@ -48,6 +48,8 @@ import Job_Check_Admissional from '../../../api/get/job/Job_Check_Admissional';
 import Job_Dynamic from '../../../api/delete/job/job_dynamic';
 import SignedDocument from '../../../components/canva/SignedDocument';
 import Signatures from '../../../api/get/picture/Signatures';
+// 
+import Job_Demissional from '../../../api/get/job/Job_Demissional';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -59,8 +61,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
     const [stepTitle, setStepTitle] = useState('Exame admisisional')
     const [stepIcon, setIcon] = useState('LooksOne')
     const { userData } = useContext(AuthContext);
-	const [candidates, setCandidates] = useState<null | any>(null)
-	const [candidatesStep, setCandidatesStep] = useState<null | any>(null)
+	const [collaborators, setCollaborators] = useState<null | any>(null)
+	const [collaboratorsStep, setCollaboratorsStep] = useState<null | any>(null)
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 	const [menu, setMenu] = useState<boolean>(false)
 	const [manipulating, setManipulating] = useState<null | any>(null)
@@ -107,9 +109,12 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		},
 	});
 
-	const handleUpcomingDetails = (note:any) => {
-		setManipulating(null)
-		formik.setFieldValue("note", note)
+	const handleUpcomingDetails = (job:any) => {
+		setManipulatingTable(job)
+		formik.setFieldValue("note", job.note)
+		if(upcomingEventsInfoOffcanvas){
+			setManipulatingTable(false)
+		}
 		setUpcomingEventsInfoOffcanvas(!upcomingEventsInfoOffcanvas);
 	};
 
@@ -126,56 +131,56 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	};
 
 	const closeAfterSaveDocumentSignature = () => {
-		return new Promise(async (resolve, reject) => {
-		  try {
-			let allSignatureApproved:boolean = false
-			const response = await Job_Check_Admissional(manipulatingTable.id);
-			if (response.status === 200) {
-			  setDatesDynamicManipulating(response.date);
-			  const obligation = Object.keys(response.date.obligation);
-			  let dynamic = Object.values(response.date.dynamic.signature)
-			  //@ts-ignore
-				.map(item => item.replace(/^\/+|\/+$/g, '').trim()) // Remove barras no começo e final
-				.filter(item => item !== ""); // Filtra valores vazios
+		return
+		// return new Promise(async (resolve, reject) => {
+		//   try {
+		// 	let allSignatureApproved:boolean = false
+		// 	const response = await Job_Check_Admissional(manipulatingTable.id);
+		// 	if (response.status === 200) {
+		// 	  setDatesDynamicManipulating(response.date);
+		// 	  const obligation = Object.keys(response.date.obligation);
+		// 	  let dynamic = Object.values(response.date.dynamic.signature)
+		// 	  //@ts-ignore
+		// 		.map(item => item.replace(/^\/+|\/+$/g, '').trim()) // Remove barras no começo e final
+		// 		.filter(item => item !== ""); // Filtra valores vazios
 	  
-			  const documentSignatures = Object.values(response.date.documentSignature);
+		// 	  const documentSignatures = Object.values(response.date.documentSignature);
 	  
-			  const obligationExists = obligation.every(required =>
-				documentSignatures.some(signature =>
-					//@ts-ignore
-				  signature.toLowerCase().includes(required.toLowerCase())
-				)
-			  );
+		// 	  const obligationExists = obligation.every(required =>
+		// 		documentSignatures.some(signature =>
+		// 			//@ts-ignore
+		// 		  signature.toLowerCase().includes(required.toLowerCase())
+		// 		)
+		// 	  );
 	  
-			  const dynamicExists = dynamic.every(required =>
-				documentSignatures.some(signature =>
-					//@ts-ignore
-				  signature.toLowerCase().includes(required.toLowerCase())
-				)
-			  );
-			  const responseSignature = await Signatures(manipulatingTable.cpf);
-			  //@ts-ignore
-			  allSignatureApproved = responseSignature.pictures.every(picture => picture.status === 'approved');
-			  if (obligationExists && dynamicExists && allSignatureApproved) {
-				updateStatusCandidate(manipulatingTable, true, true);
-			  }
-			  setDocumentAvaliation(null);
-			  setPathDocumentMain(null);
-			  setTypeDocument(null);
-			  setIsDynamic(false);
-			  //@ts-ignore
-			  resolve(); // Indica que a Promise foi resolvida com sucesso
-			} else {
-			  reject(new Error("Response status is not 200")); // Caso o status não seja 200, rejeita a Promise
-			}
-		  } catch (error) {
-			reject(error); // Em caso de erro, rejeita a Promise
-		  }
-		});
+		// 	  const dynamicExists = dynamic.every(required =>
+		// 		documentSignatures.some(signature =>
+		// 			//@ts-ignore
+		// 		  signature.toLowerCase().includes(required.toLowerCase())
+		// 		)
+		// 	  );
+		// 	  const responseSignature = await Signatures(manipulatingTable.cpf);
+		// 	  //@ts-ignore
+		// 	  allSignatureApproved = responseSignature.pictures.every(picture => picture.status === 'approved');
+		// 	  if (obligationExists && dynamicExists && allSignatureApproved) {
+		// 		updateStatusCandidate(manipulatingTable, true, true);
+		// 	  }
+		// 	  setDocumentAvaliation(null);
+		// 	  setPathDocumentMain(null);
+		// 	  setTypeDocument(null);
+		// 	  setIsDynamic(false);
+		// 	  //@ts-ignore
+		// 	  resolve(); // Indica que a Promise foi resolvida com sucesso
+		// 	} else {
+		// 	  reject(new Error("Response status is not 200")); // Caso o status não seja 200, rejeita a Promise
+		// 	}
+		//   } catch (error) {
+		// 	reject(error); // Em caso de erro, rejeita a Promise
+		//   }
+		// });
 	};
 	
 	const toggleMenu = (e:any, colaborator:any) => {
-		console.log('colocaborador:', colaborator)
 		setManipulating(colaborator)
 		e.preventDefault(); 
 		if(menu){
@@ -192,162 +197,163 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	};
 
 	const formSubmitController = async (action:string) => {
-		switch (action) {
-			case 'observation' :
-				setSpinnerManipulating(true)
-				//@ts-ignore
-				const Newcandidates = candidates.map(({ cpf, step, status, verify, observation }) => ({ cpf, step, status, verify, observation }));
-				const candidate = Newcandidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
-				if(candidate){
-					candidate.observation = formik.values.note;
-				}else{
-					setSpinnerManipulating(false)
-					return
-				}
-				const params = {
-					candidates:JSON.stringify(Newcandidates)
-				}
-				const update = await Job(params, manipulating.id)
-				if(update.status == 200 ){
-					const candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
-					candidate.observation = formik.values.note;
-					//@ts-ignore
-					const stepCandidates = candidates.filter(candidate => candidate.step === step);
-					setCandidatesStep(stepCandidates)
-					setSpinnerManipulating(false)
-				}else{
-					setSpinnerManipulating(false)
-					console.log('não foi possível salvar a VAGA tabela (job)')
-				}
-				break	
-			case 'kitAdmission':
-				let document:string;
-				if(documentAvaliation == 'add'){
-					if(!formik.values.document || !formik.values.documentNameAdd){
-						toast(
-								<Toasts
-									icon={ 'Close' }
-									iconColor={ 'danger' }
-									title={ 'Erro!'}
-								>
-									Antes de salvar, é necessário fazer o upload do arquivo e informar o nome que ele deverá ter.
-								</Toasts>,
-								{
-									closeButton: true ,
-									autoClose: 5000 //
-								}
-						)
-						return
-					};
-					setSpinnerManipulating(true);
-					const fileName = formik.values.documentNameAdd
-					.replace(/\s+(.)/g, (match, group1) => group1.toUpperCase()) 
-					.replace(/^\w/, (c) => c.toUpperCase())  
-					.replace(/\s+/g, ""); 
+		return
+		// switch (action) {
+		// 	case 'observation' :
+		// 		setSpinnerManipulating(true)
+		// 		//@ts-ignore
+		// 		const Newcandidates = candidates.map(({ cpf, step, status, verify, observation }) => ({ cpf, step, status, verify, observation }));
+		// 		const candidate = Newcandidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
+		// 		if(candidate){
+		// 			candidate.observation = formik.values.note;
+		// 		}else{
+		// 			setSpinnerManipulating(false)
+		// 			return
+		// 		}
+		// 		const params = {
+		// 			candidates:JSON.stringify(Newcandidates)
+		// 		}
+		// 		const update = await Job(params, manipulating.id)
+		// 		if(update.status == 200 ){
+		// 			const candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
+		// 			candidate.observation = formik.values.note;
+		// 			//@ts-ignore
+		// 			const stepCandidates = candidates.filter(candidate => candidate.step === step);
+		// 			setCandidatesStep(stepCandidates)
+		// 			setSpinnerManipulating(false)
+		// 		}else{
+		// 			setSpinnerManipulating(false)
+		// 			console.log('não foi possível salvar a VAGA tabela (job)')
+		// 		}
+		// 		break	
+		// 	case 'kitAdmission':
+		// 		let document:string;
+		// 		if(documentAvaliation == 'add'){
+		// 			if(!formik.values.document || !formik.values.documentNameAdd){
+		// 				toast(
+		// 						<Toasts
+		// 							icon={ 'Close' }
+		// 							iconColor={ 'danger' }
+		// 							title={ 'Erro!'}
+		// 						>
+		// 							Antes de salvar, é necessário fazer o upload do arquivo e informar o nome que ele deverá ter.
+		// 						</Toasts>,
+		// 						{
+		// 							closeButton: true ,
+		// 							autoClose: 5000 //
+		// 						}
+		// 				)
+		// 				return
+		// 			};
+		// 			setSpinnerManipulating(true);
+		// 			const fileName = formik.values.documentNameAdd
+		// 			.replace(/\s+(.)/g, (match, group1) => group1.toUpperCase()) 
+		// 			.replace(/^\w/, (c) => c.toUpperCase())  
+		// 			.replace(/\s+/g, ""); 
 
-					const paramsJobPicture = {
-						file:formik.values.document,
-						name:'dynamic',
-						id  :manipulatingTable.id,
-						signature:false,
-						dynamic:fileName
-					};
+		// 			const paramsJobPicture = {
+		// 				file:formik.values.document,
+		// 				name:'dynamic',
+		// 				id  :manipulatingTable.id,
+		// 				signature:false,
+		// 				dynamic:fileName
+		// 			};
 
-					const response = await JobPicture(paramsJobPicture)
-					if(response.status == 200){
-						setSpinnerManipulating(false)
-						formik.setFieldValue('document', '');
-						formik.setFieldValue('documentNameAdd', '');
-						toast(
-							<Toasts
-								icon={ 'Check' }
-								iconColor={ 'success' }
-								title={ 'Sucesso!'}
-							>
-								O arquivo foi salvo com sucesso.
-							</Toasts>,
-							{
-								closeButton: true ,
-								autoClose: 5000 //
-							}
-						)
-						handleUpcomingEdit()
-						return
-					};
-				}
-				if(!formik.values.document){
-					toast(
-							<Toasts
-								icon={ 'Close' }
-								iconColor={ 'danger' }
-								title={ 'Erro!'}
-							>
-								Antes de salvar, você deve fazer o upload do arquivo
-							</Toasts>,
-							{
-								closeButton: true ,
-								autoClose: 5000 //
-							}
-					)
-					return
-				};
-				setSpinnerManipulating(true);
-				switch (documentAvaliation) {
-					case 'registration_form':
-						document = 'registration'
-						break;
-					case 'experience_contract':
-						document = 'experience'
-						break;
-					case 'hours_extension':
-						document = 'extension'
-						break;
-					case 'hours_compensation':
-						document = 'compensation'
-						break;
-					case 'transport_voucher':
-						document = 'voucher'
-						break;
-				}
-				const paramsJobPicture = {
-					file:formik.values.document,
-					//@ts-ignore
-					name:document,
-					id  :manipulatingTable.id,
-					signature:false
-				};
-				const response = await JobPicture(paramsJobPicture) 
-				if(response.status == 200){
-					const response = await Job_Check_Admissional(manipulatingTable.id)
-					if(response.status == 200){
-						setDatesDynamicManipulating(response.date);
-						const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
-						const allTrue = obligationValues.every(value => value === true); 
+		// 			const response = await JobPicture(paramsJobPicture)
+		// 			if(response.status == 200){
+		// 				setSpinnerManipulating(false)
+		// 				formik.setFieldValue('document', '');
+		// 				formik.setFieldValue('documentNameAdd', '');
+		// 				toast(
+		// 					<Toasts
+		// 						icon={ 'Check' }
+		// 						iconColor={ 'success' }
+		// 						title={ 'Sucesso!'}
+		// 					>
+		// 						O arquivo foi salvo com sucesso.
+		// 					</Toasts>,
+		// 					{
+		// 						closeButton: true ,
+		// 						autoClose: 5000 //
+		// 					}
+		// 				)
+		// 				handleUpcomingEdit()
+		// 				return
+		// 			};
+		// 		}
+		// 		if(!formik.values.document){
+		// 			toast(
+		// 					<Toasts
+		// 						icon={ 'Close' }
+		// 						iconColor={ 'danger' }
+		// 						title={ 'Erro!'}
+		// 					>
+		// 						Antes de salvar, você deve fazer o upload do arquivo
+		// 					</Toasts>,
+		// 					{
+		// 						closeButton: true ,
+		// 						autoClose: 5000 //
+		// 					}
+		// 			)
+		// 			return
+		// 		};
+		// 		setSpinnerManipulating(true);
+		// 		switch (documentAvaliation) {
+		// 			case 'registration_form':
+		// 				document = 'registration'
+		// 				break;
+		// 			case 'experience_contract':
+		// 				document = 'experience'
+		// 				break;
+		// 			case 'hours_extension':
+		// 				document = 'extension'
+		// 				break;
+		// 			case 'hours_compensation':
+		// 				document = 'compensation'
+		// 				break;
+		// 			case 'transport_voucher':
+		// 				document = 'voucher'
+		// 				break;
+		// 		}
+		// 		const paramsJobPicture = {
+		// 			file:formik.values.document,
+		// 			//@ts-ignore
+		// 			name:document,
+		// 			id  :manipulatingTable.id,
+		// 			signature:false
+		// 		};
+		// 		const response = await JobPicture(paramsJobPicture) 
+		// 		if(response.status == 200){
+		// 			const response = await Job_Check_Admissional(manipulatingTable.id)
+		// 			if(response.status == 200){
+		// 				setDatesDynamicManipulating(response.date);
+		// 				const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
+		// 				const allTrue = obligationValues.every(value => value === true); 
 					  
-						if (allTrue) {
-						  updateStatusCandidate(manipulatingTable, true, true);
-						}
-					}
-					setSpinnerManipulating(false)
-					formik.setFieldValue('document', '');
-					toast(
-						<Toasts
-							icon={ 'Check' }
-							iconColor={ 'success' }
-							title={ 'Sucesso!'}
-						>
-							O arquivo foi salvo com sucesso.
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 5000 //
-						}
-					)
-					handleUpcomingEdit()
-					return
-				}
-			break
-		};
+		// 				if (allTrue) {
+		// 				  updateStatusCandidate(manipulatingTable, true, true);
+		// 				}
+		// 			}
+		// 			setSpinnerManipulating(false)
+		// 			formik.setFieldValue('document', '');
+		// 			toast(
+		// 				<Toasts
+		// 					icon={ 'Check' }
+		// 					iconColor={ 'success' }
+		// 					title={ 'Sucesso!'}
+		// 				>
+		// 					O arquivo foi salvo com sucesso.
+		// 				</Toasts>,
+		// 				{
+		// 					closeButton: true ,
+		// 					autoClose: 5000 //
+		// 				}
+		// 			)
+		// 			handleUpcomingEdit()
+		// 			return
+		// 		}
+		// 	break
+		// };
 		setSpinnerManipulating(false)
 		handleUpcomingEdit()
 	};
@@ -357,18 +363,22 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		let params;
 		let update;
 		let Newcandidates;
+
 		switch (action) {
+			case 'cancelDemission':
+				cancelDemission(manipulating)
+				break
 			case 'finishAdmission':
-				finishAdmission()
+				// finishAdmission()
 				break;
 			case 'nextStep':
-				updateStatusCandidate(manipulating, null, null, true)
+				updateStatusCandidate(manipulating, true)
 				break;
 			case 'previousStep':
-				updateStatusCandidate(manipulating, null, null, false)
+				updateStatusCandidate(manipulating, false)
 				break;
 			case 'profile':
-				navigate(`/sales/Job/Customer/${manipulating.cpf}/${manipulating.id}`);
+				navigate(`/collaborator/profile/${manipulating.CPF_collaborator}`);
 				break;
 			case 'observation':
 				setTitleManipulating('Adicione uma Observação');
@@ -392,280 +402,282 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	};
 
 	const documentController = async (document:any, dynamic?:any, signature?:any) => {
-		setPathDocumentMain(null)
-		setTypeDocument(null)
-		setPathDocumentSignature(null)
-		setTypeDocumentSignature(null)
-		setAllDocument(null)
-		setAllAssignature(null)
-		setLoadingSearchDocument(true)
-		if(!dynamic){
-			setIsDynamic(false)
-		}
+		// setPathDocumentMain(null)
+		// setTypeDocument(null)
+		// setPathDocumentSignature(null)
+		// setTypeDocumentSignature(null)
+		// setAllDocument(null)
+		// setAllAssignature(null)
+		// setLoadingSearchDocument(true)
+		// if(!dynamic){
+		// 	setIsDynamic(false)
+		// }
 
-		let responseSignature;
-		let responseDocument;
+		// let responseSignature;
+		// let responseDocument;
 
-		switch (document) {
-			case 'registration_form':
-				setDocumentAvaliation(document)
-				if(signature){
-					responseSignature = await JobFile(manipulatingTable.id, 'registration', '1')
-				}
-				responseDocument = await JobFile(manipulatingTable.id, 'registration', '0');
-				toast(
-					<Toasts
-						icon={ 'Check' }
-						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Sucesso!'}
-					>
-						Ficha de Registro
-					</Toasts>,
-					{
-						closeButton: true ,
-						autoClose: 5000 //
-					}
-				);
-				break;
-			case 'experience_contract':
-				setDocumentAvaliation(document)
-				if(signature){
-					responseSignature = await JobFile(manipulatingTable.id, 'experience', '1')
-				}
-				responseDocument = await JobFile(manipulatingTable.id, 'experience', '0');
-				toast(
-					<Toasts
-						icon={ 'Check' }
-						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Sucesso!'}
-					>
-						Contrato de Experiencia
-					</Toasts>,
-					{
-						closeButton: true ,
-						autoClose: 5000 //
-					}
-				)
-				break;
-			case 'hours_extension':
-				setDocumentAvaliation(document)
-				if(signature){
-					responseSignature = await JobFile(manipulatingTable.id, 'extension', '1')
-				}
-				responseDocument = await JobFile(manipulatingTable.id, 'extension', '0');
-				toast(
-					<Toasts
-						icon={ 'Check' }
-						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Sucesso!'}
-					>
-						Acordo de Prorrogação de Horas
-					</Toasts>,
-					{
-						closeButton: true ,
-						autoClose: 5000 //
-					}
-				)
-				break;
-			case 'hours_compensation':
-				setDocumentAvaliation(document)
-				if(signature){
-					responseSignature = await JobFile(manipulatingTable.id, 'compensation', '1')
-				}
-				responseDocument = await JobFile(manipulatingTable.id, 'compensation', '0');
-				toast(
-					<Toasts
-						icon={ 'Check' }
-						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Sucesso!'}
-					>
-						Acordo de Compensação de Horas
-					</Toasts>,
-					{
-						closeButton: true ,
-						autoClose: 5000 //
-					}
-				)
-				break;
-			case 'transport_voucher':
-				setDocumentAvaliation(document)
-				if(signature){
-					responseSignature = await JobFile(manipulatingTable.id, 'voucher', '1')
-				}
-				responseDocument = await JobFile(manipulatingTable.id, 'voucher', '0');
-				toast(
-					<Toasts
-						icon={ 'Check' }
-						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Sucesso!'}
-					>
-						Solitação de Vale Transporte
-					</Toasts>,
-					{
-						closeButton: true ,
-						autoClose: 5000 //
-					}
-				)
-				break;
-			case 'dynamic':
-				if(signature){
-					responseSignature = await JobFile(manipulatingTable.id, 'dynamic', '1', dynamic);
-				}
-				responseDocument = await JobFile(manipulatingTable.id, 'dynamic', '0', dynamic);
-				//@ts-ignore
-				const formattedFileName = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2');
-				toast(
-					<Toasts
-						icon={ 'Check' }
-						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Sucesso!'}
-					>
-						{formattedFileName}
-					</Toasts>,
-					{
-						closeButton: true ,
-						autoClose: 5000 //
-					}
-				)
-				break
-			case 'add':
-				setDocumentAvaliation('add')
-				break
-			default:
-				break;
-		};
+		// switch (document) {
+		// 	case 'registration_form':
+		// 		setDocumentAvaliation(document)
+		// 		if(signature){
+		// 			responseSignature = await JobFile(manipulatingTable.id, 'registration', '1')
+		// 		}
+		// 		responseDocument = await JobFile(manipulatingTable.id, 'registration', '0');
+		// 		toast(
+		// 			<Toasts
+		// 				icon={ 'Check' }
+		// 				iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 				title={ 'Sucesso!'}
+		// 			>
+		// 				Ficha de Registro
+		// 			</Toasts>,
+		// 			{
+		// 				closeButton: true ,
+		// 				autoClose: 5000 //
+		// 			}
+		// 		);
+		// 		break;
+		// 	case 'experience_contract':
+		// 		setDocumentAvaliation(document)
+		// 		if(signature){
+		// 			responseSignature = await JobFile(manipulatingTable.id, 'experience', '1')
+		// 		}
+		// 		responseDocument = await JobFile(manipulatingTable.id, 'experience', '0');
+		// 		toast(
+		// 			<Toasts
+		// 				icon={ 'Check' }
+		// 				iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 				title={ 'Sucesso!'}
+		// 			>
+		// 				Contrato de Experiencia
+		// 			</Toasts>,
+		// 			{
+		// 				closeButton: true ,
+		// 				autoClose: 5000 //
+		// 			}
+		// 		)
+		// 		break;
+		// 	case 'hours_extension':
+		// 		setDocumentAvaliation(document)
+		// 		if(signature){
+		// 			responseSignature = await JobFile(manipulatingTable.id, 'extension', '1')
+		// 		}
+		// 		responseDocument = await JobFile(manipulatingTable.id, 'extension', '0');
+		// 		toast(
+		// 			<Toasts
+		// 				icon={ 'Check' }
+		// 				iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 				title={ 'Sucesso!'}
+		// 			>
+		// 				Acordo de Prorrogação de Horas
+		// 			</Toasts>,
+		// 			{
+		// 				closeButton: true ,
+		// 				autoClose: 5000 //
+		// 			}
+		// 		)
+		// 		break;
+		// 	case 'hours_compensation':
+		// 		setDocumentAvaliation(document)
+		// 		if(signature){
+		// 			responseSignature = await JobFile(manipulatingTable.id, 'compensation', '1')
+		// 		}
+		// 		responseDocument = await JobFile(manipulatingTable.id, 'compensation', '0');
+		// 		toast(
+		// 			<Toasts
+		// 				icon={ 'Check' }
+		// 				iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 				title={ 'Sucesso!'}
+		// 			>
+		// 				Acordo de Compensação de Horas
+		// 			</Toasts>,
+		// 			{
+		// 				closeButton: true ,
+		// 				autoClose: 5000 //
+		// 			}
+		// 		)
+		// 		break;
+		// 	case 'transport_voucher':
+		// 		setDocumentAvaliation(document)
+		// 		if(signature){
+		// 			responseSignature = await JobFile(manipulatingTable.id, 'voucher', '1')
+		// 		}
+		// 		responseDocument = await JobFile(manipulatingTable.id, 'voucher', '0');
+		// 		toast(
+		// 			<Toasts
+		// 				icon={ 'Check' }
+		// 				iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 				title={ 'Sucesso!'}
+		// 			>
+		// 				Solitação de Vale Transporte
+		// 			</Toasts>,
+		// 			{
+		// 				closeButton: true ,
+		// 				autoClose: 5000 //
+		// 			}
+		// 		)
+		// 		break;
+		// 	case 'dynamic':
+		// 		if(signature){
+		// 			responseSignature = await JobFile(manipulatingTable.id, 'dynamic', '1', dynamic);
+		// 		}
+		// 		responseDocument = await JobFile(manipulatingTable.id, 'dynamic', '0', dynamic);
+		// 		//@ts-ignore
+		// 		const formattedFileName = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2');
+		// 		toast(
+		// 			<Toasts
+		// 				icon={ 'Check' }
+		// 				iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 				title={ 'Sucesso!'}
+		// 			>
+		// 				{formattedFileName}
+		// 			</Toasts>,
+		// 			{
+		// 				closeButton: true ,
+		// 				autoClose: 5000 //
+		// 			}
+		// 		)
+		// 		break
+		// 	case 'add':
+		// 		setDocumentAvaliation('add')
+		// 		break
+		// 	default:
+		// 		break;
+		// };
 
-		if(step == 3){
-			const response = await Signatures(manipulatingTable.cpf);
-			if(response.status == 200){
-				setStatusAllSignature(response.pictures)
-				if(document != 'dynamic'){
-					//@ts-ignore
-					const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
-					setStatusSignature(filteredPictures);
-				}else{
-					//@ts-ignore
-					const filteredPictures = response.pictures.some(item => item.picture.includes(dynamic) && item.status == 'approved' );
-					setStatusSignature(filteredPictures);
-				}
-			}
-		};
+		// if(step == 3){
+		// 	const response = await Signatures(manipulatingTable.cpf);
+		// 	if(response.status == 200){
+		// 		setStatusAllSignature(response.pictures)
+		// 		if(document != 'dynamic'){
+		// 			//@ts-ignore
+		// 			const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
+		// 			setStatusSignature(filteredPictures);
+		// 		}else{
+		// 			//@ts-ignore
+		// 			const filteredPictures = response.pictures.some(item => item.picture.includes(dynamic) && item.status == 'approved' );
+		// 			setStatusSignature(filteredPictures);
+		// 		}
+		// 	}
+		// };
 	
-		if(responseDocument  && responseDocument.status == 200){
-			setAllDocument(responseDocument)
-			setPathDocumentMain(responseDocument.path)
-			setTypeDocument(responseDocument.type)
-		};
+		// if(responseDocument  && responseDocument.status == 200){
+		// 	setAllDocument(responseDocument)
+		// 	setPathDocumentMain(responseDocument.path)
+		// 	setTypeDocument(responseDocument.type)
+		// };
 
-		if(responseSignature  && responseSignature.status == 200){
-			setAllAssignature(responseSignature)
-			setPathDocumentSignature(responseSignature.path)
-			setTypeDocumentSignature(responseSignature.type)
-			setTypeDocumentSignatureFull(responseSignature.typeDocumentSignature ? responseSignature.typeDocumentSignature : null)
-			setPathDocumentSignatureFull(responseSignature.pathDocumentSignature ? responseSignature.pathDocumentSignature : null)
-		};
+		// if(responseSignature  && responseSignature.status == 200){
+		// 	setAllAssignature(responseSignature)
+		// 	setPathDocumentSignature(responseSignature.path)
+		// 	setTypeDocumentSignature(responseSignature.type)
+		// 	setTypeDocumentSignatureFull(responseSignature.typeDocumentSignature ? responseSignature.typeDocumentSignature : null)
+		// 	setPathDocumentSignatureFull(responseSignature.pathDocumentSignature ? responseSignature.pathDocumentSignature : null)
+		// };
 
-		setLoadingSearchDocument(false)
+		// setLoadingSearchDocument(false)
 	};
 
 	const actionController = async (candidate:any) => {
-		let response;
-		switch (candidate.step) {
-			case 1:
-				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
-				setManipulatingTable(candidate)
-				response = await CollaboratorFile(candidate.cpf, 'medical_examination');
-				if(response.status == 200){
-					setDocumentAvaliation('medical_examination')
-					setPathDocumentMain(response.path)
-					setTypeDocument(response.type)
-					setOpenDocument(true)
-					setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-					return
-				}
-				toast(
-					<Toasts
-						icon={ 'Close' }
-						iconColor={ 'danger' }
-						title={ 'Erro!'}
-					>
-						O candidato ainda não enviou o exame admissional.
-					</Toasts>,
-					{
-						closeButton: true ,
-						autoClose: 5000 //
-					}
-				)
-				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-				break;
-			case 2:
-				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
-				setDocumentAvaliation(null)
-				response = await Job_Check_Admissional(candidate.id)
-				if(response.status == 200){
-					setDatesDynamicManipulating(response.date)
-					const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
-					const allTrue = obligationValues.every(value => value === true); 
-					if (allTrue) {
-						updateStatusCandidate(candidate, true, true);
-					}
-				}
-				setManipulatingTable(candidate)
-				setControllerBodyManipulating('kitAdmission');
-				setTitleManipulating('Gerencie seu Kit Admissional');
-				handleUpcomingEdit();
-				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-				break;
-			case 3:
-				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
-				setManipulatingTable(candidate)
-				response = await Signatures(candidate.cpf);
-				let allSignatureApproved:boolean = false
-				if(response.status == 200){
-					//@ts-ignore
-					allSignatureApproved = response.pictures.every(picture => picture.status === 'approved');
-					setStatusAllSignature(response.pictures)
-				}else{
-					setStatusAllSignature(null)
-				}
-				response = await Job_Check_Admissional(candidate.id)
-				if(response.status == 200){
-					setDatesDynamicManipulating(response.date)
-					const obligation = Object.keys(response.date.obligation);
-					let dynamic = Object.values(response.date.dynamic.signature);
-					dynamic = dynamic
-					//@ts-ignore
-					.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
-					.filter(item => item !== "");;
-					const documentSignatures = Object.values(response.date.documentSignature)
-					const obligationExists = obligation.every(required =>
-						documentSignatures.some(signature =>
-							//@ts-ignore
-							signature.toLowerCase().includes(required.toLowerCase())
-						)
-					);
-					const dynamicExists = dynamic.every(required =>
-						documentSignatures.some(signature =>
-						  //@ts-ignore
-						  signature.toLowerCase().includes(required.toLowerCase())
-						)
-					);
-					if (obligationExists && dynamicExists && allSignatureApproved) {
-						updateStatusCandidate(candidate, true, true);
-					};
-				};
-				setControllerBodyManipulating('signature');
-				setTitleManipulating('Gerencie as Assinaturas');
-				handleUpcomingEdit();
-				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-				break;
-		}
+		return
+		// let response;
+		// switch (candidate.step) {
+		// 	case 1:
+		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
+		// 		setManipulatingTable(candidate)
+		// 		response = await CollaboratorFile(candidate.cpf, 'medical_examination');
+		// 		if(response.status == 200){
+		// 			setDocumentAvaliation('medical_examination')
+		// 			setPathDocumentMain(response.path)
+		// 			setTypeDocument(response.type)
+		// 			setOpenDocument(true)
+		// 			setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
+		// 			return
+		// 		}
+		// 		toast(
+		// 			<Toasts
+		// 				icon={ 'Close' }
+		// 				iconColor={ 'danger' }
+		// 				title={ 'Erro!'}
+		// 			>
+		// 				O candidato ainda não enviou o exame admissional.
+		// 			</Toasts>,
+		// 			{
+		// 				closeButton: true ,
+		// 				autoClose: 5000 //
+		// 			}
+		// 		)
+		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
+		// 		break;
+		// 	case 2:
+		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
+		// 		setDocumentAvaliation(null)
+		// 		response = await Job_Check_Admissional(candidate.id)
+		// 		if(response.status == 200){
+		// 			setDatesDynamicManipulating(response.date)
+		// 			const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
+		// 			const allTrue = obligationValues.every(value => value === true); 
+		// 			if (allTrue) {
+		// 				updateStatusCandidate(candidate, true);
+		// 			}
+		// 		}
+		// 		setManipulatingTable(candidate)
+		// 		setControllerBodyManipulating('kitAdmission');
+		// 		setTitleManipulating('Gerencie seu Kit Admissional');
+		// 		handleUpcomingEdit();
+		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
+		// 		break;
+		// 	case 3:
+		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
+		// 		setManipulatingTable(candidate)
+		// 		response = await Signatures(candidate.cpf);
+		// 		let allSignatureApproved:boolean = false
+		// 		if(response.status == 200){
+		// 			//@ts-ignore
+		// 			allSignatureApproved = response.pictures.every(picture => picture.status === 'approved');
+		// 			setStatusAllSignature(response.pictures)
+		// 		}else{
+		// 			setStatusAllSignature(null)
+		// 		}
+		// 		response = await Job_Check_Admissional(candidate.id)
+		// 		if(response.status == 200){
+		// 			setDatesDynamicManipulating(response.date)
+		// 			const obligation = Object.keys(response.date.obligation);
+		// 			let dynamic = Object.values(response.date.dynamic.signature);
+		// 			dynamic = dynamic
+		// 			//@ts-ignore
+		// 			.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
+		// 			.filter(item => item !== "");;
+		// 			const documentSignatures = Object.values(response.date.documentSignature)
+		// 			const obligationExists = obligation.every(required =>
+		// 				documentSignatures.some(signature =>
+		// 					//@ts-ignore
+		// 					signature.toLowerCase().includes(required.toLowerCase())
+		// 				)
+		// 			);
+		// 			const dynamicExists = dynamic.every(required =>
+		// 				documentSignatures.some(signature =>
+		// 				  //@ts-ignore
+		// 				  signature.toLowerCase().includes(required.toLowerCase())
+		// 				)
+		// 			);
+		// 			if (obligationExists && dynamicExists && allSignatureApproved) {
+		// 				updateStatusCandidate(candidate, true);
+		// 			};
+		// 		};
+		// 		setControllerBodyManipulating('signature');
+		// 		setTitleManipulating('Gerencie as Assinaturas');
+		// 		handleUpcomingEdit();
+		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
+		// 		break;
+		// }
 	};
 
-	const navegationStep = async (navigation:boolean) => {
+	const navegationStep = async (navigation:boolean) => {	
         let newStep
         setPathDocumentMain(null)
         setTypeDocument(null)
+
         if(navigation){
             setStep(step + 1)
             newStep = step + 1
@@ -674,8 +686,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
             newStep = step - 1
         }
 		//@ts-ignore
-		const stepCandidates = candidates.filter(candidate => candidate.step === newStep);
-		setCandidatesStep(stepCandidates)
+		const stepCandidates = collaborators.filter(collaborators => collaborators.demission.step === newStep);
+		setCollaboratorsStep(stepCandidates)
         switch (newStep) {
             case 1:
                 setIcon('LooksOne')
@@ -689,12 +701,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
             case 3:
                 setIcon('Looks3')
                 setStepTitle('Assinaturas')
-                break;
-            // case 4:
-            //     setIcon('Looks4')
-            //     setStepTitle('')
-            //     break;
-            default:
                 break;
         }
     };
@@ -711,7 +717,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				switch (manipulatingTable.step) {
 					case 1:
 						if(avaliation){
-							updateStatusCandidate(manipulatingTable, true, true)
+							updateStatusCandidate(manipulatingTable, true )
 							toast(
 								<Toasts
 									icon={ 'Check' }
@@ -726,7 +732,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								}
 							)
 						}else{
-							updateStatusCandidate(manipulatingTable, null, false)
+							updateStatusCandidate(manipulatingTable, false)
 							toast(
 								<Toasts
 									icon={ 'Check' }
@@ -764,7 +770,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							)
 						}else{
 							setStatusSignature(false)
-							updateStatusCandidate(manipulatingTable, null, false);
+							updateStatusCandidate(manipulatingTable, false);
 							toast(
 								<Toasts
 									icon={ 'Check' }
@@ -859,114 +865,160 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		)
 	};
 
-	const updateStatusCandidate = async (dates:any, verify:any, status:any, isStep:any = undefined) => {
+	const updateStatusCandidate = async (dates:any, isStep:any ) => {
+		const step = dates.demission.step;
+		const status = dates.demission.status;
 
-		//@ts-ignore
-		const Newcandidates = candidates.map(({ cpf, step, status, verify, observation }) => ({ cpf, step, status, verify, observation }));
-		let candidate       = Newcandidates.find((item: { cpf: string | undefined; }) => item.cpf === dates.cpf);
-		if(candidate){
-			if(isStep){
-				if(!candidate.verify || !candidate.status){
-					toast(
-						<Toasts
-							icon={ 'Close' }
-							iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={ 'Erro!'}
-						>
-							Aprove o candidato antes de avançar de etapa.
-						</Toasts>,
-						{
-							closeButton: true ,
-							autoClose: 5000 //
-						}
-					)
-					return
-				};
-				
-			}
-			candidate.verify = verify
-			candidate.status = status
-			if(isStep){
-				candidate.step = candidate.step + 1;
-			};
-			if(isStep == false){
-				candidate.step = candidate.step - 1;
-			};
-		}else{
+		if(isStep && status){
 			toast(
 				<Toasts
 					icon={ 'Close' }
 					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
 					title={ 'Erro!'}
 				>
-					Erro ao atualizar o status do candidato, tente mais tarde.
+					Aprove o colaborador antes de avançar de etapa.
 				</Toasts>,
 				{
 					closeButton: true ,
 					autoClose: 5000 //
 				}
 			)
-			setMenu(false)
 			return
 		}
+
+		if(isStep){
+			dates.demission.step = step + 1;
+		}else{
+			dates.demission.step = step - 1;
+		};
+
 		const params = {
-			candidates:JSON.stringify(Newcandidates)
+			demission:JSON.stringify(dates.demission)
 		}
+		
 		const update = await Job(params, dates.id)
 		if(update.status == 200 ){
-			candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === dates.cpf);
+			let newCollaborators = collaborators.find((item: any) => item.cpf === dates.CPF_collaborator);
+
 			if(isStep){
-				candidate.step = candidate.step + 1;
-				candidate.verify = null
-				candidate.status = null
-			}else if(isStep == false){
-				candidate.step = candidate.step - 1;
-				candidate.verify = null
-				candidate.status = null
+				newCollaborators = dates.demission.step = step + 1;
+				newCollaborators = dates.demission.status = null
 			}else{
-				candidate.verify = verify
-				candidate.status = status
-			};
-			//@ts-ignore
-			const stepCandidates = candidates.filter(candidate => candidate.step === step);
-			setCandidatesStep(stepCandidates)
-			if(isStep === undefined){
-				return
+				newCollaborators = dates.demission.step  = step - 1;
+				newCollaborators = dates.demission.status = null
 			}
-			toast(
-				<Toasts
-					icon={ 'Check' }
-					iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={ 'Sucesso!'}
-				>
-					{  isStep ?
-						'Candidato avançou para próxima etapa.'
-						:
-						'Candidato regrediu para etapa anterior.'
-					}
-				</Toasts>,
-				{
-					closeButton: true ,
-					autoClose: 5000 //
-				}
-			)
-			setMenu(false)
-		}else{
-			toast(
-				<Toasts
-					icon={ 'Close' }
-					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={ 'Erro!'}
-				>
-					Erro ao atualizar o status do candidato internamente, verifique sua internet.
-				</Toasts>,
-				{
-					closeButton: true ,
-					autoClose: 5000 //
-				}
-			)
-			setMenu(false)
+
+		const stepCollaborator = newCollaborators.filter((collaborator: { demission: { step: any; }; }) => collaborator.demission.step === step);
+		setCollaboratorsStep(stepCollaborator)
+
 		}
+		return
+		//@ts-ignore
+		// const Newcandidates = candidates.map(({ cpf, step, status, verify, observation }) => ({ cpf, step, status, verify, observation }));
+		// let candidate       = Newcandidates.find((item: { cpf: string | undefined; }) => item.cpf === dates.cpf);
+		// if(candidate){
+		// 	if(isStep){
+		// 		if(!candidate.verify || !candidate.status){
+		// 			toast(
+		// 				<Toasts
+		// 					icon={ 'Close' }
+		// 					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 					title={ 'Erro!'}
+		// 				>
+		// 					Aprove o candidato antes de avançar de etapa.
+		// 				</Toasts>,
+		// 				{
+		// 					closeButton: true ,
+		// 					autoClose: 5000 //
+		// 				}
+		// 			)
+		// 			return
+		// 		};
+				
+		// 	}
+		// 	candidate.verify = verify
+		// 	candidate.status = status
+		// 	if(isStep){
+		// 		candidate.step = candidate.step + 1;
+		// 	};
+		// 	if(isStep == false){
+		// 		candidate.step = candidate.step - 1;
+		// 	};
+		// }else{
+		// 	toast(
+		// 		<Toasts
+		// 			icon={ 'Close' }
+		// 			iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 			title={ 'Erro!'}
+		// 		>
+		// 			Erro ao atualizar o status do candidato, tente mais tarde.
+		// 		</Toasts>,
+		// 		{
+		// 			closeButton: true ,
+		// 			autoClose: 5000 //
+		// 		}
+		// 	)
+		// 	setMenu(false)
+		// 	return
+		// }
+		// const params = {
+		// 	candidates:JSON.stringify(Newcandidates)
+		// }
+		// const update = await Job(params, dates.id)
+		// if(update.status == 200 ){
+		// 	candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === dates.cpf);
+		// 	if(isStep){
+		// 		candidate.step = candidate.step + 1;
+		// 		candidate.verify = null
+		// 		candidate.status = null
+		// 	}else if(isStep == false){
+		// 		candidate.step = candidate.step - 1;
+		// 		candidate.verify = null
+		// 		candidate.status = null
+		// 	}else{
+		// 		candidate.verify = verify
+		// 		candidate.status = status
+		// 	};
+		// 	//@ts-ignore
+		// 	const stepCandidates = candidates.filter(candidate => candidate.step === step);
+		// 	setCandidatesStep(stepCandidates)
+		// 	if(isStep === undefined){
+		// 		return
+		// 	}
+		// 	toast(
+		// 		<Toasts
+		// 			icon={ 'Check' }
+		// 			iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 			title={ 'Sucesso!'}
+		// 		>
+		// 			{  isStep ?
+		// 				'Candidato avançou para próxima etapa.'
+		// 				:
+		// 				'Candidato regrediu para etapa anterior.'
+		// 			}
+		// 		</Toasts>,
+		// 		{
+		// 			closeButton: true ,
+		// 			autoClose: 5000 //
+		// 		}
+		// 	)
+		// 	setMenu(false)
+		// }else{
+		// 	toast(
+		// 		<Toasts
+		// 			icon={ 'Close' }
+		// 			iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 			title={ 'Erro!'}
+		// 		>
+		// 			Erro ao atualizar o status do candidato internamente, verifique sua internet.
+		// 		</Toasts>,
+		// 		{
+		// 			closeButton: true ,
+		// 			autoClose: 5000 //
+		// 		}
+		// 	)
+		// 	setMenu(false)
+		// }
 	};
 
 	const generateDocumentSignature = async () => {
@@ -974,70 +1026,108 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	};
 
 	const finishAdmission = async () => {
-		let candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
-		if(!candidate.verify || !candidate.status){
-			toast(
-				<Toasts
-					icon={ 'Close' }
-					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={ 'Erro!'}
-				>
-					Aprove o candidato antes de avançar de etapa.
-				</Toasts>,
-				{
-					closeButton: true ,
-					autoClose: 5000 //
-				}
-			)
-			return
-		}
-		const params = {
-			CPF_collaborator:manipulating.cpf
-		}
-		const update = await Job(params, manipulating.id)
-		if(update.status == 200 ){
-			const newCandidates = candidates.filter((item: { cpf: string | undefined; }) => item.cpf !== manipulating.cpf);
-			setCandidates(newCandidates)
-			setCandidatesStep(newCandidates)
-			toast(
-				<Toasts
-					icon={ 'Check' }
-					iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={ 'Sucesso!'}
-				>
-					Parabéns, {Mask('firstName',manipulating.name)} foi adicionado(a) a equipe.
-				</Toasts>,
-				{
-					closeButton: true ,
-					autoClose: 5000 //
-				}
-			)
-			return
-		}
-		toast(
-			<Toasts
-				icon={ 'Close' }
-				iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-				title={ 'Erro!'}
-			>
-				Algo deu errado. Tente novamente mais tarde!
-			</Toasts>,
-			{
-				closeButton: true ,
-				autoClose: 5000 //
-			}
-		)
+		return
+		// let candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
+		// if(!candidate.verify || !candidate.status){
+		// 	toast(
+		// 		<Toasts
+		// 			icon={ 'Close' }
+		// 			iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 			title={ 'Erro!'}
+		// 		>
+		// 			Aprove o candidato antes de avançar de etapa.
+		// 		</Toasts>,
+		// 		{
+		// 			closeButton: true ,
+		// 			autoClose: 5000 //
+		// 		}
+		// 	)
+		// 	return
+		// }
+		// const params = {
+		// 	CPF_collaborator:manipulating.cpf
+		// }
+		// const update = await Job(params, manipulating.id)
+		// if(update.status == 200 ){
+		// 	const newCandidates = candidates.filter((item: { cpf: string | undefined; }) => item.cpf !== manipulating.cpf);
+		// 	setCandidates(newCandidates)
+		// 	setCandidatesStep(newCandidates)
+		// 	toast(
+		// 		<Toasts
+		// 			icon={ 'Check' }
+		// 			iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 			title={ 'Sucesso!'}
+		// 		>
+		// 			Parabéns, {Mask('firstName',manipulating.name)} foi adicionado(a) a equipe.
+		// 		</Toasts>,
+		// 		{
+		// 			closeButton: true ,
+		// 			autoClose: 5000 //
+		// 		}
+		// 	)
+		// 	return
+		// }
+		// toast(
+		// 	<Toasts
+		// 		icon={ 'Close' }
+		// 		iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+		// 		title={ 'Erro!'}
+		// 	>
+		// 		Algo deu errado. Tente novamente mais tarde!
+		// 	</Toasts>,
+		// 	{
+		// 		closeButton: true ,
+		// 		autoClose: 5000 //
+		// 	}
+		// )
 		// console.log('finalizando:', manipulating.name)
+	};
+
+	const cancelDemission = async (job:any) => {
+		 const updateJob = {
+			motion_demission: null,
+			demission: null,
+			user_edit: userData.id
+		};
+		const response = await Job(updateJob, job.id )
+		if(response.status == 200){
+					toast(
+						<Toasts
+							icon={'Check'}
+							iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={'Sucesso'}>
+								Processo de demissão <b>cancelado</b> com sucesso
+						</Toasts>,
+						{
+							closeButton: true,
+							autoClose: 5000, //
+						},
+					);
+					return
+		};
+		toast(
+					<Toasts
+						icon={'Close'}
+						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={'Erro!'}>
+						Erro interno, tente mais tarde!
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 5000, //
+					},
+		);
 	};
 
 	useEffect(()=>{
         const fetchData = async () => {
-            const response = await Job_Admissional(userData.cnpj);
+            const response = await Job_Demissional(userData.cnpj);
 			if(response.status == 200){
-				setCandidates(response.candidates)
-				//@ts-ignore
-				const stepOneCandidates = response.candidates.filter(candidate => candidate.step === 1);
-				setCandidatesStep(stepOneCandidates)
+				setCollaborators(response.job)
+				console.log(response.job)
+				
+				const stepOneCollaborators = response.job.filter((job: { demission: { step: number; }; }) => job.demission.step === 1);
+				setCollaboratorsStep(stepOneCollaborators)
 				setLoaderTable(true)
 				return
 			};
@@ -1090,7 +1180,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						</Button>
 					}
 					</li>
-					{ step > 1 &&
+					{ step > 1 ?
 						<li>
 							<Button
 								icon='KeyboardReturn'
@@ -1099,6 +1189,17 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								onClick={()=>menuController('previousStep')}
 							>
 								Retorna etapa
+							</Button>
+						</li>
+						:
+						<li>
+							<Button
+								icon='Close'
+								color='danger'
+								isLink={true}
+								onClick={()=>menuController('cancelDemission')}
+							>
+								Cancelar Demissão
 							</Button>
 						</li>
 					}
@@ -1266,7 +1367,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							Processo de Demissão
 						</CardTitle>
 					</CardLabel>
-					{ candidates  && candidates.length > 0 &&
+					{ collaborators  && collaborators.length > 0 &&
 						<div className='d-flex align-items-center justify-content-center gap-2'>
 							
 							{ step != 1 &&
@@ -1308,19 +1409,20 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						<></>
 					</CardActions>
 				</CardHeader>
+				
 				<CardBody className='table-responsive' isScrollable={isFluid} onClick={closeMenu}>
 					{ !loaderTable ? 
 					<div className='d-flex align-items-center gap-2'>
 						{/* <Spinner/> */}
 						<h1>🔍 Buscando candidatos</h1>
 					</div> :
-					candidates  && candidates.length > 0 ?
+					collaborators  && collaborators.length > 0 ?
 					<>
 						<table className='table table-modern' onClick={closeMenu}>
 							<thead>
 								<tr>
 									<td aria-labelledby='Image' style={{ width: 60 }} />
-									<th>Última atualização</th>
+									<th>Solicitação de Demissão</th>
 									<th>Contato</th>
 									<th>Nome</th>
 									<th>Contrato</th>
@@ -1330,7 +1432,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								</tr>
 							</thead>
 							<tbody>
-								{ dataPagination(candidatesStep, currentPage, perPage).map((item) => (
+								{ dataPagination(collaboratorsStep, currentPage, perPage).map((item) => (
 									<tr key={item.id}  onContextMenu={(e) => toggleMenu(e, item)} >
 										<td>
 											<Button
@@ -1341,7 +1443,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 													'border-light': !darkModeStatus,
 												})}
 												icon='Info'
-												onClick={()=>handleUpcomingDetails(item.observation)}
+												onClick={()=>handleUpcomingDetails(item)}
 												aria-label='Detailed information'
 											/>
 										</td>
@@ -1362,15 +1464,15 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 													</span>
 												</span>
 												<span className='text-nowrap'>
-													{Mask('lastUpdate',item.update_at)}
+													{item.demission.solicitation == 'company' ? 'Empresa' : 'Colaborador' }
 												</span>
 											</div>
 										</td>
 										<td>
 											<div>
-												<div>{Mask('phone', item.phone)}</div>
+												<div>{Mask('phone', item.collaborator.phone)}</div>
 												<div className='small text-muted'>
-													{item.email}
+													{item.collaborator.email}
 												</div>
 											</div>
 										</td>
@@ -1379,7 +1481,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 												<div className='flex-shrink-0'>
 													<img
 														className='rounded-circle'
-														src={item.picture}
+														src={item.collaborator.picture}
 														width={36}
 														height={36}
 														// srcSet={item.assigned.srcSet}
@@ -1387,7 +1489,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 													/>
 												</div>
 												<div className='flex-grow-1 ms-3 d-flex align-items-center text-nowrap'>
-													{ `${Mask('firstName', item.name)} ${Mask('secondName', item.name)}` }
+													{ `${Mask('firstName', item.collaborator.name)} ${Mask('secondName', item.collaborator.name)}` }
 												</div>
 											</div>
 										</td>
@@ -1476,7 +1578,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						</table>
 
 						<PaginationButtons
-							data={candidatesStep}
+							data={collaboratorsStep}
 							label='candidatos'
 							setCurrentPage={setCurrentPage}
 							currentPage={currentPage}
@@ -1513,6 +1615,10 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 										childWrapperClassName='col-sm-10'>
 										<Textarea style={{height:'150px'}} value={formik.values.note} readOnly disabled />
 									</FormGroup>
+								</div>
+								<div className='col-lg-6'>
+									<p className='text-white'>Motivo: {manipulatingTable && manipulatingTable.motion_demission}</p>
+
 								</div>
 							</div>
 						</OffCanvasBody>	

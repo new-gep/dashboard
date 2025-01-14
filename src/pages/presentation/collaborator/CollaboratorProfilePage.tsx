@@ -20,7 +20,7 @@ import Card, {
 } from '../../../components/bootstrap/Card';
 import Avatar from '../../../components/Avatar';
 import Icon from '../../../components/icon/Icon';
-import { demoPagesMenu } from '../../../menu';
+import { dashboardPagesMenu } from '../../../menu';
 import Badge from '../../../components/bootstrap/Badge';
 import Dropdown, {
 	DropdownItem,
@@ -45,7 +45,7 @@ import DossiePayStub from './dossie/PayStub';
 import DossiePoint from './dossie/Points';
 import DossieResignation from './dossie/Resignation';
 import ModalDemission from './modalDemission';
-
+import Spinner from '../../../components/bootstrap/Spinner';
 
 const CollaboratorProfilePage = () => {
 	useTourStep(19);
@@ -63,6 +63,7 @@ const CollaboratorProfilePage = () => {
 	const [picture, setPicture] = useState<any>(null);
 	const [job, setJob] = useState<any>(null);
 	const [modalDemission, setModalDemission] = useState<any>(null);
+	const [listen, setListen] = useState<number>(1);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -71,27 +72,25 @@ const CollaboratorProfilePage = () => {
 				if (response.status == 200) {
 					setCollaborator(response.collaborator);
 					setPicture(response.picture);
-
+					
 					const responseJob = await Job_One(response.collaborator.id_work);
 					if (responseJob.status == 200) {
 						setJob(responseJob.job);
 					}
-				};
+				}
 			}
 		};
 		fetchData();
-	}, [cpf]);
+	}, [cpf, listen]);
 
 	const startDemission = () => {
-		setModalDemission(true)
+		setModalDemission(true);
 	};
-
-
 
 	const userTasks = dummyEventsData.filter((f) => f.assigned.username === 'CPF.username');
 
 	return (
-		<PageWrapper title={`nome username`}>
+		<PageWrapper title={collaborator && Mask('firstName', collaborator.name)}>
 			<SubHeader>
 				<SubHeaderLeft>
 					<Button
@@ -99,35 +98,53 @@ const CollaboratorProfilePage = () => {
 						isLink
 						icon='ArrowBack'
 						tag='a'
-						to={`../${demoPagesMenu.appointment.subMenu.employeeList.path}`}>
-						Back to List
+						to={`../${dashboardPagesMenu.collaborator.path}`}>
+						Voltar
 					</Button>
-					<SubheaderSeparator />
+
+					{/* <SubheaderSeparator />
 					<CommonAvatarTeam isAlignmentEnd>
 						<strong>Sports</strong> Team
-					</CommonAvatarTeam>
+					</CommonAvatarTeam> */}
 				</SubHeaderLeft>
-				<SubHeaderRight>
+				{/* <SubHeaderRight>
 					<span className='text-muted fst-italic me-2'>Last update:</span>
 					<span className='fw-bold'>13 hours ago</span>
-				</SubHeaderRight>
+				</SubHeaderRight> */}
 			</SubHeader>
-			{1 > 0 ? (
+
+			{collaborator && job ? (
 				<Page>
-					<ModalDemission collaborator={collaborator} job={job} openModal={modalDemission} closeModal={setModalDemission} />
+					<ModalDemission
+						listen={listen}
+						setListen={setListen}
+						collaborator={collaborator}
+						job={job}
+						openModal={modalDemission}
+						closeModal={setModalDemission}
+					/>
 					<div className='pt-3 pb-5 d-flex align-items-center justify-content-between'>
 						<span className='display-4 fw-bold me-3'>
 							{collaborator && collaborator.name}
 						</span>
 						<span>
-							<Button icon='DoorFront' color='danger' isOutline={true} size={'lg'}
-								onClick={startDemission}
-							>
+							<Button
+								icon='DoorFront'
+								color='danger'
+								isOutline={true}
+								size={'lg'}
+								onClick={startDemission}>
 								Desligar
 							</Button>
 						</span>
 					</div>
-					<div className='row'>
+					<div
+						className='row'
+						style={
+							job && job.motion_demission
+								? { filter: 'grayscale(70%)' } // Aplica o estilo condicionalmente
+								: undefined // Sem estilo adicional caso a condição seja falsa
+						}>
 						<div className='col-lg-4'>
 							<Card className='shadow-3d-info'>
 								<CardBody>
@@ -176,13 +193,14 @@ const CollaboratorProfilePage = () => {
 														<div className='flex-grow-1 ms-3'>
 															<div className='fw-bold fs-5 mb-0'>
 																{collaborator &&
-																	collaborator.marriage == '1' ? 'Sim' : 'Não'
-																}
+																collaborator.marriage == '1'
+																	? 'Sim'
+																	: 'Não'}
 															</div>
 															<div className='text-muted'>
 																Casado(a)
 															</div>
-														</div> 
+														</div>
 													</div>
 												</div>
 												<div className='col-12'>
@@ -391,7 +409,7 @@ const CollaboratorProfilePage = () => {
 												</div>
 											</div>
 										</div>
-									</div> 
+									</div>
 								</CardBody>
 							</Card>
 						</div>
@@ -430,7 +448,7 @@ const CollaboratorProfilePage = () => {
 									</CardActions> */}
 								</CardHeader>
 
-								<CardBody className='d-flex gap-5' style={{height:'400px'}}>
+								<CardBody className='d-flex gap-5' style={{ height: '400px' }}>
 									{/* BUTTON */}
 									<Card stretch className='col-4'>
 										<CardBody isScrollable className='h-100'>
@@ -498,19 +516,15 @@ const CollaboratorProfilePage = () => {
 									<Card stretch className='col-7	'>
 										<CardBody isScrollable>
 											{TABS.COLLABORATOR === activeTab && (
-												<DossieDocument collaborator={collaborator}/>
+												<DossieDocument collaborator={collaborator} />
 											)}
 											{TABS.ADMISSION === activeTab && (
-												<DossieAdmission job={job}/>
+												<DossieAdmission job={job} />
 											)}
-											{TABS.PAYSTUB === activeTab && (
-												<DossiePayStub/>
-											)}
-											{TABS.POINT === activeTab && (
-												<DossiePoint/>
-											)}
+											{TABS.PAYSTUB === activeTab && <DossiePayStub />}
+											{TABS.POINT === activeTab && <DossiePoint />}
 											{TABS.RESIGNATION === activeTab && (
-												<DossieResignation/>
+												<DossieResignation />
 											)}
 										</CardBody>
 									</Card>
@@ -635,7 +649,9 @@ const CollaboratorProfilePage = () => {
 				</Page>
 			) : (
 				<Page>
-					<>aqui</>
+					<div className='w-100 h-100 d-flex align-items-center justify-content-center'>
+						<Spinner />
+					</div>
 				</Page>
 			)}
 		</PageWrapper>

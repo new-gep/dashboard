@@ -8,7 +8,11 @@ interface PropsUpdateJob {
     function ?: string;
     obligations?: string;
     salary?: string;
+    
     time  ?: JSON;
+    demission?: any | null;
+    motion_demission?: string | null;
+    user_edit?: string;
     user_create?: string;
     CPF_collaborator?:string;
     CNPJ_company?:string;

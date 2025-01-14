@@ -48,6 +48,7 @@ import Job_Check_Admissional from '../../../api/get/job/Job_Check_Admissional';
 import Job_Dynamic from '../../../api/delete/job/job_dynamic';
 import SignedDocument from '../../../components/canva/SignedDocument';
 import Signatures from '../../../api/get/picture/Signatures';
+import GetCompanyDocument from '../../../api/get/company/Document';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -574,7 +575,10 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			case 1:
 				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
 				setManipulatingTable(candidate)
-				response = await CollaboratorFile(candidate.cpf, 'medical_examination');
+				// response = await CollaboratorFile(candidate.cpf, 'medical_examination');
+				console.log(candidate)
+				response = await JobFile(candidate.id,'medical','0' ,'0')
+				console.log(response)
 				if(response.status == 200){
 					setDocumentAvaliation('medical_examination')
 					setPathDocumentMain(response.path)
@@ -582,7 +586,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					setOpenDocument(true)
 					setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
 					setTimeout(() => {
-						console.log(typeDocument && pathDocumentMain && step != 3 )
+						// console.log(typeDocument && pathDocumentMain && step != 3 )
 					}, 2000)
 					return
 				}
@@ -1312,6 +1316,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						<></>
 					</CardActions>
 				</CardHeader>
+
 				<CardBody className='table-responsive' isScrollable={isFluid} onClick={closeMenu}>
 					{ !loaderTable ? 
 					<div className='d-flex align-items-center gap-2'>
@@ -1518,6 +1523,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 										<Textarea style={{height:'150px'}} value={formik.values.note} readOnly disabled />
 									</FormGroup>
 								</div>
+							
 							</div>
 						</OffCanvasBody>	
 					</>
