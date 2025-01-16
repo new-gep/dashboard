@@ -1,6 +1,6 @@
-import Button from "../../../components/bootstrap/Button";
-import Modal, { ModalBody, ModalFooter, ModalHeader } from "../../../components/bootstrap/Modal";
-import Picture from "../../../api/patch/Picture";
+import Button from "../../../../components/bootstrap/Button";
+import Modal, { ModalBody, ModalFooter, ModalHeader } from "../../../../components/bootstrap/Modal";
+import Picture from "../../../../api/patch/Picture";
 import { useEffect, useState } from "react";
 
 interface ModalDocumentProps {

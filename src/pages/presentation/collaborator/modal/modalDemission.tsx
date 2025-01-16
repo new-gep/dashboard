@@ -1,13 +1,13 @@
-import Button from '../../../components/bootstrap/Button';
-import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
-import Picture from '../../../api/patch/Picture';
+import Button from '../../../../components/bootstrap/Button';
+import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../../components/bootstrap/Modal';
+import Picture from '../../../../api/patch/Picture';
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import Select from '../../../components/bootstrap/forms/Select';
-import { Options } from '../../../components/bootstrap/Option';
-import Toasts from '../../../components/bootstrap/Toasts';
+import Select from '../../../../components/bootstrap/forms/Select';
+import { Options } from '../../../../components/bootstrap/Option';
+import Toasts from '../../../../components/bootstrap/Toasts';
 import { toast } from 'react-toastify';
-import Job from '../../../api/patch/Job';
-import AuthContext from '../../../contexts/authContext';
+import Job from '../../../../api/patch/Job';
+import AuthContext from '../../../../contexts/authContext';
 
 interface ModalDocumentProps {
 	collaborator: any;

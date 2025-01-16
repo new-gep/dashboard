@@ -272,7 +272,13 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								autoClose: 5000 //
 							}
 						)
-						handleUpcomingEdit()
+						setPathDocumentMain(null)
+						setTypeDocument(null)
+						setPathDocumentSignature(null)
+						setTypeDocumentSignature(null)
+						setAllDocument(null)
+						setAllAssignature(null)
+						setDocumentAvaliation(null)
 						return
 					};
 				}
@@ -344,7 +350,13 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							autoClose: 5000 //
 						}
 					)
-					handleUpcomingEdit()
+					setPathDocumentMain(null)
+					setTypeDocument(null)
+					setPathDocumentSignature(null)
+					setTypeDocumentSignature(null)
+					setAllDocument(null)
+					setAllAssignature(null)
+					setDocumentAvaliation(null)
 					return
 				}
 			break
@@ -385,7 +397,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				window.open(mailtoURL, '_blank');
 				break;
 			case 'whatsapp':
-				const whatsappURL = `https://wa.me/${manipulating.phone}`;
+				const whatsappURL = `https://wa.me/55${manipulating.phone}`;
 				window.open(whatsappURL, '_blank');
 				break;
 		}
@@ -575,8 +587,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			case 1:
 				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
 				setManipulatingTable(candidate)
-				// response = await CollaboratorFile(candidate.cpf, 'medical_examination');
-				console.log(candidate)
 				response = await JobFile(candidate.id,'medical','0' ,'0')
 				console.log(response)
 				if(response.status == 200){

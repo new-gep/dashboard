@@ -58,7 +58,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	const navigate = useNavigate();
 
     const [step, setStep]     = useState(1)
-    const [stepTitle, setStepTitle] = useState('Exame admisisional')
+    const [stepTitle, setStepTitle] = useState('Comunicado')
     const [stepIcon, setIcon] = useState('LooksOne')
     const { userData } = useContext(AuthContext);
 	const [collaborators, setCollaborators] = useState<null | any>(null)
@@ -394,14 +394,45 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				window.open(mailtoURL, '_blank');
 				break;
 			case 'whatsapp':
-				const whatsappURL = `https://wa.me/${manipulating.phone}`;
+				const whatsappURL = `https://wa.me/55${manipulating.phone}`;
 				window.open(whatsappURL, '_blank');
 				break;
 		}
 		setMenu(false)
 	};
 
-	const documentController = async (document:any, dynamic?:any, signature?:any) => {
+	const documentController = async (document:any, dynamic?:any, signature?:any, dates?:any) => {
+		let responseDocument
+		switch (document) {
+			case 'dismissal_hand':
+				responseDocument = await JobFile(dates.id, 'dismissal_hand', '0');
+				// toast(
+				// 	<Toasts
+				// 		icon={ 'Check' }
+				// 		iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+				// 		title={ 'Sucesso!'}
+				// 	>
+				// 		Acordo de Compensação de Horas
+				// 	</Toasts>,
+				// 	{
+				// 		closeButton: true ,
+				// 		autoClose: 5000 //
+				// 	}
+				// )
+				break;
+		}
+		if(responseDocument && responseDocument.status == 200){
+			setAllDocument(responseDocument)
+			setPathDocumentMain(responseDocument.path)
+			setTypeDocument(responseDocument.type)
+		};
+
+		setLoadingSearchDocument(false)
+
+
+		// dismissal_hand
+
+
 		// setPathDocumentMain(null)
 		// setTypeDocument(null)
 		// setPathDocumentSignature(null)
@@ -578,7 +609,22 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		// setLoadingSearchDocument(false)
 	};
 
-	const actionController = async (candidate:any) => {
+	const actionController = async (job:any) => {
+		let response;
+		switch (job.demission.step) {
+			case 1:
+				setLoadingStates(prevStates => ({ ...prevStates, [collaborators.CPF_collaborator]: true }));
+				documentController('dismissal_hand', null, null, job)
+				setManipulatingTable(job)
+				setControllerBodyManipulating('communication')
+				setTitleManipulating('Gerencie seu Comunicado');
+				handleUpcomingEdit();
+				setLoadingStates(prevStates => ({ ...prevStates, [collaborators.CPF_collaborator]: false }));
+				break;
+		
+			default:
+				break;
+		}
 		return
 		// let response;
 		// switch (candidate.step) {
@@ -688,15 +734,16 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		//@ts-ignore
 		const stepCandidates = collaborators.filter(collaborators => collaborators.demission.step === newStep);
 		setCollaboratorsStep(stepCandidates)
+
         switch (newStep) {
             case 1:
                 setIcon('LooksOne')
-                setStepTitle('Exame admisisional')
+                setStepTitle('Comunicado')
 				
                 break;
             case 2:
                 setIcon('LooksTwo')
-                setStepTitle('KIT admissional')
+                setStepTitle('Exame Demissional')
                 break;
             case 3:
                 setIcon('Looks3')
@@ -869,7 +916,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		const step = dates.demission.step;
 		const status = dates.demission.status;
 
-		if(isStep && status){
+		if(isStep && !status){
 			toast(
 				<Toasts
 					icon={ 'Close' }
@@ -888,8 +935,10 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 		if(isStep){
 			dates.demission.step = step + 1;
+			dates.demission.status = null;
 		}else{
 			dates.demission.step = step - 1;
+			dates.demission.status = null;
 		};
 
 		const params = {
@@ -908,117 +957,42 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				newCollaborators = dates.demission.status = null
 			}
 
-		const stepCollaborator = newCollaborators.filter((collaborator: { demission: { step: any; }; }) => collaborator.demission.step === step);
-		setCollaboratorsStep(stepCollaborator)
-
+			const stepCollaborator = collaborators.filter(
+				(collaborator: any) => collaborator.demission.step === step
+			);
+			setCollaboratorsStep(stepCollaborator)
+			toast(
+				<Toasts
+					icon={ 'Check' }
+					iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={ 'Sucesso'}
+				>
+					{ isStep ?
+						'Colaborador avançou para próxima etapa.'
+						:
+						'Colaborador avançou para etapa anterior.'
+					}
+				</Toasts>,
+				{
+					closeButton: true ,
+					autoClose: 5000 //
+				}
+			)
+			return
 		}
-		return
-		//@ts-ignore
-		// const Newcandidates = candidates.map(({ cpf, step, status, verify, observation }) => ({ cpf, step, status, verify, observation }));
-		// let candidate       = Newcandidates.find((item: { cpf: string | undefined; }) => item.cpf === dates.cpf);
-		// if(candidate){
-		// 	if(isStep){
-		// 		if(!candidate.verify || !candidate.status){
-		// 			toast(
-		// 				<Toasts
-		// 					icon={ 'Close' }
-		// 					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-		// 					title={ 'Erro!'}
-		// 				>
-		// 					Aprove o candidato antes de avançar de etapa.
-		// 				</Toasts>,
-		// 				{
-		// 					closeButton: true ,
-		// 					autoClose: 5000 //
-		// 				}
-		// 			)
-		// 			return
-		// 		};
-				
-		// 	}
-		// 	candidate.verify = verify
-		// 	candidate.status = status
-		// 	if(isStep){
-		// 		candidate.step = candidate.step + 1;
-		// 	};
-		// 	if(isStep == false){
-		// 		candidate.step = candidate.step - 1;
-		// 	};
-		// }else{
-		// 	toast(
-		// 		<Toasts
-		// 			icon={ 'Close' }
-		// 			iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-		// 			title={ 'Erro!'}
-		// 		>
-		// 			Erro ao atualizar o status do candidato, tente mais tarde.
-		// 		</Toasts>,
-		// 		{
-		// 			closeButton: true ,
-		// 			autoClose: 5000 //
-		// 		}
-		// 	)
-		// 	setMenu(false)
-		// 	return
-		// }
-		// const params = {
-		// 	candidates:JSON.stringify(Newcandidates)
-		// }
-		// const update = await Job(params, dates.id)
-		// if(update.status == 200 ){
-		// 	candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === dates.cpf);
-		// 	if(isStep){
-		// 		candidate.step = candidate.step + 1;
-		// 		candidate.verify = null
-		// 		candidate.status = null
-		// 	}else if(isStep == false){
-		// 		candidate.step = candidate.step - 1;
-		// 		candidate.verify = null
-		// 		candidate.status = null
-		// 	}else{
-		// 		candidate.verify = verify
-		// 		candidate.status = status
-		// 	};
-		// 	//@ts-ignore
-		// 	const stepCandidates = candidates.filter(candidate => candidate.step === step);
-		// 	setCandidatesStep(stepCandidates)
-		// 	if(isStep === undefined){
-		// 		return
-		// 	}
-		// 	toast(
-		// 		<Toasts
-		// 			icon={ 'Check' }
-		// 			iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-		// 			title={ 'Sucesso!'}
-		// 		>
-		// 			{  isStep ?
-		// 				'Candidato avançou para próxima etapa.'
-		// 				:
-		// 				'Candidato regrediu para etapa anterior.'
-		// 			}
-		// 		</Toasts>,
-		// 		{
-		// 			closeButton: true ,
-		// 			autoClose: 5000 //
-		// 		}
-		// 	)
-		// 	setMenu(false)
-		// }else{
-		// 	toast(
-		// 		<Toasts
-		// 			icon={ 'Close' }
-		// 			iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-		// 			title={ 'Erro!'}
-		// 		>
-		// 			Erro ao atualizar o status do candidato internamente, verifique sua internet.
-		// 		</Toasts>,
-		// 		{
-		// 			closeButton: true ,
-		// 			autoClose: 5000 //
-		// 		}
-		// 	)
-		// 	setMenu(false)
-		// }
+		toast(
+			<Toasts
+				icon={ 'Close' }
+				iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+				title={ 'Erro!'}
+			>
+				Não foi possível atualizar o colaborador, tente mais tarde!
+			</Toasts>,
+			{
+				closeButton: true ,
+				autoClose: 5000 //
+			}
+		)
 	};
 
 	const generateDocumentSignature = async () => {
@@ -1089,9 +1063,21 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			demission: null,
 			user_edit: userData.id
 		};
+
 		const response = await Job(updateJob, job.id )
+
 		if(response.status == 200){
-					toast(
+			const filteredCollaborators = collaborators.filter(
+				(item: any) => item.CPF_collaborator !== job.CPF_collaborator
+			);
+		
+			const stepCollaborator = filteredCollaborators.filter(
+				(collaborator: any) => collaborator.demission.step === step
+			);
+			setCollaborators(filteredCollaborators)
+			setCollaboratorsStep(stepCollaborator)
+
+			toast(
 						<Toasts
 							icon={'Check'}
 							iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
@@ -1102,8 +1088,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							closeButton: true,
 							autoClose: 5000, //
 						},
-					);
-					return
+			);
+			return
 		};
 		toast(
 					<Toasts
@@ -1335,7 +1321,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					}
 				</ModalBody>
 				<ModalFooter>
-					{ (typeDocument && pathDocumentMain && step != 3 ) || (view == 'signature' && step == 3 && typeDocumentSignature && pathDocumentSignature) &&
+					{ ((typeDocument && pathDocumentMain && step == 1 ) || (view == 'signature' && step == 3 && typeDocumentSignature && pathDocumentSignature)) &&
 						<div className='d-flex gap-4'>
 							<Button
 								isLight={true}
@@ -1464,7 +1450,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 													</span>
 												</span>
 												<span className='text-nowrap'>
-													{item.demission.solicitation == 'company' ? 'Empresa' : 'Colaborador' }
+													{item && item.demission.solicitation == 'company' ? 'Empresa' : 'Colaborador' }
 												</span>
 											</div>
 										</td>
@@ -1506,10 +1492,10 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 											<DropdownToggle hasIcon={false}>
 												<Button
 													isLink
-													color={item.status && item.verify ?  'success' : item.status == null && item.verify == null  ? 'warning'   : item.status == false && item.verify == null  ? 'light' : 'danger'}
+													color={item.demission.status ?  'success' : item.demission.status == null   ? 'warning'   : item.demission.status == false   ? 'light' : 'danger'}
 													icon='Circle'
 													className='text-nowrap'>
-													{item.status && item.verify       ?  'Aprovado' : item.status == null && item.verify == null ? 'Em espera' : item.status == false && item.verify == null  ? 'Rejeitado': 'Reprovado'}
+													{item.demission.status       ?  'Aprovado' : item.demission.status == null  ? 'Em espera' : item.demission.status == false  ? 'Rejeitado': 'Reprovado'}
 												</Button>
 											</DropdownToggle>
 										</td>
@@ -1641,6 +1627,265 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				<OffCanvasBody>
 
 					<div className='row g-5'>
+					{ controllerBodyManipulating == 'communication' &&
+							<>
+
+								{ manipulatingTable && manipulatingTable.demission.solicitation !== 'company' ?
+									<>
+										<span>
+											Abaixo, selecione seus arquivos, e envie para o colaborador.
+										</span>
+
+										<div className='col-12'>
+											<Dropdown>
+												<DropdownToggle>
+													<Button color='light' isLight icon='FolderOpen' className='col-12'>
+														Selecione um Documento
+													</Button>
+												</DropdownToggle>
+
+												<DropdownMenu breakpoint='xxl'>
+														<DropdownItem>
+															<Button 
+																	onClick={()=>documentController('add')}
+																>
+																	<Icon icon='AddCircle' /> Adicionar Documento
+															</Button>
+														</DropdownItem>
+
+													{/* <DropdownItem isHeader>Obrigatórios</DropdownItem>
+												
+													<DropdownItem>
+																<Button
+																	onClick={()=>documentController('registration_form')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.registration) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.registration)? 'success' : 'warning'}
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.registration) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.registration)? 'Check' : 'Info'} 
+																	/> 
+																	Ficha de Registro
+																</Button>
+													</DropdownItem>
+
+													<DropdownItem>
+																<Button 
+																	onClick={()=>documentController('experience_contract')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.experience) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.experience)? 'success': 'warning'}
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.experience) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.experience)? 'Check'  : 'Info'} 
+																	/> 
+																	Contrato de Experiência
+																</Button>
+													</DropdownItem>
+
+													<DropdownItem>
+																<Button
+																	onClick={()=>documentController('hours_extension')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.extension) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.extension) ? 'success' : 'warning'}
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.extension) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.extension) ? 'Check' : 'Info'} 
+																	/>  
+																	Acordo de Prorrogação de Horas
+																</Button>
+													</DropdownItem>
+
+													<DropdownItem>
+																<Button 
+																	onClick={()=>documentController('hours_compensation')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.compensation) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.compensation) ? 'success' : 'warning'}
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.compensation) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.compensation) ? 'Check' : 'Info'} 
+																	/> 
+																	Acordo de Compensação de Horas
+																</Button>
+													</DropdownItem>
+
+													<DropdownItem>
+																<Button 
+																	onClick={()=>documentController('transport_voucher')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.voucher) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.voucher) ? 'success' : 'warning'} 
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.voucher) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.voucher) ? 'Check' : 'Info'} 
+																	/> 
+																	Solicitação de Vale Transporte
+																</Button>
+													</DropdownItem> */}
+														
+													<DropdownItem isDivider />
+
+													<DropdownItem isText>Documentos Adicionais</DropdownItem>
+														
+													
+
+													<>
+														{datesDynamicManipulating && datesDynamicManipulating.dynamic &&
+															Object.keys(datesDynamicManipulating.dynamic.document).map((key) => {
+																const fileName = datesDynamicManipulating.dynamic.document[key];
+																const formattedFileName = fileName.replace(/([a-z])([A-Z])/g, '$1 $2');
+																return (
+																	<DropdownItem key={key}>
+																	<Button 
+																	onClick={() => {
+																		setDocumentAvaliation(datesDynamicManipulating.dynamic.document[key])
+																		documentController('dynamic', datesDynamicManipulating.dynamic.document[key])
+																	}}
+																	>
+																		<Icon color='warning' icon="Check" /> {formattedFileName}
+																	</Button>
+																	</DropdownItem>
+																);
+															})
+														}
+													</>
+
+												</DropdownMenu>
+											</Dropdown>
+										</div>
+									</>
+									:
+									<>
+										<span>
+											Abaixo, está a carta de demissão do colaborador.
+										</span>
+
+										<div className='col-12'>
+											<Button
+												className='col-12'
+												icon='Markunread'
+												color='secondary'
+												isLight={true}
+												onClick={()=>{
+													setView(null)
+													setOpenDocument(true)
+												}}
+												size={'lg'}
+											>
+												Carta a Punho
+											</Button>
+										</div>
+									</>
+								}
+
+								
+								{documentAvaliation &&
+									( loadingSearchDocument  ?
+										<div> 
+											<h1>Ops, peraí que o documento tá se escondendo...</h1>
+												<Spinner />
+										</div>
+										:
+										<>
+											{ manipulatingTable && ( documentAvaliation != 'add') && 
+												<div className='col-12'>
+													<FormGroup id='customerName' 
+													label={ 
+														documentAvaliation == 'registration_form'  ? 'Ficha de Registro'       :
+														documentAvaliation == 'experience_contract'? 'Contrato de Experiencia' :
+														documentAvaliation == 'hours_extension'    ? 'Acordo de Prorrogação de Horas' :
+														documentAvaliation == 'hours_compensation' ? 'Acordo de Compensação de Horas' : 
+														documentAvaliation == 'transport_voucher'  ? 'Solitação de Vale Transporte'   : 
+														documentAvaliation.replace(/([a-z])([A-Z])/g, '$1 $2')
+													}
+													>
+														<InputGroup>
+															<Input 
+																type='file'
+																onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+																	const file = event.target.files?.[0]; // Pega o primeiro arquivo selecionado
+																	if (file) {
+																	formik.setFieldValue('document', file); // Atualiza o valor no Formik
+																	}
+																}}
+															/>
+																<Button isOutline color='light' icon={pathDocumentMain ? 'Autorenew' : 'CloudUpload'}>
+																	{pathDocumentMain ? 'Edit' : 'Upload'}
+																</Button>
+														</InputGroup>
+													</FormGroup>
+												</div>
+											}
+
+											{ manipulatingTable && documentAvaliation == 'add' && 
+												<>
+													<FormGroup id='customerName' label={'Nome do novo documento'}>
+															<Input
+																id='documentNameAdd'
+																type='text'
+																value={formik.values.documentNameAdd}
+																className='text-capitalize'
+																onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+																	formik.setFieldValue('documentNameAdd', event.target.value);
+																}}
+															/>
+													</FormGroup>
+
+													<FormGroup id='customerName'>
+														<InputGroup>
+															<Input 
+																type='file'
+																onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+																	const file = event.target.files?.[0];
+																	if (file) {
+																	formik.setFieldValue('document', file);
+																	}
+																}}
+															/>
+																<Button isOutline color='light' icon={pathDocumentMain ? 'Autorenew' : 'CloudUpload'}>
+																	{pathDocumentMain ? 'Edit' : 'Upload'}
+																</Button>
+														</InputGroup>
+													</FormGroup>
+												</>
+											}
+
+											{ pathDocumentMain && typeDocument && 
+												<div className='col-12'>
+													<FormGroup label='Visualizar' className='gap-2 d-flex flex-column'>
+														<div>
+															<Button 
+																	isLink={true}
+																	icon='Description'
+																	color='info'
+																	onClick={()=>{
+																		setView('document')
+																		setOpenDocument(true)
+																	}}
+																>
+																	Documento
+															</Button>
+														</div>
+													</FormGroup>
+													{
+														step == 2 && !['registration_form', 'experience_contract', 'hours_extension', 'hours_compensation', 'transport_voucher'].includes(documentAvaliation) &&
+														<FormGroup>
+															<div>
+																<div>
+																	<Button 
+																		isLink={true}
+																		onClick={deleteDocumentDynamic}
+																		icon='Delete'
+																		color='danger'
+																	>
+																		Deletar
+																	</Button>
+																</div>
+															</div>
+														</FormGroup>
+													}
+												</div>
+											}
+										</>
+									)
+								}
+
+							</>
+						}
+
+						
 						{ controllerBodyManipulating == 'kitAdmission' &&
 							<>
 

@@ -44,9 +44,10 @@ import DossieDocument from './dossie/Document';
 import DossiePayStub from './dossie/PayStub';
 import DossiePoint from './dossie/Points';
 import DossieResignation from './dossie/Resignation';
-import ModalDemission from './modalDemission';
+import DossieAttest from './dossie/Attest';
+import ModalDemission from './modal/modalDemission';
+import ModalChangeWork from './modal/modalChangeWork';
 import Spinner from '../../../components/bootstrap/Spinner';
-
 const CollaboratorProfilePage = () => {
 	useTourStep(19);
 	const TABS = {
@@ -55,6 +56,7 @@ const CollaboratorProfilePage = () => {
 		RESIGNATION: 'Demissão',
 		PAYSTUB: 'Holerite',
 		POINT: 'Ponto',
+		ATTEST: 'Ausência'
 	};
 	const [activeTab, setActiveTab] = useState(TABS.COLLABORATOR);
 	const { darkModeStatus } = useDarkMode();
@@ -63,6 +65,7 @@ const CollaboratorProfilePage = () => {
 	const [picture, setPicture] = useState<any>(null);
 	const [job, setJob] = useState<any>(null);
 	const [modalDemission, setModalDemission] = useState<any>(null);
+	const [modalChangeWork, setModalChangeWork] = useState<any>(null);
 	const [listen, setListen] = useState<number>(1);
 
 	useEffect(() => {
@@ -122,6 +125,14 @@ const CollaboratorProfilePage = () => {
 						job={job}
 						openModal={modalDemission}
 						closeModal={setModalDemission}
+					/>
+					<ModalChangeWork
+						listen={listen}
+						setListen={setListen}
+						collaborator={collaborator}
+						job={job}
+						openModal={modalChangeWork}
+						closeModal={setModalChangeWork}
 					/>
 					<div className='pt-3 pb-5 d-flex align-items-center justify-content-between'>
 						<span className='display-4 fw-bold me-3'>
@@ -295,7 +306,7 @@ const CollaboratorProfilePage = () => {
 								<CardHeader>
 									<CardLabel
 										icon='Stream'
-										className=' col-12'
+										className=' col-6'
 										iconColor='warning'>
 										<CardTitle
 											tag='div'
@@ -305,6 +316,16 @@ const CollaboratorProfilePage = () => {
 										<CardTitle tag='div' className='h6'>
 											Função
 										</CardTitle>
+									</CardLabel>
+									<CardLabel
+										className=' col-6 d-flex justify-content-end'
+									>
+										<Button 
+											onClick={()=>{setModalChangeWork(true)}}
+											icon='Sync' 
+											isLight={true}
+											color='light'
+										/>
 									</CardLabel>
 								</CardHeader>
 								<CardBody>
@@ -509,6 +530,16 @@ const CollaboratorProfilePage = () => {
 														{TABS.POINT}
 													</Button>
 												</div>
+												<div className='col-12'>
+													<Button
+														icon='MedicalServices'
+														color='light'
+														className='w-100 p-3'
+														isLight={TABS.ATTEST !== activeTab}
+														onClick={() => setActiveTab(TABS.ATTEST)}>
+														{TABS.ATTEST}
+													</Button>
+												</div>
 											</div>
 										</CardBody>
 									</Card>
@@ -526,124 +557,13 @@ const CollaboratorProfilePage = () => {
 											{TABS.RESIGNATION === activeTab && (
 												<DossieResignation />
 											)}
+											{TABS.ATTEST === activeTab && (
+												<DossieAttest/>
+											)}
 										</CardBody>
 									</Card>
 								</CardBody>
 							</Card>
-							{/* <Card>
-								<CardHeader>
-									<CardLabel icon='Task' iconColor='danger'>
-										<CardTitle>
-											<CardLabel tag='div' className='h5'>
-												Assigned
-											</CardLabel>
-										</CardTitle>
-									</CardLabel>
-								</CardHeader>
-								<CardBody>
-									<div className='table-responsive'>
-										<table className='table table-modern mb-0'>
-											<thead>
-												<tr>
-													<th>Date / Time</th>
-													<th>Customer</th>
-													<th>Service</th>
-													<th>Duration</th>
-													<th>Payment</th>
-													<th>Status</th>
-												</tr>
-											</thead>
-											<tbody>
-												{userTasks.map((item) => (
-													<tr key={item.id}>
-														<td>
-															<div className='d-flex align-items-center'>
-																<span
-																	className={classNames(
-																		'badge',
-																		'border border-2 border-light',
-																		'rounded-circle',
-																		'bg-success',
-																		'p-2 me-2',
-																		`bg-${item.status.color}`,
-																	)}>
-																	<span className='visually-hidden'>
-																		{item.status.name}
-																	</span>
-																</span>
-																<span className='text-nowrap'>
-																	{dayjs(
-																		`${item.date} ${item.time}`,
-																	).format('MMM Do YYYY, h:mm a')}
-																</span>
-															</div>
-														</td>
-														<td>
-															<div>
-																<div>{item.customer.name}</div>
-																<div className='small text-muted'>
-																	{item.customer.email}
-																</div>
-															</div>
-														</td>
-														<td>{item.service.name}</td>
-														<td>{item.duration}</td>
-														<td>
-															{item.payment &&
-																priceFormat(item.payment)}
-														</td>
-														<td>
-															<Dropdown>
-																<DropdownToggle hasIcon={false}>
-																	<Button
-																		isLink
-																		color={item.status.color}
-																		icon='Circle'
-																		className='text-nowrap'>
-																		{item.status.name}
-																	</Button>
-																</DropdownToggle>
-																<DropdownMenu>
-																	{Object.keys(EVENT_STATUS).map(
-																		(key) => (
-																			<DropdownItem key={key}>
-																				<div>
-																					<Icon
-																						icon='Circle'
-																						color={
-																							EVENT_STATUS[
-																								key
-																							].color
-																						}
-																					/>
-																					{
-																						EVENT_STATUS[
-																							key
-																						].name
-																					}
-																				</div>
-																			</DropdownItem>
-																		),
-																	)}
-																</DropdownMenu>
-															</Dropdown>
-														</td>
-													</tr>
-												))}
-											</tbody>
-										</table>
-									</div>
-									{!userTasks.length && (
-										<Alert
-											color='warning'
-											isLight
-											icon='Report'
-											className='mt-3'>
-											There is no scheduled and assigned task.
-										</Alert>
-									)}
-								</CardBody>
-							</Card> */}
 						</div>
 					</div>
 				</Page>

@@ -8,7 +8,7 @@ import Button from '../../../components/bootstrap/Button';
 import { mainMenu } from '../../../menu';
 import DemissionTable from '../../_common/Process/DemissionTable';
 import useDarkMode from '../../../hooks/useDarkMode';
-import Job_Admissional from '../../../api/get/job/Job_Admissional';
+import Job_Demissional from '../../../api/get/job/Job_Demissional';
 import AuthContext from '../../../contexts/authContext';
 
 const AppointmentList = () => {
@@ -18,8 +18,9 @@ const AppointmentList = () => {
 	const [laoder, setLoader] = useState<boolean>(false)
 	
 	const fetchData = async () => {
-		const response = await Job_Admissional(userData.cnpj)
+		const response = await Job_Demissional(userData.cnpj)
 		if(response.status == 200){
+			console.log(response.counts)
 			setCount(response.counts)
 			setLoader(true)
 		}

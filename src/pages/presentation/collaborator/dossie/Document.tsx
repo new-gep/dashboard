@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Button from '../../../../components/bootstrap/Button';
-import ModalDocument from '../modalDocument';
+import ModalDocument from '../modal/modalDocument';
 import CollaboratorFile from '../../../../api/get/collaborator/CollaboratorFile';
 import { toast } from 'react-toastify';
 import Toasts from '../../../../components/bootstrap/Toasts';
