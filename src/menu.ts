@@ -1076,11 +1076,19 @@ export const secondaryPath = {
 };
 
 export const mainMenu = {
-	process: {
-		id: 'processPages',
-		text: 'DP Digital',
+	IA: {
+		id: 'iaPages',
+		text: 'Agentes',
 		path: 'process-pages',
-		icon: 'Dvr',
+		icon: 'SupportAgent',
+		subMenu: {
+		},
+	},
+	recruit: {
+		id: 'examplePages',
+		text: 'Recrutamento',
+		path: 'process-pages',
+		icon: 'PersonAddAlt1',
 		subMenu: {
 			job: {
 				id  : 'Job',
@@ -1088,11 +1096,31 @@ export const mainMenu = {
 				path: 'sales/grid',
 				icon: 'Work',
 			},
+		},
+	},
+	process: {
+		id: 'processPages',
+		text: 'DP Digital',
+		path: 'process-pages',
+		icon: 'Dvr',
+		subMenu: {
 			admission: {
 				id: 'admission',
 				text: 'Admissão',
 				path: 'admission/fluid-list',
 				icon: 'ManageAccounts',
+			},
+			holerite: {
+				id: 'admission',
+				text: 'Holerite',
+				path: 'admission/fluid-list',
+				icon: 'AttachMoney',
+			},
+			point: {
+				id: 'admission',
+				text: 'Holerite',
+				path: 'admission/fluid-list',
+				icon: 'LocationOn',
 			},
 			dismissal: {
 				id: 'dismissal',
@@ -1100,6 +1128,15 @@ export const mainMenu = {
 				path: 'dismissal/fluid-list',
 				icon: 'DoorBack',
 			},
+		},
+	},
+	academy: {
+		id: 'academysPages',
+		text: 'Academy',
+		path: 'academy-pages',
+		icon: 'School',
+		subMenu: {
+			
 		},
 	}
 };

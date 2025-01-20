@@ -48,6 +48,8 @@ import DossieAttest from './dossie/Attest';
 import ModalDemission from './modal/modalDemission';
 import ModalChangeWork from './modal/modalChangeWork';
 import Spinner from '../../../components/bootstrap/Spinner';
+import Job_All_Collaborator from '../../../api/get/job/Job_All_Collaborator';
+
 const CollaboratorProfilePage = () => {
 	useTourStep(19);
 	const TABS = {
@@ -64,6 +66,7 @@ const CollaboratorProfilePage = () => {
 	const [collaborator, setCollaborator] = useState<any>(null);
 	const [picture, setPicture] = useState<any>(null);
 	const [job, setJob] = useState<any>(null);
+	const [allJob, setAllJob] = useState<any>(null);
 	const [modalDemission, setModalDemission] = useState<any>(null);
 	const [modalChangeWork, setModalChangeWork] = useState<any>(null);
 	const [listen, setListen] = useState<number>(1);
@@ -75,10 +78,13 @@ const CollaboratorProfilePage = () => {
 				if (response.status == 200) {
 					setCollaborator(response.collaborator);
 					setPicture(response.picture);
-					
 					const responseJob = await Job_One(response.collaborator.id_work);
 					if (responseJob.status == 200) {
 						setJob(responseJob.job);
+						const response = await Job_All_Collaborator(responseJob.job.CPF_collaborator)
+						if(response.status == 200){
+							setAllJob(response.job)
+						}
 					}
 				}
 			}
@@ -131,6 +137,8 @@ const CollaboratorProfilePage = () => {
 						setListen={setListen}
 						collaborator={collaborator}
 						job={job}
+						setJob={setJob}
+						allJob={allJob}
 						openModal={modalChangeWork}
 						closeModal={setModalChangeWork}
 					/>
@@ -320,12 +328,14 @@ const CollaboratorProfilePage = () => {
 									<CardLabel
 										className=' col-6 d-flex justify-content-end'
 									>
-										<Button 
-											onClick={()=>{setModalChangeWork(true)}}
-											icon='Sync' 
-											isLight={true}
-											color='light'
-										/>
+										{ allJob &&
+											<Button 
+												onClick={()=>{setModalChangeWork(true)}}
+												icon='Sync' 
+												isLight={true}
+												color='light'
+											/>
+										}
 									</CardLabel>
 								</CardHeader>
 								<CardBody>
