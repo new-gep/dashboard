@@ -47,7 +47,7 @@ import JobPicture from '../../../api/post/Job_Picture';
 import Job_Check_Admissional from '../../../api/get/job/Job_Check_Admissional';
 import Job_Dynamic from '../../../api/delete/job/job_dynamic';
 import SignedDocument from '../../../components/canva/SignedDocument';
-import Signatures from '../../../api/get/picture/Signatures';
+import Signatures from '../../../api/get/picture/Admission_Signatures';
 import GetCompanyDocument from '../../../api/get/company/Document';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;

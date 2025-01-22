@@ -13,6 +13,7 @@ import Icon from '../icon/Icon';
 import AuthContext from '../../contexts/authContext';
 
 interface Props {
+  where?:string | null;
   document: any;
   nameDocument:string | null;
   assignature: any;
@@ -23,7 +24,7 @@ interface Props {
   closeAfterSave?:any
 }
 
-export default function SignedDocument({modal, setModal ,document, assignature, nameDocument, dynamic, id, closeAfterSave}: Props) {
+export default function SignedDocument({modal, setModal ,document, assignature, nameDocument, dynamic, id, closeAfterSave, where = null}: Props) {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLCanvasElement>(null);
   const { userData } = useContext(AuthContext);
@@ -49,13 +50,25 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
     if(canvasElement){
       setLoader(true)
       const dataURL = canvasElement.toDataURL('png',100);
-      const PropsUploadJob = {
-        file:dataURL,
-        name:dynamic ? 'dynamic': nameDocument ,
-        id  :id,
-        dynamic:dynamic ? nameDocument : null
-      };
-      const response = await Job_DocumentSignature(PropsUploadJob)
+      let PropsUploadJob;
+      if(where){
+        PropsUploadJob = {
+          file:dataURL,
+          name:dynamic ? 'dismissal_dynamic': nameDocument ,
+          id  :id,
+          dynamic:dynamic ? nameDocument : null,
+        };
+      }else{
+        PropsUploadJob = {
+          file:dataURL,
+          name:dynamic ? 'dynamic': nameDocument ,
+          id  :id,
+          dynamic:dynamic ? nameDocument : null,
+        };
+      }
+      console.log(PropsUploadJob)
+      const response = await Job_DocumentSignature(PropsUploadJob);
+      console.log('signature:', response)
       if(response.status == 200){
         await closeAfterSave();
         setModal(false)

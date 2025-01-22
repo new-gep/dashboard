@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState, useRef } from 'react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import Spinner from '../../../components/bootstrap/Spinner';
@@ -51,9 +51,10 @@ import Job_Check_Admissional from '../../../api/get/job/Job_Check_Admissional';
 import Job_Check_Dismissal from '../../../api/get/job/Job_Check_Dismissal';
 import Job_Dynamic from '../../../api/delete/job/job_dynamic';
 import SignedDocument from '../../../components/canva/SignedDocument';
-import Signatures from '../../../api/get/picture/Signatures';
+import Signatures from '../../../api/get/picture/Admission_Signatures';
 //
 import Job_Demissional from '../../../api/get/job/Job_Demissional';
+import DismissalSignatures from '../../../api/get/picture/Dismissal_Signatures';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -97,6 +98,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	const [isDynamic, setIsDynamic] = useState<boolean>(false);
 	const [statusSignature, setStatusSignature] = useState<boolean | null>(false);
 	const [statusAllSignature, setStatusAllSignature] = useState<any>(false);
+	const inputFile = useRef<HTMLInputElement>(null);
 
 	const formik = useFormik({
 		onSubmit<Values>(
@@ -200,11 +202,11 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		setManipulating(null);
 	};
 
-	const formSubmitController = async (action: string) => {
+	const formSubmitController = async (action: string, update:any = null) => {
 		switch (action) {
 			case 'communication':
 				setSpinnerManipulating(true);
-				if (!formik.values.document || !formik.values.documentNameAdd) {
+				if ((!formik.values.document || !formik.values.documentNameAdd)	&& !update) {
 					toast(
 						<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
 							Antes de salvar, é necessário fazer o upload do arquivo e informar o
@@ -223,11 +225,11 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					.replace(/\s+/g, '');
 
 				const paramsJobPictureDismissal = {
-					file: formik.values.document,
+					file: update ? update.file : formik.values.document,
 					name: 'dismissal_dynamic',
 					id: manipulatingTable.id,
 					signature: false,
-					dynamic: fileName,
+					dynamic: update ? update.name :fileName,
 				};
 				const response = await JobPicture(paramsJobPictureDismissal);
 				if (response.status == 200) {
@@ -259,7 +261,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				}
 				setSpinnerManipulating(false);
 				break;
-			case 'value':
+
 				break;
 
 			default:
@@ -479,14 +481,17 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		signature?: any,
 		dates?: any,
 	) => {
+		setLoadingSearchDocument(true)
 		setPathDocumentMain(null)
 		setTypeDocument(null)
 		setPathDocumentSignature(null)
 		setTypeDocumentSignature(null)
 		setAllDocument(null)
 		setAllAssignature(null)
-		setLoadingSearchDocument(true)
-
+		setStatusSignature(null)
+		setPathDocumentSignatureFull(null)
+		setTypeDocumentSignatureFull(null)
+		
 		let responseDocument;
 		let responseSignature
 		
@@ -497,25 +502,10 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		switch (document) {
 			case 'dismissal_hand':
 				responseDocument = await JobFile(dates.id, 'dismissal_hand', '0');
-				// toast(
-				// 	<Toasts
-				// 		icon={ 'Check' }
-				// 		iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-				// 		title={ 'Sucesso!'}
-				// 	>
-				// 		Acordo de Compensação de Horas
-				// 	</Toasts>,
-				// 	{
-				// 		closeButton: true ,
-				// 		autoClose: 5000 //
-				// 	}
-				// )
 				break;
 			case 'dynamic':
-				if(signature){
-					responseSignature = await JobFile(manipulatingTable.id, 'dismissal_dynamic', '1', dynamic);
-				}
-				responseDocument = await JobFile(manipulatingTable.id, 'dismissal_dynamic', '0', dynamic);
+				responseSignature = await JobFile(manipulatingTable.id, 'dismissal_dynamic', '1', dynamic);
+				responseDocument  = await JobFile(manipulatingTable.id, 'dismissal_dynamic', '0', dynamic);
 				//@ts-ignore
 				const formattedFileName = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2');
 				toast(
@@ -537,8 +527,27 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				break;
 		}
 
+		if(step == 1 && manipulatingTable.demission.solicitation == 'company'){
+			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator);
+			if(response.status == 200){
+				setStatusAllSignature(response.pictures)
+				if(document != 'dynamic'){
+					//@ts-ignore
+					const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
+					setStatusSignature(filteredPictures);
+				}else{
+					//@ts-ignore
+					const filteredPictures = response.pictures.some(item =>
+						item.picture.toLowerCase() === `dismissal_signature_${dynamic.toLowerCase()}` &&
+						item.status === 'approved'
+					  );					  
+					setStatusSignature(filteredPictures);
+				}
+			}
+		};
 
 		if (responseDocument && responseDocument.status == 200) {
+			
 			setAllDocument(responseDocument);
 			setPathDocumentMain(responseDocument.path);
 			setTypeDocument(responseDocument.type);
@@ -756,13 +765,25 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					}));
 					response = await Job_Check_Dismissal(job.id)
 					if(response.status == 200){
-						setDatesDynamicManipulating(response.date)	
-						// const allTrue = obligationValues.every(value => value === true);
-						// if (allTrue) {
-						// 	updateStatusCandidate(job, true);
-						// }
+						setDatesDynamicManipulating(response.date)
+						// const obligation = Object.keys(response.date.obligation);
+						let dynamic = Object.values(response.date.dynamic.document);
+						let signature = response.date.documentSignature
+						dynamic = dynamic
+						//@ts-ignore
+						.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
+						//@ts-ignore
+						.filter(item => item !== "");
+						const documentDynamic = dynamic.every(document =>
+							Object.values(signature)
+							//@ts-ignore
+							  .filter(value => value.trim() !== "") // Ignorar valores vazios
+							  .includes(document)
+						);
+						if(documentDynamic){
+							updateStatusCandidate(job);
+						};
 					}
-					// setDatesDynamicManipulating(response.date)
 					setManipulatingTable(job);
 					setControllerBodyManipulating('communication');
 					setTitleManipulating('Gerencie seu Comunicado');
@@ -911,22 +932,22 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				status: avaliation ? 'approved' : 'reproved',
 				picture:
 					view == 'signature'
-						? `admission_signature_${documentAvaliation}`
+						? `dismissal_signature_${documentAvaliation}`
 						: documentAvaliation,
 				id_user: userData.id,
 			};
-			const response: any = await PicturePath(params, manipulatingTable.cpf);
+			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
 			if (response.status == 200) {
-				switch (manipulatingTable.step) {
+				switch (manipulatingTable.demission.step) {
 					case 1:
 						if (avaliation) {
-							updateStatusCandidate(manipulatingTable, true);
+							setStatusSignature(true)
 							toast(
 								<Toasts
 									icon={'Check'}
 									iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
 									title={'Sucesso!'}>
-									Exame admissional Aprovado com sucesso
+									Assinatura aprovada com sucesso
 								</Toasts>,
 								{
 									closeButton: true,
@@ -934,13 +955,13 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								},
 							);
 						} else {
-							updateStatusCandidate(manipulatingTable, false);
+							setStatusSignature(false)
 							toast(
 								<Toasts
 									icon={'Check'}
 									iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
 									title={'Sucesso!'}>
-									Exame admissional Rejeitado com sucesso
+									Assinatura rejeitada com sucesso
 								</Toasts>,
 								{
 									closeButton: true,
@@ -1029,8 +1050,9 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	};
 
 	const deleteDocumentDynamic = async () => {
-		const response = await Job_Dynamic(documentAvaliation, manipulatingTable.id);
-		if (response.status == 200) {
+		console.log( manipulatingTable.id)
+		const response = await Job_Dynamic(documentAvaliation, manipulatingTable.id, 'dismissal');
+		if (response && response.status == 200) {
 			handleUpcomingEdit();
 			toast(
 				<Toasts
@@ -1060,9 +1082,24 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		);
 	};
 
-	const updateStatusCandidate = async (dates: any, isStep: any) => {
+	const updateStatusCandidate = async (dates: any, isStep:any = null) => {
 		const step = dates.demission.step;
 		const status = dates.demission.status;
+
+		if(isStep == null){
+			dates.demission.status = true;
+			const params = {
+				demission: JSON.stringify(dates.demission)
+			};
+			const update = await Job(params, dates.id)
+			if (update.status == 200) {
+				const stepCollaborator = collaborators.filter(
+					(collaborator: any) => collaborator.demission.step === step,
+				);
+				setCollaboratorsStep(stepCollaborator);
+			}
+			return
+		}
 
 		if (isStep && !status) {
 			toast(
@@ -1248,6 +1285,14 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				autoClose: 5000, //
 			},
 		);
+	};
+
+	const alterDocument = async () =>{
+		if (inputFile.current) {
+			inputFile.current.click(); // Simula um clique no input
+		  } else {
+			console.error('Referência do input não está definida');
+		}
 	};
 
 	useEffect(() => {
@@ -1465,9 +1510,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					)}
 				</ModalBody>
 				<ModalFooter>
-					{((typeDocument && pathDocumentMain && step == 1) ||
+					{((typeDocument && pathDocumentMain && step == 1 && manipulatingTable.demission.solicitation !== 'company' ) ||
 						(view == 'signature' &&
-							step == 3 &&
 							typeDocumentSignature &&
 							pathDocumentSignature)) && (
 						<div className='d-flex gap-4'>
@@ -1494,6 +1538,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 			{manipulatingTable && (
 				<SignedDocument
+					where={'dismissal'}
 					dynamic={isDynamic}
 					closeAfterSave={closeAfterSaveDocumentSignature}
 					nameDocument={documentAvaliation}
@@ -1951,6 +1996,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 																						key
 																					],
 																				);
+																				setIsDynamic(true);
 																			}}>
 																			<Icon
 																				color='warning'
@@ -2002,43 +2048,73 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 													{documentAvaliation && (
 														<>
+															
 															<FormGroup
-																label='Atualizar'
+																label='Ações'
 																className='gap-2 d-flex flex-column'>
+																<input
+																	className='d-none'
+																	ref={inputFile}
+																	type='file'
+																	accept='application/pdf'
+																	onChange={(
+																		event: React.ChangeEvent<HTMLInputElement>,
+																	) => {
+																		const file = event.target.files?.[0];
+																		if (file) {
+																			// Verifica se o arquivo é um PDF
+																			if (file.type === 'application/pdf') {
+																				const nameDocument = documentAvaliation.replace(/([a-z])([A-Z])/g,'$1 $2',)
+																				const fileName = nameDocument
+																				.replace(/\s+(.)/g, (match, group1) => group1.toUpperCase())
+																				.replace(/^\w/, (c) => c.toUpperCase())
+																				.replace(/\s+/g, '');
+
+																				const updateProps = {
+																					file:file,
+																					name:fileName
+																				}
+																				formSubmitController('communication', updateProps);
+																			} else {
+																				toast(
+																					<Toasts
+																						icon={'Close'}
+																						iconColor={'danger'}
+																						title={'Erro!'}>
+																						Envie apenas{' '}
+																						<span>PDF</span>, não
+																						aceitamos outros tipos de
+																						documentos.
+																					</Toasts>,
+																					{
+																						closeButton: true,
+																						autoClose: 5000, //
+																					},
+																				);
+																				return;
+																			}
+																		}
+																	}}
+																/>												
+																<div>
+																	<Button
+																		isLink={true}
+																		icon='Delete'
+																		color='danger'
+																		onClick={deleteDocumentDynamic}>
+																		Deletar Documento
+																	</Button>
+																</div>
 																<div>
 																	<Button
 																		isLink={true}
 																		icon='Sync'
 																		color='info'
-																		onClick={() => {
-																			setView('document');
-																			setOpenDocument(true);
-																		}}>
+																		onClick={alterDocument}>
 																		Atualizar Documento
 																	</Button>
 																</div>
-																<>
-																	{typeDocumentSignatureFull &&
-																		pathDocumentSignatureFull &&
-																		statusSignature && (
-																			<div>
-																				<Button
-																					isLink={true}
-																					icon='Verified'
-																					color='warning'
-																					onClick={() => {
-																						setView(
-																							'documentSignature',
-																						);
-																						setOpenDocument(
-																							true,
-																						);
-																					}}>
-																					Documento Assinado
-																				</Button>
-																			</div>
-																		)}
-																</>
+																
 															</FormGroup>
 
 															<FormGroup
@@ -2160,6 +2236,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 										<FormGroup id='customerName'>
 											<InputGroup>
 												<Input
+													
 													type='file'
 													accept='application/pdf'
 													onChange={(
@@ -2610,6 +2687,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 														}>
 														<InputGroup>
 															<Input
+																ref={inputFile}
 																type='file'
 																onChange={(
 																	event: React.ChangeEvent<HTMLInputElement>,
@@ -3440,39 +3518,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							</div>
 						)}
 
-						{/* <div className='col-12'>
-							<Card isCompact borderSize={2} shadow='none' className='mb-0'>
-								<CardHeader>
-									<CardLabel>
-										<CardTitle>Notification</CardTitle>
-									</CardLabel>
-								</CardHeader>
-								<CardBody>
-									<FormGroup>
-										<Checks
-											id='notify'
-											type='switch'
-											label={
-												<>
-													Notify the Customer
-													<Popovers
-														trigger='hover'
-														desc='Check this checkbox if you want your customer to receive an email about the scheduled appointment'>
-														<Icon
-															icon='Help'
-															size='lg'
-															className='ms-1 cursor-help'
-														/>
-													</Popovers>
-												</>
-											}
-											onChange={formik.handleChange}
-											checked={formik.values.notify}
-										/>
-									</FormGroup>
-								</CardBody>
-							</Card>
-						</div> */}
 					</div>
 				</OffCanvasBody>
 				{controllerBodyManipulating == 'communication' && documentAvaliation == 'add' && (
