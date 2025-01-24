@@ -153,22 +153,31 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			setDatesDynamicManipulating(response.date)
 			// const obligation = Object.keys(response.date.obligation);
 			let dynamic = Object.values(response.date.dynamic.communication.document);
-			let signature = response.date.documentSignature
+			let signature = response.date.dynamic.communication.complet
+
+			
+
 			dynamic = dynamic
 			//@ts-ignore
-			.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
+			.map(item => item.replace(/^\/+|\/+$/g, '').replace(/\//g, '').trim())  // Remove barras no começo e final
 			//@ts-ignore
 			.filter(item => item !== "");
+
+			signature = Object.values(signature)
+			//@ts-ignore
+			.map(item => item.replace(/^\/+|\/+$/g, '').replace(/\//g, '').trim())  // Remove barras no começo e final
+			//@ts-ignore
+			.filter(item => item !== "");
+
 			const documentDynamic = dynamic.every(document =>
 				Object.values(signature)
 				//@ts-ignore
 				  .filter(value => value.trim() !== "") // Ignorar valores vazios
 				  .includes(document)
 			);
-			console.log(dynamic)
-			console.log(signature)
+
 			if(documentDynamic){
-				updateStatusCandidate(manipulatingTable);
+				updateStatusCandidate(manipulatingTable, null, true);
 			};
 		}
 		return;
@@ -268,7 +277,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				const response = await JobPicture(paramsJobPictureDismissal);
 				if (response.status == 200) {
 					const response = await Job_Check_Dismissal(manipulatingTable.id)
-					setDatesDynamicManipulating(response.date.dynamic.communication)
+					setDatesDynamicManipulating(response.date)
 					formik.setFieldValue('document', '');
 					formik.setFieldValue('documentNameAdd', '');
 					toast(
@@ -820,19 +829,20 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						setDatesDynamicManipulating(response.date);
 						// const obligation = Object.keys(response.date.obligation);
 						let dynamic = Object.values(response.date.dynamic.communication.document);
-						let signature = response.date.dynamic.communication.documentSignature						
+						let signature = response.date.dynamic.communication.complet						
 						if(dynamic){
 							dynamic = dynamic
 							//@ts-ignore
-							.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
+							.map(item => item.replace(/^\/+|\/+$/g, '').replace(/\//g, '').trim())  // Remove barras no começo e final
 							//@ts-ignore
 							.filter(item => item !== "");
 						}
 						if(signature){
+					
 							const documentDynamic = dynamic.every(document =>
 								Object.values(signature)
 								//@ts-ignore
-								.filter(value => value.trim() !== "") // Ignorar valores vazios
+								.filter(value => value.trim().replace(/\//g, '') !== "") // Ignorar valores vazios
 								.includes(document)
 							);
 
@@ -1201,36 +1211,43 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	};
 
 	const deleteDocumentDynamic = async () => {
-		console.log( manipulatingTable.id)
-		const response = await Job_Dynamic(documentAvaliation, manipulatingTable.id, 'dismissal');
-		if (response && response.status == 200) {
-			handleUpcomingEdit();
-			toast(
-				<Toasts
-					icon={'Check'}
-					iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={'Sucesso!'}>
-					Documento deletado com sucesso!
-				</Toasts>,
-				{
-					closeButton: true,
-					autoClose: 5000, //
-				},
-			);
-			return;
+		switch (manipulatingTable.demission.step) {
+			case 1:
+				const response = await Job_Dynamic(documentAvaliation, manipulatingTable.id, 'communication');
+				if (response && response.status == 200) {
+					handleUpcomingEdit();
+					toast(
+						<Toasts
+							icon={'Check'}
+							iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={'Sucesso!'}>
+							Documento deletado com sucesso!
+						</Toasts>,
+						{
+							closeButton: true,
+							autoClose: 5000, //
+						},
+					);
+					return;
+				}else{
+					toast(
+						<Toasts
+							icon={'Close'}
+							iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={'Erro!'}>
+							Erro ao deletar documento, tente mais tarde e verifique sua internet.
+						</Toasts>,
+						{
+							closeButton: true,
+							autoClose: 5000, //
+						},
+					);
+				}
+				break;
+		
+			default:
+				break;
 		}
-		toast(
-			<Toasts
-				icon={'Close'}
-				iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-				title={'Erro!'}>
-				Erro ao deletar documento, tente mais tarde e verifique sua internet.
-			</Toasts>,
-			{
-				closeButton: true,
-				autoClose: 5000, //
-			},
-		);
 	};
 
 	const updateStatusCandidate = async (dates: any, isStep:any = null, newStatus:any = null) => {
