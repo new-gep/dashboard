@@ -54,7 +54,7 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
       if(where){
         PropsUploadJob = {
           file:dataURL,
-          name:dynamic ? 'dismissal_dynamic': nameDocument ,
+          name:dynamic ? 'dismissal_communication_dynamic': nameDocument ,
           id  :id,
           dynamic:dynamic ? nameDocument : null,
         };
@@ -66,9 +66,7 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
           dynamic:dynamic ? nameDocument : null,
         };
       }
-      console.log(PropsUploadJob)
       const response = await Job_DocumentSignature(PropsUploadJob);
-      console.log('signature:', response)
       if(response.status == 200){
         await closeAfterSave();
         setModal(false)

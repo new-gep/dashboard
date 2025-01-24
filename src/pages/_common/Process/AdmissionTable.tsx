@@ -588,7 +588,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
 				setManipulatingTable(candidate)
 				response = await JobFile(candidate.id,'medical','0' ,'0')
-				console.log(response)
 				if(response.status == 200){
 					setDocumentAvaliation('medical_examination')
 					setPathDocumentMain(response.path)

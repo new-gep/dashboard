@@ -82,6 +82,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	const [upcomingEventsInfoOffcanvas, setUpcomingEventsInfoOffcanvas] = useState(false);
 	const [upcomingEventsEditOffcanvas, setUpcomingEventsEditOffcanvas] = useState(false);
 	const [openDocument, setOpenDocument] = useState<boolean>(false);
+	const [avalidDocument, setAvalidDocument] = useState<boolean>(false);
 	const [typeDocument, setTypeDocument] = useState<any>(null);
 	const [pathDocumentMain, setPathDocumentMain] = useState<any>(null);
 	const [typeDocumentSignature, setTypeDocumentSignature] = useState<any>(null);
@@ -136,7 +137,40 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		setUpcomingEventsEditOffcanvas(!upcomingEventsEditOffcanvas);
 	};
 
-	const closeAfterSaveDocumentSignature = () => {
+	const closeAfterSaveDocumentSignature = async () => {
+		setDocumentAvaliation(null)
+		setPathDocumentMain(null)
+		setTypeDocument(null)
+		setPathDocumentSignature(null)
+		setTypeDocumentSignature(null)
+		setAllDocument(null)
+		setAllAssignature(null)
+		setStatusSignature(null)
+		setPathDocumentSignatureFull(null)
+		setTypeDocumentSignatureFull(null)
+		const response = await Job_Check_Dismissal(manipulatingTable.id)
+		if(response.status == 200){
+			setDatesDynamicManipulating(response.date)
+			// const obligation = Object.keys(response.date.obligation);
+			let dynamic = Object.values(response.date.dynamic.communication.document);
+			let signature = response.date.documentSignature
+			dynamic = dynamic
+			//@ts-ignore
+			.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
+			//@ts-ignore
+			.filter(item => item !== "");
+			const documentDynamic = dynamic.every(document =>
+				Object.values(signature)
+				//@ts-ignore
+				  .filter(value => value.trim() !== "") // Ignorar valores vazios
+				  .includes(document)
+			);
+			console.log(dynamic)
+			console.log(signature)
+			if(documentDynamic){
+				updateStatusCandidate(manipulatingTable);
+			};
+		}
 		return;
 		// return new Promise(async (resolve, reject) => {
 		//   try {
@@ -226,7 +260,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 				const paramsJobPictureDismissal = {
 					file: update ? update.file : formik.values.document,
-					name: 'dismissal_dynamic',
+					name: 'dismissal_communication_dynamic',
 					id: manipulatingTable.id,
 					signature: false,
 					dynamic: update ? update.name :fileName,
@@ -234,7 +268,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				const response = await JobPicture(paramsJobPictureDismissal);
 				if (response.status == 200) {
 					const response = await Job_Check_Dismissal(manipulatingTable.id)
-					setDatesDynamicManipulating(response.date)
+					setDatesDynamicManipulating(response.date.dynamic.communication)
 					formik.setFieldValue('document', '');
 					formik.setFieldValue('documentNameAdd', '');
 					toast(
@@ -481,7 +515,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		signature?: any,
 		dates?: any,
 	) => {
-		setLoadingSearchDocument(true)
 		setPathDocumentMain(null)
 		setTypeDocument(null)
 		setPathDocumentSignature(null)
@@ -522,6 +555,25 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						}
 				)
 				break;
+			case 'dismissal_communication_dynamic':
+				responseSignature = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '1', dynamic.replace(/\//g, ''));
+				responseDocument  = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '0', dynamic.replace(/\//g, ''));
+			
+				const formattedFileNameNew = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\//g, '');
+				toast(
+					<Toasts
+						icon={ 'Check' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Sucesso!'}
+					>
+						{formattedFileNameNew}
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+				break;
 			case 'add':
 				setDocumentAvaliation('add');
 				break;
@@ -531,16 +583,16 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator);
 			if(response.status == 200){
 				setStatusAllSignature(response.pictures)
-				if(document != 'dynamic'){
+				if(document != 'dismissal_communication_dynamic'){
 					//@ts-ignore
 					const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
 					setStatusSignature(filteredPictures);
 				}else{
 					//@ts-ignore
 					const filteredPictures = response.pictures.some(item =>
-						item.picture.toLowerCase() === `dismissal_signature_${dynamic.toLowerCase()}` &&
+						item.picture.toLowerCase() === `dismissal_signature_communication` &&
 						item.status === 'approved'
-					  );					  
+					 );					  
 					setStatusSignature(filteredPictures);
 				}
 			}
@@ -765,24 +817,29 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					}));
 					response = await Job_Check_Dismissal(job.id)
 					if(response.status == 200){
-						setDatesDynamicManipulating(response.date)
+						setDatesDynamicManipulating(response.date);
 						// const obligation = Object.keys(response.date.obligation);
-						let dynamic = Object.values(response.date.dynamic.document);
-						let signature = response.date.documentSignature
-						dynamic = dynamic
-						//@ts-ignore
-						.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
-						//@ts-ignore
-						.filter(item => item !== "");
-						const documentDynamic = dynamic.every(document =>
-							Object.values(signature)
+						let dynamic = Object.values(response.date.dynamic.communication.document);
+						let signature = response.date.dynamic.communication.documentSignature						
+						if(dynamic){
+							dynamic = dynamic
 							//@ts-ignore
-							  .filter(value => value.trim() !== "") // Ignorar valores vazios
-							  .includes(document)
-						);
-						if(documentDynamic){
-							updateStatusCandidate(job);
-						};
+							.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
+							//@ts-ignore
+							.filter(item => item !== "");
+						}
+						if(signature){
+							const documentDynamic = dynamic.every(document =>
+								Object.values(signature)
+								//@ts-ignore
+								.filter(value => value.trim() !== "") // Ignorar valores vazios
+								.includes(document)
+							);
+
+							if(documentDynamic){
+								updateStatusCandidate(job);
+							};
+						}
 					}
 					setManipulatingTable(job);
 					setControllerBodyManipulating('communication');
@@ -794,6 +851,77 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					}));
 				}
 				break;
+			case 2:
+				setLoadingStates((prevStates) => ({
+					...prevStates,
+					[collaborators.CPF_collaborator]: true,
+				}));
+				setManipulatingTable(job);
+				response = await JobFile(job.id,'dismissal_medical','0' ,'0')
+				if(response.status == 200){
+					setDocumentAvaliation('medical_examination')
+					setPathDocumentMain(response.path)
+					setTypeDocument(response.type)
+					setOpenDocument(true)
+					setLoadingStates(prevStates => ({ ...prevStates, [collaborators.CPF_collaborator]: false }));
+					setTimeout(() => {
+						// console.log(typeDocument && pathDocumentMain && step != 3 )
+					}, 2000)
+					return
+				}
+				toast(
+					<Toasts
+						icon={ 'Close' }
+						iconColor={ 'danger' }
+						title={ 'Erro!'}
+					>
+						O candidato ainda não enviou o exame demissional.
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 3000 
+					}
+				)
+				setLoadingStates((prevStates) => ({
+					...prevStates,
+					[collaborators.CPF_collaborator]: false,
+				}));
+				break;
+			case 3:
+				setLoadingStates((prevStates) => ({
+					...prevStates,
+					[collaborators.CPF_collaborator]: true,
+				}));
+				response = await Job_Check_Dismissal(job.id)
+				if(response.status == 200){
+					setDatesDynamicManipulating(response.date)
+					// const obligation = Object.keys(response.date.obligation);
+					let dynamic = Object.values(response.date.dynamic.document);
+					let signature = response.date.documentSignature
+					dynamic = dynamic
+					//@ts-ignore
+					.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
+					//@ts-ignore
+					.filter(item => item !== "");
+					const documentDynamic = dynamic.every(document =>
+						Object.values(signature)
+						//@ts-ignore
+						  .filter(value => value.trim() !== "") // Ignorar valores vazios
+						  .includes(document)
+					);
+					if(documentDynamic){
+						updateStatusCandidate(job);
+					};
+				}
+				setManipulatingTable(job);
+				setControllerBodyManipulating('kitDismissal');
+				setTitleManipulating('Gerencie seu Kit Demissional');
+				handleUpcomingEdit();
+				setLoadingStates((prevStates) => ({
+					...prevStates,
+					[collaborators.CPF_collaborator]: false,
+				}));
+				break
 			default:
 				break;
 		}
@@ -928,12 +1056,13 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 	const AvaliationPicture = async (avaliation: boolean) => {
 		try {
+
 			const params = {
 				status: avaliation ? 'approved' : 'reproved',
 				picture:
-					view == 'signature'
-						? `dismissal_signature_${documentAvaliation}`
-						: documentAvaliation,
+					view == 'signature' && step == 1
+						? `dismissal_signature_communication_${documentAvaliation}`
+						: `dismissal_${documentAvaliation}`,
 				id_user: userData.id,
 			};
 			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
@@ -972,10 +1101,40 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						setOpenDocument(false);
 						return;
 					case 2:
-						break;
+						if (avaliation) {
+							updateStatusCandidate(manipulatingTable, null, true);
+							toast(
+								<Toasts
+									icon={'Check'}
+									iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+									title={'Sucesso!'}>
+									Exame Demissional aprovado com sucesso
+								</Toasts>,
+								{
+									closeButton: true,
+									autoClose: 5000, //
+								},
+							);
+						} else {
+							updateStatusCandidate(manipulatingTable, null, false);
+							toast(
+								<Toasts
+									icon={'Check'}
+									iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+									title={'Sucesso!'}>
+									Exame Demissional rejeitado com sucesso
+								</Toasts>,
+								{
+									closeButton: true,
+									autoClose: 5000, //
+								},
+							);
+						}
+						setOpenDocument(false);
+						return;
 					case 3:
 						if (avaliation) {
-							setStatusSignature(true);
+							setStatusSignature(true)
 							toast(
 								<Toasts
 									icon={'Check'}
@@ -989,14 +1148,13 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								},
 							);
 						} else {
-							setStatusSignature(false);
-							updateStatusCandidate(manipulatingTable, false);
+							setStatusSignature(false)
 							toast(
 								<Toasts
 									icon={'Check'}
 									iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
 									title={'Sucesso!'}>
-									Assinatura reprovada com sucesso
+									Assinatura rejeitada com sucesso
 								</Toasts>,
 								{
 									closeButton: true,
@@ -1004,15 +1162,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								},
 							);
 						}
-						const response = await Signatures(manipulatingTable.cpf);
-						if (response.status == 200) {
-							setStatusAllSignature(response.pictures);
-						} else {
-							setStatusAllSignature(null);
-						}
-
 						setOpenDocument(false);
-						break;
+						return;
 					default:
 						console.log('step indefinido, ou manipulado não setado');
 						break;
@@ -1082,12 +1233,16 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		);
 	};
 
-	const updateStatusCandidate = async (dates: any, isStep:any = null) => {
+	const updateStatusCandidate = async (dates: any, isStep:any = null, newStatus:any = null) => {
 		const step = dates.demission.step;
 		const status = dates.demission.status;
 
 		if(isStep == null){
-			dates.demission.status = true;
+			if(newStatus){
+				dates.demission.status = true;
+			}else{
+				dates.demission.status = false;
+			}
 			const params = {
 				demission: JSON.stringify(dates.demission)
 			};
@@ -1510,29 +1665,25 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					)}
 				</ModalBody>
 				<ModalFooter>
-					{((typeDocument && pathDocumentMain && step == 1 && manipulatingTable.demission.solicitation !== 'company' ) ||
-						(view == 'signature' &&
-							typeDocumentSignature &&
-							pathDocumentSignature)) && (
-						<div className='d-flex gap-4'>
-							<Button
-								isLight={true}
-								color='danger'
-								onClick={() => AvaliationPicture(false)}
-								// size='lg'
-							>
-								Recusar
-							</Button>
-							<Button
-								isLight={true}
-								color='success'
-								onClick={() => AvaliationPicture(true)}
-								// size='lg'
-							>
-								Aprovar
-							</Button>
-						</div>
-					)}
+				{ avalidDocument &&
+					<div className='d-flex gap-4'>
+						<Button
+							isLight={true}
+							color='danger'
+							onClick={() => AvaliationPicture(false)}
+						>
+							Recusar
+						</Button>
+						<Button
+							isLight={true}
+							color='success'
+							onClick={() => AvaliationPicture(true)}
+						>
+							Aprovar
+						</Button>
+					</div>
+				}
+
 				</ModalFooter>
 			</Modal>
 
@@ -1862,6 +2013,437 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				<OffCanvasBody>
 					<div className='row g-5'>
 						{controllerBodyManipulating == 'communication' && (
+							<>
+								{manipulatingTable &&
+								manipulatingTable.demission.solicitation == 'company' ? (
+									<>
+										<span>
+											Abaixo, selecione e adicione seus arquivos, e envie para
+											o colaborador.
+										</span>
+
+										<div className='col-12'>
+											<Dropdown>
+												<DropdownToggle>
+													<Button
+														color='light'
+														isLight
+														icon='FolderOpen'
+														className='col-12'>
+														Selecione um Documento
+													</Button>
+												</DropdownToggle>
+
+												<DropdownMenu breakpoint='xxl'>
+													<DropdownItem>
+														<Button
+															onClick={() =>
+																documentController('add')
+															}>
+															<Icon icon='AddCircle' /> Adicionar
+															Documento
+														</Button>
+													</DropdownItem>
+
+													{/* <DropdownItem isHeader>Obrigatórios</DropdownItem>
+												
+													<DropdownItem>
+																<Button
+																	onClick={()=>documentController('registration_form')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.registration) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.registration)? 'success' : 'warning'}
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.registration) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.registration)? 'Check' : 'Info'} 
+																	/> 
+																	Ficha de Registro
+																</Button>
+													</DropdownItem>
+
+													<DropdownItem>
+																<Button 
+																	onClick={()=>documentController('experience_contract')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.experience) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.experience)? 'success': 'warning'}
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.experience) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.experience)? 'Check'  : 'Info'} 
+																	/> 
+																	Contrato de Experiência
+																</Button>
+													</DropdownItem>
+
+													<DropdownItem>
+																<Button
+																	onClick={()=>documentController('hours_extension')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.extension) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.extension) ? 'success' : 'warning'}
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.extension) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.extension) ? 'Check' : 'Info'} 
+																	/>  
+																	Acordo de Prorrogação de Horas
+																</Button>
+													</DropdownItem>
+
+													<DropdownItem>
+																<Button 
+																	onClick={()=>documentController('hours_compensation')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.compensation) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.compensation) ? 'success' : 'warning'}
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.compensation) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.compensation) ? 'Check' : 'Info'} 
+																	/> 
+																	Acordo de Compensação de Horas
+																</Button>
+													</DropdownItem>
+
+													<DropdownItem>
+																<Button 
+																	onClick={()=>documentController('transport_voucher')}
+																>
+																	<Icon 
+																		color={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.voucher) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.voucher) ? 'success' : 'warning'} 
+																		icon ={(step == 2 && datesDynamicManipulating && datesDynamicManipulating.obligation.voucher) || (step == 3 && datesDynamicManipulating && datesDynamicManipulating.signature.voucher) ? 'Check' : 'Info'} 
+																	/> 
+																	Solicitação de Vale Transporte
+																</Button>
+													</DropdownItem> */}
+
+													<DropdownItem isDivider />
+
+													<DropdownItem isText>
+														Documentos Adicionais
+													</DropdownItem>
+
+													<>
+														{datesDynamicManipulating &&
+															datesDynamicManipulating.dynamic.communication &&
+															Object.keys(
+																datesDynamicManipulating.dynamic.communication
+																	.document,
+															).map((key) => {
+																const fileName =
+																	datesDynamicManipulating.dynamic.communication
+																		.document[key];
+																const formattedFileName =
+																	fileName.replace(
+																		/([a-z])([A-Z])/g,
+																		'$1 $2',
+																	).replace(/\//g, '');
+																return (
+																	<DropdownItem key={key}>
+																		<Button
+																			onClick={() => {
+																				setDocumentAvaliation(
+																					datesDynamicManipulating
+																						.dynamic.communication
+																						.document[
+																						key
+																					].replace(/\//g, ''),
+																				);
+																				documentController(
+																					'dismissal_communication_dynamic',
+																					datesDynamicManipulating
+																						.dynamic.communication
+																						.document[
+																						key
+																					],
+																				);
+																				setIsDynamic(true);
+																			}}>
+																			<Icon
+																				color='warning'
+																				icon='Check'
+																			/>{' '}
+																			{formattedFileName}
+																		</Button>
+																	</DropdownItem>
+																);
+															})}
+													</>
+												</DropdownMenu>
+											</Dropdown>
+										</div>
+
+										{(documentAvaliation && documentAvaliation != 'add') &&
+											(loadingSearchDocument ? (
+												<div>
+													<h1>Ops, peraí que o documento tá se escondendo...</h1>
+													<Spinner />
+												</div>
+											) : (
+												<>
+													{documentAvaliation && (
+														<h5>
+															{documentAvaliation == 'registration_form'
+																? 'Ficha de Registro'
+																: documentAvaliation ==
+																	'experience_contract'
+																	? 'Contrato de Experiencia'
+																	: documentAvaliation ==
+																		'hours_extension'
+																		? 'Acordo de Prorrogação de Horas'
+																		: documentAvaliation ==
+																			'hours_compensation'
+																			? 'Acordo de Compensação de Horas'
+																			: documentAvaliation ==
+																				'transport_voucher'
+																				? 'Solitação de Vale Transporte'
+																				: documentAvaliation ==
+																					'view'
+																					? ''
+																					: documentAvaliation.replace(
+																							/([a-z])([A-Z])/g,
+																							'$1 $2',
+																						).replace(/\//g, '')}
+														</h5>
+													)}
+
+													{documentAvaliation && (
+														<>
+															
+															<FormGroup
+																label='Ações'
+																className='gap-2 d-flex flex-column'>
+																<input
+																	className='d-none'
+																	ref={inputFile}
+																	type='file'
+																	accept='application/pdf'
+																	onChange={(
+																		event: React.ChangeEvent<HTMLInputElement>,
+																	) => {
+																		const file = event.target.files?.[0];
+																		if (file) {
+																			// Verifica se o arquivo é um PDF
+																			if (file.type === 'application/pdf') {
+																				const nameDocument = documentAvaliation.replace(/([a-z])([A-Z])/g,'$1 $2',)
+																				const fileName = nameDocument
+																				.replace(/\s+(.)/g, (match, group1) => group1.toUpperCase())
+																				.replace(/^\w/, (c) => c.toUpperCase())
+																				.replace(/\s+/g, '');
+
+																				const updateProps = {
+																					file:file,
+																					name:fileName
+																				}
+																				formSubmitController('communication', updateProps);
+																			} else {
+																				toast(
+																					<Toasts
+																						icon={'Close'}
+																						iconColor={'danger'}
+																						title={'Erro!'}>
+																						Envie apenas{' '}
+																						<span>PDF</span>, não
+																						aceitamos outros tipos de
+																						documentos.
+																					</Toasts>,
+																					{
+																						closeButton: true,
+																						autoClose: 5000, //
+																					},
+																				);
+																				return;
+																			}
+																		}
+																	}}
+																/>												
+																<div>
+																	<Button
+																		isLink={true}
+																		icon='Delete'
+																		color='danger'
+																		onClick={deleteDocumentDynamic}>
+																		Deletar Documento
+																	</Button>
+																</div>
+																<div>
+																	<Button
+																		isLink={true}
+																		icon='Sync'
+																		color='info'
+																		onClick={alterDocument}>
+																		Atualizar Documento
+																	</Button>
+																</div>
+																
+															</FormGroup>
+
+															<FormGroup
+																label='Visualizar'
+																className='gap-2 d-flex flex-column'>
+																<div>
+																	<Button
+																		isLink={true}
+																		icon='Description'
+																		color='info'
+																		onClick={() => {
+																			setAvalidDocument(false)
+																			setView('document');
+																			setOpenDocument(true);
+																		}}>
+																		Documento
+																	</Button>
+																</div>
+																<div>
+																	<Button
+																		isLink={true}
+																		icon='Mode'
+																		color='storybook'
+																		onClick={() => {
+																			setAvalidDocument(true)
+																			setView('signature');
+																			setOpenDocument(true);
+																		}}>
+																		Assinatura
+																	</Button>
+																</div>
+																<>
+																	{typeDocumentSignatureFull &&
+																		pathDocumentSignatureFull &&
+																		statusSignature && (
+																			<div>
+																				<Button
+																					isLink={true}
+																					icon='Verified'
+																					color='warning'
+																					onClick={() => {
+																						setView(
+																							'documentSignature',
+																						);
+																						setOpenDocument(
+																							true,
+																						);
+																					}}>
+																					Documento Assinado
+																				</Button>
+																			</div>
+																		)}
+																</>
+															</FormGroup>
+
+															{statusSignature && (
+																<FormGroup label='Gerar'>
+																	<div>
+																		<Button
+																			isLink={true}
+																			icon='LibraryAdd'
+																			color='success'
+																			onClick={
+																				generateDocumentSignature
+																			}>
+																			Documento Assinado
+																		</Button>
+																	</div>
+																</FormGroup>
+															)}
+														</>
+													)}
+												</>
+											))
+										}
+									</>
+								) : (
+									<>
+										<span>
+											Abaixo, está a carta de demissão do colaborador.
+										</span>
+
+										<div className='col-12'>
+											<Button
+												className='col-12'
+												icon='Markunread'
+												color='secondary'
+												isLight={true}
+												onClick={() => {
+													setView(null);
+													setAvalidDocument(true)
+													setOpenDocument(true);
+												}}
+												size={'lg'}>
+												Carta a Punho
+											</Button>
+										</div>
+									</>
+								)}
+
+								{documentAvaliation == 'add' && (
+									<>
+										<FormGroup
+											id='customerName'
+											label={'Nome do novo documento'}>
+											<Input
+												id='documentNameAdd'
+												type='text'
+												value={formik.values.documentNameAdd}
+												className='text-capitalize'
+												onChange={(
+													event: React.ChangeEvent<HTMLInputElement>,
+												) => {
+													formik.setFieldValue(
+														'documentNameAdd',
+														event.target.value,
+													);
+												}}
+											/>
+										</FormGroup>
+
+										<FormGroup id='customerName'>
+											<InputGroup>
+												<Input
+													
+													type='file'
+													accept='application/pdf'
+													onChange={(
+														event: React.ChangeEvent<HTMLInputElement>,
+													) => {
+														const file = event.target.files?.[0];
+														if (file) {
+															// Verifica se o arquivo é um PDF
+															if (file.type === 'application/pdf') {
+																// Se for PDF, atualiza o campo no formik
+																formik.setFieldValue(
+																	'document',
+																	file,
+																);
+															} else {
+																toast(
+																	<Toasts
+																		icon={'Close'}
+																		iconColor={'danger'}
+																		title={'Erro!'}>
+																		Envie apenas{' '}
+																		<span>PDF</span>, não
+																		aceitamos outros tipos de
+																		documentos.
+																	</Toasts>,
+																	{
+																		closeButton: true,
+																		autoClose: 5000, //
+																	},
+																);
+																return;
+															}
+														}
+													}}
+												/>
+												<Button
+													isOutline
+													color='light'
+													icon={
+														pathDocumentMain
+															? 'Autorenew'
+															: 'CloudUpload'
+													}>
+													{pathDocumentMain ? 'Edit' : 'Upload'}
+												</Button>
+											</InputGroup>
+										</FormGroup>
+									</>
+								)}					
+							</>
+						)}
+
+						{controllerBodyManipulating == 'kitDismissal' && (
 							<>
 								{manipulatingTable &&
 								manipulatingTable.demission.solicitation == 'company' ? (
@@ -2400,1101 +2982,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							</>
 						)}
 
-						{controllerBodyManipulating == 'kitAdmission' && (
-							<>
-								<span>
-									Abaixo, selecione seus arquivos, e envie para o candidato.
-								</span>
-
-								<div className='col-12'>
-									<Dropdown>
-										<DropdownToggle>
-											<Button
-												color='light'
-												isLight
-												icon='FolderOpen'
-												className='col-12'>
-												Selecione um Documento
-											</Button>
-										</DropdownToggle>
-										<DropdownMenu breakpoint='xxl'>
-											<DropdownItem>
-												<Button onClick={() => documentController('add')}>
-													<Icon icon='AddCircle' /> Adicionar Documento
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem isHeader>Obrigatórios</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController('registration_form')
-													}>
-													<Icon
-														color={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.registration) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.registration)
-																? 'success'
-																: 'warning'
-														}
-														icon={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.registration) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.registration)
-																? 'Check'
-																: 'Info'
-														}
-													/>
-													Ficha de Registro
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController('experience_contract')
-													}>
-													<Icon
-														color={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.experience) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.experience)
-																? 'success'
-																: 'warning'
-														}
-														icon={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.experience) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.experience)
-																? 'Check'
-																: 'Info'
-														}
-													/>
-													Contrato de Experiência
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController('hours_extension')
-													}>
-													<Icon
-														color={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.extension) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.extension)
-																? 'success'
-																: 'warning'
-														}
-														icon={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.extension) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.extension)
-																? 'Check'
-																: 'Info'
-														}
-													/>
-													Acordo de Prorrogação de Horas
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController('hours_compensation')
-													}>
-													<Icon
-														color={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.compensation) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.compensation)
-																? 'success'
-																: 'warning'
-														}
-														icon={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.compensation) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.compensation)
-																? 'Check'
-																: 'Info'
-														}
-													/>
-													Acordo de Compensação de Horas
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController('transport_voucher')
-													}>
-													<Icon
-														color={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.voucher) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.voucher)
-																? 'success'
-																: 'warning'
-														}
-														icon={
-															(step == 2 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.obligation
-																	.voucher) ||
-															(step == 3 &&
-																datesDynamicManipulating &&
-																datesDynamicManipulating.signature
-																	.voucher)
-																? 'Check'
-																: 'Info'
-														}
-													/>
-													Solicitação de Vale Transporte
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem isDivider />
-
-											<DropdownItem isText>
-												Documentos Adicionais
-											</DropdownItem>
-
-											<>
-												{datesDynamicManipulating &&
-													datesDynamicManipulating.dynamic &&
-													Object.keys(
-														datesDynamicManipulating.dynamic.document,
-													).map((key) => {
-														const fileName =
-															datesDynamicManipulating.dynamic
-																.document[key];
-														const formattedFileName = fileName.replace(
-															/([a-z])([A-Z])/g,
-															'$1 $2',
-														);
-														return (
-															<DropdownItem key={key}>
-																<Button
-																	onClick={() => {
-																		setDocumentAvaliation(
-																			datesDynamicManipulating
-																				.dynamic.document[
-																				key
-																			],
-																		);
-																		documentController(
-																			'dynamic',
-																			datesDynamicManipulating
-																				.dynamic.document[
-																				key
-																			],
-																		);
-																	}}>
-																	<Icon
-																		color='warning'
-																		icon='Check'
-																	/>{' '}
-																	{formattedFileName}
-																</Button>
-															</DropdownItem>
-														);
-													})}
-											</>
-										</DropdownMenu>
-									</Dropdown>
-								</div>
-
-								{documentAvaliation &&
-									(loadingSearchDocument ? (
-										<div>
-											<h1>Ops, peraí que o documento tá se escondendo...</h1>
-											<Spinner />
-										</div>
-									) : (
-										<>
-											{manipulatingTable && documentAvaliation != 'add' && (
-												<div className='col-12'>
-													<FormGroup
-														id='customerName'
-														label={
-															documentAvaliation ==
-															'registration_form'
-																? 'Ficha de Registro'
-																: documentAvaliation ==
-																	  'experience_contract'
-																	? 'Contrato de Experiencia'
-																	: documentAvaliation ==
-																		  'hours_extension'
-																		? 'Acordo de Prorrogação de Horas'
-																		: documentAvaliation ==
-																			  'hours_compensation'
-																			? 'Acordo de Compensação de Horas'
-																			: documentAvaliation ==
-																				  'transport_voucher'
-																				? 'Solitação de Vale Transporte'
-																				: documentAvaliation.replace(
-																						/([a-z])([A-Z])/g,
-																						'$1 $2',
-																					)
-														}>
-														<InputGroup>
-															<Input
-																ref={inputFile}
-																type='file'
-																onChange={(
-																	event: React.ChangeEvent<HTMLInputElement>,
-																) => {
-																	const file =
-																		event.target.files?.[0]; // Pega o primeiro arquivo selecionado
-																	if (file) {
-																		formik.setFieldValue(
-																			'document',
-																			file,
-																		); // Atualiza o valor no Formik
-																	}
-																}}
-															/>
-															<Button
-																isOutline
-																color='light'
-																icon={
-																	pathDocumentMain
-																		? 'Autorenew'
-																		: 'CloudUpload'
-																}>
-																{pathDocumentMain
-																	? 'Edit'
-																	: 'Upload'}
-															</Button>
-														</InputGroup>
-													</FormGroup>
-												</div>
-											)}
-
-											{manipulatingTable && documentAvaliation == 'add' && (
-												<>
-													<FormGroup
-														id='customerName'
-														label={'Nome do novo documento'}>
-														<Input
-															id='documentNameAdd'
-															type='text'
-															value={formik.values.documentNameAdd}
-															className='text-capitalize'
-															onChange={(
-																event: React.ChangeEvent<HTMLInputElement>,
-															) => {
-																formik.setFieldValue(
-																	'documentNameAdd',
-																	event.target.value,
-																);
-															}}
-														/>
-													</FormGroup>
-
-													<FormGroup id='customerName'>
-														<InputGroup>
-															<Input
-																type='file'
-																onChange={(
-																	event: React.ChangeEvent<HTMLInputElement>,
-																) => {
-																	const file =
-																		event.target.files?.[0];
-																	if (file) {
-																		formik.setFieldValue(
-																			'document',
-																			file,
-																		);
-																	}
-																}}
-															/>
-															<Button
-																isOutline
-																color='light'
-																icon={
-																	pathDocumentMain
-																		? 'Autorenew'
-																		: 'CloudUpload'
-																}>
-																{pathDocumentMain
-																	? 'Edit'
-																	: 'Upload'}
-															</Button>
-														</InputGroup>
-													</FormGroup>
-												</>
-											)}
-
-											{pathDocumentMain && typeDocument && (
-												<div className='col-12'>
-													<FormGroup
-														label='Visualizar'
-														className='gap-2 d-flex flex-column'>
-														<div>
-															<Button
-																isLink={true}
-																icon='Description'
-																color='info'
-																onClick={() => {
-																	setView('document');
-																	setOpenDocument(true);
-																}}>
-																Documento
-															</Button>
-														</div>
-													</FormGroup>
-													{step == 2 &&
-														![
-															'registration_form',
-															'experience_contract',
-															'hours_extension',
-															'hours_compensation',
-															'transport_voucher',
-														].includes(documentAvaliation) && (
-															<FormGroup>
-																<div>
-																	<div>
-																		<Button
-																			isLink={true}
-																			onClick={
-																				deleteDocumentDynamic
-																			}
-																			icon='Delete'
-																			color='danger'>
-																			Deletar
-																		</Button>
-																	</div>
-																</div>
-															</FormGroup>
-														)}
-												</div>
-											)}
-										</>
-									))}
-							</>
-						)}
-
-						{controllerBodyManipulating == 'signature' && (
-							<>
-								<span>
-									Abaixo, selecione seus arquivos, confira as assinaturas e gere
-									seu documento assinado.
-								</span>
-
-								<div className='col-12'>
-									<Dropdown>
-										<DropdownToggle>
-											<Button
-												color='light'
-												isLight
-												icon='FolderOpen'
-												className='col-12'>
-												Selecione um Documento
-											</Button>
-										</DropdownToggle>
-										<DropdownMenu breakpoint='xxl'>
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController(
-															'registration_form',
-															'',
-															true,
-														)
-													}>
-													<Icon
-														//@ts-ignore
-														color={
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'registration_form',
-															) &&
-															statusAllSignature.some(
-																(item: any) =>
-																	item.picture
-																		.toLowerCase()
-																		.includes(
-																			'registration_form',
-																		) &&
-																	item.status == 'approved',
-															)
-																? 'success'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'registration_form',
-																					) &&
-																				item.status ==
-																					'reproved',
-																	  )
-																	? 'danger'
-																	: 'warning'
-														}
-														//@ts-ignore
-														icon={
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'registration_form',
-															) &&
-															statusAllSignature.some(
-																(item: any) =>
-																	item.picture
-																		.toLowerCase()
-																		.includes(
-																			'registration_form',
-																		) &&
-																	item.status == 'approved',
-															)
-																? 'Check'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'registration_form',
-																					) &&
-																				item.status ==
-																					'reproved',
-																	  )
-																	? 'Close'
-																	: ' Info'
-														}
-													/>
-													Ficha de Registro
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController(
-															'experience_contract',
-															'',
-															true,
-														)
-													}>
-													<Icon
-														//@ts-ignore
-														color={
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'experience_contract' &&
-																	statusAllSignature.some(
-																		(item: any) =>
-																			item.picture
-																				.toLowerCase()
-																				.includes(
-																					'experience_contract',
-																				) &&
-																			item.status ==
-																				'approved',
-																	),
-															)
-																? 'success'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'experience_contract',
-																					) &&
-																				item.status ==
-																					'approved',
-																	  )
-																	? 'Danger'
-																	: 'warning'
-														}
-														//@ts-ignore
-														icon={
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'experience_contract' &&
-																	statusAllSignature.some(
-																		(item: any) =>
-																			item.picture
-																				.toLowerCase()
-																				.includes(
-																					'experience_contract',
-																				) &&
-																			item.status ==
-																				'approved',
-																	),
-															)
-																? 'Check'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'experience_contract',
-																					) &&
-																				item.status ==
-																					'approved',
-																	  )
-																	? 'Close'
-																	: 'Info'
-														}
-													/>
-													Contrato de Experiência
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController(
-															'hours_extension',
-															'',
-															true,
-														)
-													}>
-													<Icon
-														//@ts-ignore
-														color={
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'hours_extension',
-															) &&
-															statusAllSignature.some(
-																(item: any) =>
-																	item.picture
-																		.toLowerCase()
-																		.includes(
-																			'hours_extension',
-																		) &&
-																	item.status == 'approved',
-															)
-																? 'success'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'hours_extension',
-																					) &&
-																				item.status ==
-																					'reproved',
-																	  )
-																	? 'danger'
-																	: 'warning'
-														}
-														//@ts-ignore
-														icon={
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'hours_extension',
-															) &&
-															statusAllSignature.some(
-																(item: any) =>
-																	item.picture
-																		.toLowerCase()
-																		.includes(
-																			'hours_extension',
-																		) &&
-																	item.status == 'approved',
-															)
-																? 'Check'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'hours_extension',
-																					) &&
-																				item.status ==
-																					'reproved',
-																	  )
-																	? 'Close'
-																	: 'Info'
-														}
-													/>
-													Acordo de Prorrogação de Horas
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController(
-															'hours_compensation',
-															'',
-															true,
-														)
-													}>
-													<Icon
-														//@ts-ignore
-														color={
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'hours_compensation' &&
-																	statusAllSignature.some(
-																		(item: any) =>
-																			item.picture
-																				.toLowerCase()
-																				.includes(
-																					'hours_compensation',
-																				) &&
-																			item.status ==
-																				'approved',
-																	),
-															)
-																? 'success'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'hours_compensation',
-																					) &&
-																				item.status ==
-																					'reproved',
-																	  )
-																	? 'danger'
-																	: 'warning'
-														}
-														//@ts-ignore
-														icon={
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'hours_compensation' &&
-																	statusAllSignature.some(
-																		(item: any) =>
-																			item.picture
-																				.toLowerCase()
-																				.includes(
-																					'hours_compensation',
-																				) &&
-																			item.status ==
-																				'approved',
-																	),
-															)
-																? 'Check'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'hours_compensation',
-																					) &&
-																				item.status ==
-																					'reproved',
-																	  )
-																	? 'Close'
-																	: 'Info'
-														}
-													/>
-													Acordo de Compensação de Horas
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem>
-												<Button
-													onClick={() =>
-														documentController(
-															'transport_voucher',
-															'',
-															true,
-														)
-													}>
-													<Icon
-														//@ts-ignore
-														color={
-															statusAllSignature &&
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'transport_voucher',
-															) &&
-															statusAllSignature.some(
-																(item: any) =>
-																	item.picture
-																		.toLowerCase()
-																		.includes(
-																			'transport_voucher',
-																		) &&
-																	item.status == 'approved',
-															)
-																? 'success'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'transport_voucher',
-																					) &&
-																				item.status ==
-																					'reproved',
-																	  )
-																	? 'danger'
-																	: 'warning'
-														}
-														//@ts-ignore
-														icon={
-															statusAllSignature &&
-															datesDynamicManipulating?.documentSignature &&
-															Object.values(
-																datesDynamicManipulating.documentSignature,
-															).find(
-																(key) =>
-																	typeof key === 'string' &&
-																	key.toLowerCase() ===
-																		'transport_voucher',
-															) &&
-															statusAllSignature.some(
-																(item: any) =>
-																	item.picture
-																		.toLowerCase()
-																		.includes(
-																			'transport_voucher',
-																		) &&
-																	item.status == 'approved',
-															)
-																? 'Check'
-																: statusAllSignature.some(
-																			(item: any) =>
-																				item.picture
-																					.toLowerCase()
-																					.includes(
-																						'transport_voucher',
-																					) &&
-																				item.status ==
-																					'reproved',
-																	  )
-																	? 'Close'
-																	: 'Info'
-														}
-													/>
-													Solicitação de Vale Transporte
-												</Button>
-											</DropdownItem>
-
-											<DropdownItem isDivider />
-
-											<DropdownItem isText>
-												Documentos Adicionais
-											</DropdownItem>
-
-											<>
-												{datesDynamicManipulating &&
-													datesDynamicManipulating.dynamic &&
-													Object.keys(
-														datesDynamicManipulating.dynamic.document,
-													).map((key) => {
-														const fileName =
-															datesDynamicManipulating.dynamic
-																.document[key];
-														const formattedFileName = fileName.replace(
-															/([a-z])([A-Z])/g,
-															'$1 $2',
-														);
-														return (
-															<DropdownItem key={key}>
-																<Button
-																	onClick={() => {
-																		setDocumentAvaliation(
-																			datesDynamicManipulating
-																				.dynamic.document[
-																				key
-																			],
-																		);
-																		documentController(
-																			'dynamic',
-																			datesDynamicManipulating
-																				.dynamic.document[
-																				key
-																			],
-																			true,
-																		);
-																		setIsDynamic(true);
-																	}}>
-																	<Icon
-																		//@ts-ignore
-																		color={
-																			datesDynamicManipulating?.documentSignature &&
-																			Object.values(
-																				datesDynamicManipulating.documentSignature,
-																			).find(
-																				(key) =>
-																					key ===
-																					fileName,
-																			) &&
-																			statusAllSignature.some(
-																				(item: any) =>
-																					item.picture
-																						.toLowerCase()
-																						.includes(
-																							fileName.toLowerCase(),
-																						) &&
-																					item.status ==
-																						'approved',
-																			)
-																				? 'success'
-																				: statusAllSignature.some(
-																							(
-																								item: any,
-																							) =>
-																								item.picture
-																									.toLowerCase()
-																									.includes(
-																										fileName.toLowerCase(),
-																									) &&
-																								item.status ==
-																									'reproved',
-																					  )
-																					? 'danger'
-																					: 'warning'
-																		}
-																		//@ts-ignore
-																		icon={
-																			datesDynamicManipulating?.documentSignature &&
-																			Object.values(
-																				datesDynamicManipulating.documentSignature,
-																			).find(
-																				(key) =>
-																					key ===
-																					fileName,
-																			) &&
-																			statusAllSignature.some(
-																				(item: any) =>
-																					item.picture
-																						.toLowerCase()
-																						.includes(
-																							fileName.toLowerCase(),
-																						) &&
-																					item.status ==
-																						'approved',
-																			)
-																				? 'Check'
-																				: statusAllSignature.some(
-																							(
-																								item: any,
-																							) =>
-																								item.picture
-																									.toLowerCase()
-																									.includes(
-																										fileName.toLowerCase(),
-																									) &&
-																								item.status ==
-																									'reproved',
-																					  )
-																					? 'Close'
-																					: 'Info'
-																		}
-																	/>
-																	{formattedFileName}
-																</Button>
-															</DropdownItem>
-														);
-													})}
-											</>
-										</DropdownMenu>
-									</Dropdown>
-								</div>
-
-								{documentAvaliation &&
-									(loadingSearchDocument ? (
-										<div>
-											<h1>Ops, peraí que o documento tá se escondendo...</h1>
-											<Spinner />
-										</div>
-									) : (
-										<>
-											{documentAvaliation && (
-												<h5>
-													{documentAvaliation == 'registration_form'
-														? 'Ficha de Registro'
-														: documentAvaliation ==
-															  'experience_contract'
-															? 'Contrato de Experiencia'
-															: documentAvaliation ==
-																  'hours_extension'
-																? 'Acordo de Prorrogação de Horas'
-																: documentAvaliation ==
-																	  'hours_compensation'
-																	? 'Acordo de Compensação de Horas'
-																	: documentAvaliation ==
-																		  'transport_voucher'
-																		? 'Solitação de Vale Transporte'
-																		: documentAvaliation ==
-																			  'view'
-																			? ''
-																			: documentAvaliation.replace(
-																					/([a-z])([A-Z])/g,
-																					'$1 $2',
-																				)}
-												</h5>
-											)}
-
-											{documentAvaliation && (
-												<>
-													<FormGroup
-														label='Visualizar'
-														className='gap-2 d-flex flex-column'>
-														<div>
-															<Button
-																isLink={true}
-																icon='Description'
-																color='info'
-																onClick={() => {
-																	setView('document');
-																	setOpenDocument(true);
-																}}>
-																Documento
-															</Button>
-														</div>
-														<div>
-															<Button
-																isLink={true}
-																icon='Mode'
-																color='storybook'
-																onClick={() => {
-																	setView('signature');
-																	setOpenDocument(true);
-																}}>
-																Assinatura
-															</Button>
-														</div>
-														<>
-															{typeDocumentSignatureFull &&
-																pathDocumentSignatureFull &&
-																statusSignature && (
-																	<div>
-																		<Button
-																			isLink={true}
-																			icon='Verified'
-																			color='warning'
-																			onClick={() => {
-																				setView(
-																					'documentSignature',
-																				);
-																				setOpenDocument(
-																					true,
-																				);
-																			}}>
-																			Documento Assinado
-																		</Button>
-																	</div>
-																)}
-														</>
-													</FormGroup>
-
-													{statusSignature && (
-														<FormGroup label='Gerar'>
-															<div>
-																<Button
-																	isLink={true}
-																	icon='LibraryAdd'
-																	color='success'
-																	onClick={
-																		generateDocumentSignature
-																	}>
-																	Documento Assinado
-																</Button>
-															</div>
-														</FormGroup>
-													)}
-												</>
-											)}
-										</>
-									))}
-							</>
-						)}
-
 						{controllerBodyManipulating == 'observation' && (
 							<div className='col-12'>
 								<Card isCompact borderSize={2} shadow='none' className='mb-0'>
@@ -3536,6 +3023,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		</section>
 	);
 };
+
 DemissionTable.defaultProps = {
 	isFluid: false,
 };
