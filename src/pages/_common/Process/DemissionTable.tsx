@@ -155,8 +155,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			let dynamic = Object.values(response.date.dynamic.communication.document);
 			let signature = response.date.dynamic.communication.complet
 
-			
-
+		
 			dynamic = dynamic
 			//@ts-ignore
 			.map(item => item.replace(/^\/+|\/+$/g, '').replace(/\//g, '').trim())  // Remove barras no começo e final
@@ -246,6 +245,9 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	};
 
 	const formSubmitController = async (action: string, update:any = null) => {
+		let fileName;
+		let paramsJobPictureDismissal;
+		let response;
 		switch (action) {
 			case 'communication':
 				setSpinnerManipulating(true);
@@ -262,19 +264,19 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					);
 					return;
 				}
-				const fileName = formik.values.documentNameAdd
+				fileName = formik.values.documentNameAdd
 					.replace(/\s+(.)/g, (match, group1) => group1.toUpperCase())
 					.replace(/^\w/, (c) => c.toUpperCase())
 					.replace(/\s+/g, '');
 
-				const paramsJobPictureDismissal = {
+				paramsJobPictureDismissal = {
 					file: update ? update.file : formik.values.document,
 					name: 'dismissal_communication_dynamic',
 					id: manipulatingTable.id,
 					signature: false,
 					dynamic: update ? update.name :fileName,
 				};
-				const response = await JobPicture(paramsJobPictureDismissal);
+				response = await JobPicture(paramsJobPictureDismissal);
 				if (response.status == 200) {
 					const response = await Job_Check_Dismissal(manipulatingTable.id)
 					setDatesDynamicManipulating(response.date)
@@ -289,6 +291,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							autoClose: 5000, //
 						},
 					);
+					updateStatusCandidate(manipulatingTable, null, null);
 					setDocumentAvaliation(null);
 					setIsDynamic(false);
 				} else {
@@ -304,9 +307,64 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				}
 				setSpinnerManipulating(false);
 				break;
+			case 'kitDismissal':
+				setSpinnerManipulating(true);
+				if ((!formik.values.document || !formik.values.documentNameAdd)	&& !update) {
+					toast(
+						<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+							Antes de salvar, é necessário fazer o upload do arquivo e informar o
+							nome que ele deverá ter.
+						</Toasts>,
+						{
+							closeButton: true,
+							autoClose: 5000, //
+						},
+					);
+					return;
+				}
+				fileName = formik.values.documentNameAdd
+					.replace(/\s+(.)/g, (match, group1) => group1.toUpperCase())
+					.replace(/^\w/, (c) => c.toUpperCase())
+					.replace(/\s+/g, '');
 
+				paramsJobPictureDismissal = {
+					file: update ? update.file : formik.values.document,
+					name: 'dismissal_kit_dynamic',
+					id: manipulatingTable.id,
+					signature: false,
+					dynamic: update ? update.name :fileName,
+				};
+				response = await JobPicture(paramsJobPictureDismissal);
+				if (response.status == 200) {
+					const response = await Job_Check_Dismissal(manipulatingTable.id)
+					setDatesDynamicManipulating(response.date)
+					formik.setFieldValue('document', '');
+					formik.setFieldValue('documentNameAdd', '');
+					toast(
+						<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso!'}>
+							O arquivo foi salvo com sucesso.
+						</Toasts>,
+						{
+							closeButton: true,
+							autoClose: 5000, //
+						},
+					);
+					updateStatusCandidate(manipulatingTable, null, null);
+					setDocumentAvaliation(null);
+					setIsDynamic(false);
+				} else {
+					toast(
+						<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+							Erro ao salvar o documento, tente mais tarde.
+						</Toasts>,
+						{
+							closeButton: true,
+							autoClose: 5000, //
+						},
+					);
+				}
+				setSpinnerManipulating(false);
 				break;
-
 			default:
 				console.log(action);
 				break;
@@ -482,8 +540,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			case 'cancelDemission':
 				cancelDemission(manipulating);
 				break;
-			case 'finishAdmission':
-				// finishAdmission()
+			case 'finishDismissal':
+				finishDismissal()
 				break;
 			case 'nextStep':
 				updateStatusCandidate(manipulating, true);
@@ -583,6 +641,25 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					}
 				)
 				break;
+			case 'dismissal_kit_dynamic':
+				responseSignature = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '1', dynamic.replace(/\//g, ''));
+				responseDocument  = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '0', dynamic.replace(/\//g, ''));
+			
+				const formattedFileNameNewKit = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\//g, '');
+				toast(
+					<Toasts
+						icon={ 'Check' }
+						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Sucesso!'}
+					>
+						{formattedFileNameNewKit}
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+				break;
 			case 'add':
 				setDocumentAvaliation('add');
 				break;
@@ -600,6 +677,26 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					//@ts-ignore
 					const filteredPictures = response.pictures.some(item =>
 						item.picture.toLowerCase() === `dismissal_signature_communication` &&
+						item.status === 'approved'
+					 );					  
+					setStatusSignature(filteredPictures);
+				}
+			}
+		};
+
+		if(step == 3){
+			console.log('aqui step 3')
+			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator);
+			if(response.status == 200){
+				setStatusAllSignature(response.pictures)
+				if(document != 'dismissal_kit_dynamic'){
+					//@ts-ignore
+					const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
+					setStatusSignature(filteredPictures);
+				}else{
+					//@ts-ignore
+					const filteredPictures = response.pictures.some(item =>
+						item.picture.toLowerCase() === `dismissal_signature_kit` &&
 						item.status === 'approved'
 					 );					  
 					setStatusSignature(filteredPictures);
@@ -825,11 +922,14 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						[collaborators.CPF_collaborator]: true,
 					}));
 					response = await Job_Check_Dismissal(job.id)
+					console.log('response',response)
 					if(response.status == 200){
 						setDatesDynamicManipulating(response.date);
 						// const obligation = Object.keys(response.date.obligation);
 						let dynamic = Object.values(response.date.dynamic.communication.document);
-						let signature = response.date.dynamic.communication.complet						
+						let signature = response.date.dynamic.communication.complet	
+						// console.log('dynamic',dynamic)
+						// console.log('signature',signature)
 						if(dynamic){
 							dynamic = dynamic
 							//@ts-ignore
@@ -838,7 +938,12 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							.filter(item => item !== "");
 						}
 						if(signature){
-					
+							signature = Object.values(signature)
+							//@ts-ignore
+							.map(item => item.replace(/\//g, '').trim())  // Remove todas as barras
+							//@ts-ignore
+							.filter(item => item !== "");
+
 							const documentDynamic = dynamic.every(document =>
 								Object.values(signature)
 								//@ts-ignore
@@ -846,8 +951,9 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								.includes(document)
 							);
 
+
 							if(documentDynamic){
-								updateStatusCandidate(job);
+								updateStatusCandidate(job, null, true);
 							};
 						}
 					}
@@ -866,6 +972,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					...prevStates,
 					[collaborators.CPF_collaborator]: true,
 				}));
+				setAvalidDocument(true)
 				setManipulatingTable(job);
 				response = await JobFile(job.id,'dismissal_medical','0' ,'0')
 				if(response.status == 200){
@@ -1066,13 +1173,12 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 	const AvaliationPicture = async (avaliation: boolean) => {
 		try {
-
 			const params = {
 				status: avaliation ? 'approved' : 'reproved',
 				picture:
 					view == 'signature' && step == 1
-						? `dismissal_signature_communication_${documentAvaliation}`
-						: `dismissal_${documentAvaliation}`,
+						? `Dismissal_Signature_Communication`
+						: `Dismissal_Signature_Kit`,
 				id_user: userData.id,
 			};
 			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
@@ -1094,6 +1200,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								},
 							);
 						} else {
+							updateStatusCandidate(manipulatingTable, null, false);
 							setStatusSignature(false)
 							toast(
 								<Toasts
@@ -1159,6 +1266,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							);
 						} else {
 							setStatusSignature(false)
+							updateStatusCandidate(manipulatingTable, null, false);
 							toast(
 								<Toasts
 									icon={'Check'}
@@ -1211,9 +1319,10 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	};
 
 	const deleteDocumentDynamic = async () => {
+		let response;
 		switch (manipulatingTable.demission.step) {
 			case 1:
-				const response = await Job_Dynamic(documentAvaliation, manipulatingTable.id, 'communication');
+				response = await Job_Dynamic(documentAvaliation, manipulatingTable.id, 'communication');
 				if (response && response.status == 200) {
 					handleUpcomingEdit();
 					toast(
@@ -1244,21 +1353,61 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					);
 				}
 				break;
-		
+			case 3:
+				response = await Job_Dynamic(documentAvaliation, manipulatingTable.id, 'kitDismissal');
+				if (response && response.status == 200) {
+					handleUpcomingEdit();
+					toast(
+						<Toasts
+							icon={'Check'}
+							iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={'Sucesso!'}>
+							Documento deletado com sucesso!
+						</Toasts>,
+						{
+							closeButton: true,
+							autoClose: 5000, //
+						},
+					);
+					return;
+				}else{
+					toast(
+						<Toasts
+							icon={'Close'}
+							iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title={'Erro!'}>
+							Erro ao deletar documento, tente mais tarde e verifique sua internet.
+						</Toasts>,
+						{
+							closeButton: true,
+							autoClose: 5000, //
+						},
+					);
+				}
+				break;
 			default:
 				break;
 		}
 	};
 
 	const updateStatusCandidate = async (dates: any, isStep:any = null, newStatus:any = null) => {
+		setDocumentAvaliation(null)
+		setPathDocumentMain(null)
+		setTypeDocument(null)
+		setPathDocumentSignature(null)
+		setTypeDocumentSignature(null)
+		setAllDocument(null)
+		setAllAssignature(null)
 		const step = dates.demission.step;
 		const status = dates.demission.status;
 
 		if(isStep == null){
 			if(newStatus){
 				dates.demission.status = true;
-			}else{
+			}else if(newStatus == false){
 				dates.demission.status = false;
+			}else{
+				dates.demission.status = null;
 			}
 			const params = {
 				demission: JSON.stringify(dates.demission)
@@ -1353,62 +1502,49 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		setModalSignedDocument(true);
 	};
 
-	const finishAdmission = async () => {
-		return;
-		// let candidate = candidates.find((item: { cpf: string | undefined; }) => item.cpf === manipulating.cpf);
-		// if(!candidate.verify || !candidate.status){
-		// 	toast(
-		// 		<Toasts
-		// 			icon={ 'Close' }
-		// 			iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-		// 			title={ 'Erro!'}
-		// 		>
-		// 			Aprove o candidato antes de avançar de etapa.
-		// 		</Toasts>,
-		// 		{
-		// 			closeButton: true ,
-		// 			autoClose: 5000 //
-		// 		}
-		// 	)
-		// 	return
-		// }
-		// const params = {
-		// 	CPF_collaborator:manipulating.cpf
-		// }
-		// const update = await Job(params, manipulating.id)
-		// if(update.status == 200 ){
-		// 	const newCandidates = candidates.filter((item: { cpf: string | undefined; }) => item.cpf !== manipulating.cpf);
-		// 	setCandidates(newCandidates)
-		// 	setCandidatesStep(newCandidates)
-		// 	toast(
-		// 		<Toasts
-		// 			icon={ 'Check' }
-		// 			iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-		// 			title={ 'Sucesso!'}
-		// 		>
-		// 			Parabéns, {Mask('firstName',manipulating.name)} foi adicionado(a) a equipe.
-		// 		</Toasts>,
-		// 		{
-		// 			closeButton: true ,
-		// 			autoClose: 5000 //
-		// 		}
-		// 	)
-		// 	return
-		// }
-		// toast(
-		// 	<Toasts
-		// 		icon={ 'Close' }
-		// 		iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-		// 		title={ 'Erro!'}
-		// 	>
-		// 		Algo deu errado. Tente novamente mais tarde!
-		// 	</Toasts>,
-		// 	{
-		// 		closeButton: true ,
-		// 		autoClose: 5000 //
-		// 	}
-		// )
-		// console.log('finalizando:', manipulating.name)
+	const finishDismissal = async () => {
+		if(!manipulating.demission.status || !manipulating.demission.status){
+			toast(
+				<Toasts
+					icon={ 'Close' }
+					iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={ 'Erro!'}
+				>
+					Aprove o colaborador antes de finalizar a demissão.
+				</Toasts>,
+				{
+					closeButton: true ,
+					autoClose: 5000 //
+				}
+			)
+			return
+		};
+		manipulating.demission.step = step + 1
+		manipulating.demission.status = null
+		const params = {
+			demission: JSON.stringify(manipulating)
+		};
+		const update = await Job(params, manipulating.id);
+		if(update.status == 200){	
+			const stepCollaborator = collaborators.filter(
+				(collaborator: any) => collaborator.demission.step === step,
+			);
+			setCollaboratorsStep(stepCollaborator);
+			toast(
+				<Toasts
+					icon={ 'Check' }
+					iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={ 'Sucesso!'}
+				>
+					Parabéns, {Mask('firstName',manipulating.name)} foi removido(a) da equipe.
+				</Toasts>,
+				{
+					closeButton: true ,
+					autoClose: 5000 //
+				}
+			)
+		}
+		
 	};
 
 	const cancelDemission = async (job: any) => {
@@ -1519,8 +1655,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								icon='Check'
 								color='danger'
 								isLink={true}
-								onClick={() => menuController('finishAdmission')}>
-								Finalizar admissão
+								onClick={() => menuController('finishDismissal')}>
+								Finalizar demissão
 							</Button>
 						)}
 					</li>
@@ -2463,7 +2599,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						{controllerBodyManipulating == 'kitDismissal' && (
 							<>
 								{manipulatingTable &&
-								manipulatingTable.demission.solicitation == 'company' ? (
 									<>
 										<span>
 											Abaixo, selecione e adicione seus arquivos, e envie para
@@ -2588,7 +2723,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 																					],
 																				);
 																				documentController(
-																					'dynamic',
+																					'dismissal_kit_dynamic',
 																					datesDynamicManipulating
 																						.dynamic
 																						.document[
@@ -2673,7 +2808,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 																					file:file,
 																					name:fileName
 																				}
-																				formSubmitController('communication', updateProps);
+																				formSubmitController('kitDismissal', updateProps);
 																			} else {
 																				toast(
 																					<Toasts
@@ -2737,6 +2872,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 																		icon='Mode'
 																		color='storybook'
 																		onClick={() => {
+																			setAvalidDocument(true)
 																			setView('signature');
 																			setOpenDocument(true);
 																		}}>
@@ -2788,28 +2924,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 											))
 										}
 									</>
-								) : (
-									<>
-										<span>
-											Abaixo, está a carta de demissão do colaborador.
-										</span>
-
-										<div className='col-12'>
-											<Button
-												className='col-12'
-												icon='Markunread'
-												color='secondary'
-												isLight={true}
-												onClick={() => {
-													setView(null);
-													setOpenDocument(true);
-												}}
-												size={'lg'}>
-												Carta a Punho
-											</Button>
-										</div>
-									</>
-								)}
+								}
 
 								{documentAvaliation == 'add' && (
 									<>
@@ -2835,7 +2950,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 										<FormGroup id='customerName'>
 											<InputGroup>
 												<Input
-													
 													type='file'
 													accept='application/pdf'
 													onChange={(
@@ -3024,7 +3138,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 					</div>
 				</OffCanvasBody>
-				{controllerBodyManipulating == 'communication' && documentAvaliation == 'add' && (
+				{(controllerBodyManipulating == 'communication' || controllerBodyManipulating == 'kitDismissal') && documentAvaliation == 'add' && (
 					<div className='row m-0'>
 						<div className='col-12 p-3'>
 							<Button

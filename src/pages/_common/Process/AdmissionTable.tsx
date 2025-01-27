@@ -552,15 +552,12 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			const response = await Signatures(manipulatingTable.cpf);
 			if(response.status == 200){
 				setStatusAllSignature(response.pictures)
-				if(document != 'dynamic'){
-					//@ts-ignore
-					const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
-					setStatusSignature(filteredPictures);
-				}else{
-					//@ts-ignore
-					const filteredPictures = response.pictures.some(item => item.picture.includes(dynamic) && item.status == 'approved' );
-					setStatusSignature(filteredPictures);
-				}
+				//@ts-ignore
+				const filteredPictures = response.pictures.some(item => 
+					item.picture.toLowerCase() === `admission_signature` &&
+					item.status === 'approved'
+				);
+				setStatusSignature(filteredPictures);
 			}
 		};
 	
@@ -654,19 +651,27 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
 					.filter(item => item !== "");;
 					const documentSignatures = Object.values(response.date.documentSignature)
-					const obligationExists = obligation.every(required =>
-						documentSignatures.some(signature =>
+
+					const obligationExists = obligation.every(required => {
+						const lowerRequired = required.toLowerCase();
+						if (lowerRequired === "medical") return true; // Ignora "medical"
+						return documentSignatures.some(signature => {
 							//@ts-ignore
-							signature.toLowerCase().includes(required.toLowerCase())
-						)
-					);
+						  const lowerSignature = signature.toLowerCase();
+						  return lowerSignature.includes(lowerRequired);
+						});
+					});
+					
+
 					const dynamicExists = dynamic.every(required =>
 						documentSignatures.some(signature =>
 						  //@ts-ignore
 						  signature.toLowerCase().includes(required.toLowerCase())
 						)
 					);
-					if (obligationExists && dynamicExists && allSignatureApproved) {
+					// console.log('obligationExists: ',obligation, 'documentSignatures: ',documentSignatures)	
+					console.log('obligationExists: ',obligationExists, 'dynamicExists: ',dynamicExists, 'allSignatureApproved: ',allSignatureApproved)
+					if (obligationExists && dynamicExists) {
 						updateStatusCandidate(candidate, true, true);
 					};
 				};
@@ -717,7 +722,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		try{
 			const params = {
 				status : avaliation ? 'approved': 'reproved',
-				picture: view == 'signature' ? `admission_signature_${documentAvaliation}`: documentAvaliation,
+				picture: view == 'signature' ? `Admission_Signature`: documentAvaliation,
 				id_user: userData.id
 			}
 			const response:any = await PicturePath(params, manipulatingTable.cpf);
@@ -1804,12 +1809,26 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 												<Button
 													onClick={()=>documentController('registration_form', '', true)}
 														>
-														<Icon 
-															//@ts-ignore
-															color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'registration_form') && statusAllSignature.some(item => item.picture.toLowerCase().includes('registration_form') && item.status == 'approved' ) ? 'success' : statusAllSignature.some(item => item.picture.toLowerCase().includes('registration_form') && item.status == 'reproved' )? 'danger' : 'warning'}
-															//@ts-ignore
-															icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'registration_form') && statusAllSignature.some(item => item.picture.toLowerCase().includes('registration_form') && item.status == 'approved' ) ? 'Check'   : statusAllSignature.some(item => item.picture.toLowerCase().includes('registration_form') && item.status == 'reproved' )? 'Close' :' Info'} 
-														/> 
+														<Icon
+																color={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'registration_form'
+																	)
+																	? 'success'
+																	: 'warning'
+																}
+																icon={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'registration_form'
+																	)
+																	? 'Check'
+																	: 'Info'
+																}
+															/>
 														Ficha de Registro
 												</Button>
 											</DropdownItem>
@@ -1818,12 +1837,26 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 												<Button 
 															onClick={()=>documentController('experience_contract', '', true)}
 														>
-															<Icon 
-																//@ts-ignore
-																color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'experience_contract' && statusAllSignature.some(item => item.picture.toLowerCase().includes('experience_contract') && item.status == 'approved' )) ? 'success': statusAllSignature.some(item => item.picture.toLowerCase().includes('experience_contract') && item.status == 'approved' ) ? 'Danger' :'warning'}
-																//@ts-ignore
-																icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'experience_contract' && statusAllSignature.some(item => item.picture.toLowerCase().includes('experience_contract') && item.status == 'approved' )) ? 'Check'  : statusAllSignature.some(item => item.picture.toLowerCase().includes('experience_contract') && item.status == 'approved' ) ? 'Close' :'Info'} 
-															/> 
+															<Icon
+																color={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'experience_contract'
+																	)
+																	? 'success'
+																	: 'warning'
+																}
+																icon={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'experience_contract'
+																	)
+																	? 'Check'
+																	: 'Info'
+																}
+															/>
 															Contrato de Experiência
 												</Button>
 											</DropdownItem>
@@ -1832,12 +1865,26 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 												<Button
 															onClick={()=>documentController('hours_extension', '', true)}
 														>
-															<Icon 
-																//@ts-ignore
-																color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'hours_extension') && statusAllSignature.some(item => item.picture.toLowerCase().includes('hours_extension') && item.status == 'approved' )? 'success' : statusAllSignature.some(item => item.picture.toLowerCase().includes('hours_extension') && item.status == 'reproved' ) ? 'danger' : 'warning'}
-																//@ts-ignore
-																icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'hours_extension') && statusAllSignature.some(item => item.picture.toLowerCase().includes('hours_extension') && item.status == 'approved' )?  'Check' : statusAllSignature.some(item => item.picture.toLowerCase().includes('hours_extension') && item.status == 'reproved' )  ? 'Close' :'Info'} 
-															/>  
+															<Icon
+																color={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'hours_extension'
+																	)
+																	? 'success'
+																	: 'warning'
+																}
+																icon={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'hours_extension'
+																	)
+																	? 'Check'
+																	: 'Info'
+																}
+															/> 
 															Acordo de Prorrogação de Horas
 												</Button>
 											</DropdownItem>
@@ -1846,12 +1893,26 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 												<Button 
 													onClick={()=>documentController('hours_compensation', '', true)}
 												>
-													<Icon 
-														//@ts-ignore
-														color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'hours_compensation' && statusAllSignature.some(item => item.picture.toLowerCase().includes('hours_compensation') && item.status == 'approved' )) ? 'success' : statusAllSignature.some(item => item.picture.toLowerCase().includes('hours_compensation') && item.status == 'reproved' ) ? 'danger' : 'warning'}
-														//@ts-ignore
-														icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'hours_compensation' && statusAllSignature.some(item => item.picture.toLowerCase().includes('hours_compensation') && item.status == 'approved' )) ? 'Check' : statusAllSignature.some(item => item.picture.toLowerCase().includes('hours_compensation') && item.status == 'reproved' ) ? 'Close':'Info'} 
-													/> 
+													<Icon
+																color={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'hours_compensation'
+																	)
+																	? 'success'
+																	: 'warning'
+																}
+																icon={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'hours_compensation'
+																	)
+																	? 'Check'
+																	: 'Info'
+																}
+															/> 
 													Acordo de Compensação de Horas
 												</Button>
 											</DropdownItem>
@@ -1860,11 +1921,25 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 												<Button 
 															onClick={()=>documentController('transport_voucher', '', true)}
 														>
-															<Icon 
-																//@ts-ignore
-																color={statusAllSignature && datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'transport_voucher')  && statusAllSignature.some(item => item.picture.toLowerCase().includes('transport_voucher') && item.status == 'approved' ) ? 'success': statusAllSignature.some(item => item.picture.toLowerCase().includes('transport_voucher') && item.status == 'reproved' ) ? 'danger' : 'warning'} 
-																//@ts-ignore
-																icon ={statusAllSignature && datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => typeof key === 'string' && key.toLowerCase() === 'transport_voucher') && statusAllSignature.some(item => item.picture.toLowerCase().includes('transport_voucher') && item.status == 'approved' ) ? 'Check' : statusAllSignature.some(item => item.picture.toLowerCase().includes('transport_voucher') && item.status == 'reproved' ) ? 'Close' : 'Info'} 
+															<Icon
+																color={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'transport_voucher'
+																	)
+																	? 'success'
+																	: 'warning'
+																}
+																icon={
+																	datesDynamicManipulating &&
+    																datesDynamicManipulating.documentSignature &&
+																	Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																	key => typeof key === 'string' && key.toLowerCase() === 'transport_voucher'
+																	)
+																	? 'Check'
+																	: 'Info'
+																}
 															/> 
 															Solicitação de Vale Transporte
 												</Button>
@@ -1878,6 +1953,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 												{datesDynamicManipulating && datesDynamicManipulating.dynamic &&
 													Object.keys(datesDynamicManipulating.dynamic.document).map((key) => {
 														const fileName = datesDynamicManipulating.dynamic.document[key];
+														const originalFileName = datesDynamicManipulating.dynamic.document[key];
 														const formattedFileName = fileName.replace(/([a-z])([A-Z])/g, '$1 $2');
 														return (
 															<DropdownItem key={key}>
@@ -1888,11 +1964,27 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 																setIsDynamic(true)
 															}}
 															>
-																<Icon 
-																	//@ts-ignore
-																	color={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => key === fileName) && statusAllSignature.some(item => item.picture.toLowerCase().includes(fileName.toLowerCase()) && item.status == 'approved' ) ? 'success' : statusAllSignature.some(item => item.picture.toLowerCase().includes(fileName.toLowerCase()) && item.status == 'reproved' ) ? 'danger' : 'warning'} 
-																	//@ts-ignore
-																	icon ={datesDynamicManipulating?.documentSignature && Object.values(datesDynamicManipulating.documentSignature).find(key => key === fileName) && statusAllSignature.some(item => item.picture.toLowerCase().includes(fileName.toLowerCase()) && item.status == 'approved' ) ? 'Check'   : statusAllSignature.some(item => item.picture.toLowerCase().includes(fileName.toLowerCase()) && item.status == 'reproved' ) ? 'Close': 'Info'} 
+																<Icon
+																	color={
+																		datesDynamicManipulating &&
+																		datesDynamicManipulating.documentSignature &&
+																		Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																			key => typeof key === 'string' && key == originalFileName
+
+																		)
+																		? 'success'
+																		: 'warning'
+																	}
+																	icon={
+																		datesDynamicManipulating &&
+																		datesDynamicManipulating.documentSignature &&
+																		Object.values(datesDynamicManipulating?.documentSignature || {}).find(
+																		key => typeof key === 'string' && key == originalFileName
+																		
+																		)
+																		? 'Check'
+																		: 'Info'
+																	}
 																/> 
 																{formattedFileName}
 															</Button>
