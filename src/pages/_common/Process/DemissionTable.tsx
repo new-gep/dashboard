@@ -1605,17 +1605,20 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const response = await Job_Demissional(userData.cnpj);
-			if (response.status == 200) {
-				setCollaborators(response.job);
-				const stepOneCollaborators = response.job.filter(
-					(job: { demission: { step: number } }) => job.demission.step === 1,
-				);
-				setCollaboratorsStep(stepOneCollaborators);
+			try{
+				const response = await Job_Demissional(userData.cnpj);
+				if (response.status == 200) {
+					const stepOneCollaborators = response.job.filter(
+						(job: { demission: { step: number } }) => job.demission.step === 1,
+					);
+					setCollaboratorsStep(stepOneCollaborators);
+					return;
+				}
+			}catch(e){
+				console.log(e)
+			} finally {
 				setLoaderTable(true);
-				return;
 			}
-			setLoaderTable(true);
 		};
 		if (userData && userData.cnpj) {
 			fetchData();
@@ -1861,6 +1864,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							Processo de Demissão
 						</CardTitle>
 					</CardLabel>
+
 					{collaborators && collaborators.length > 0 && (
 						<div className='d-flex align-items-center justify-content-center gap-2'>
 							{step != 1 && (
