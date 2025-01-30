@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // @ts-ignore
 import ReactCreditCards, { Focused } from 'react-credit-cards-2';
 import Payment from 'payment';
@@ -17,7 +17,8 @@ import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 import ReactCreditCardsContainer from '../../../components/extras/ReactCreditCardsContainer';
 import useDarkMode from '../../../hooks/useDarkMode';
-
+import HumanShield from '../../../assets/humans/shield.png';
+import Spinner from '../../../components/bootstrap/Spinner';
 
 const validate = (values: {
 	name: string;
@@ -25,78 +26,101 @@ const validate = (values: {
 	cvc: number | string;
 	expiry: string;
 }) => {
-	const errors: {
-		name: string;
-		number: string;
-		cvc: number | string;
-		expiry: string;
-	} = {
-		name: '',
-		number: '',
-		cvc: '',
-		expiry: '',
-	};
+	const errors: Record<string, string> = {};
+	
 	if (!values.name) {
-		errors.name = 'Required';
+		errors.name = 'Obrigatório';
 	} else if (values.name.length < 7) {
-		errors.name = 'Must be 5 characters or more';
+		errors.name = 'Deve ter 7 caracteres ou mais';
 	} else if (!values.name.includes(' ')) {
-		errors.name = 'Must contain first and last name';
+		errors.name = 'Deve conter nome e sobrenome';
 	}
 
 	if (!values.number || values.number.includes('_')) {
-		errors.number = 'Required';
-	} else if (Payment.fns.validateCardNumber(values.number)) {
-		errors.number = 'Invalid Card Number';
+		errors.number = 'Obrigatório';
+	} else if (!Payment.fns.validateCardNumber(values.number)) {
+		errors.number = 'Número de cartão inválido';
 	}
 
 	if (!values.cvc) {
-		errors.cvc = 'Required';
+		errors.cvc = 'Obrigatório';
 	} else if (values.cvc.toString().length !== 3) {
-		errors.cvc = 'Must be 3 characters';
+		errors.cvc = 'Deve ter 3 números';
 	}
 
-	if (!values.expiry || values.expiry.includes('_')) {
-		errors.expiry = 'Required';
-	} else if (parseInt(values.expiry.slice(-2), 10) <= 20) {
-		errors.expiry = 'Must be valid date';
+
+	//# Antiga validação
+	// if (!values.expiry || values.expiry.includes('_')) {
+	// 	errors.expiry = 'Obrigatório';
+	// } else if (parseInt(values.expiry.slice(-2), 10) <= 20) {
+	// 	errors.expiry = 'Data de validade inválida';
+	// }
+
+	//# Nova validação para validar a data de validade
+	const [month, year] = values.expiry.split('/').map(Number);
+	const currentYear = new Date().getFullYear() % 100;
+	const currentMonth = new Date().getMonth() + 1; // Janeiro é 0
+
+	if (
+	!year ||
+	!month ||
+	year < currentYear ||
+	(year === currentYear && month < currentMonth)
+	) {
+		errors.expiry = 'Data de validade inválida';
 	}
 
 	return errors;
 };
 
+const saveCard = (values: {
+	name: string;
+	number: string;
+	cvc: number | string;
+	expiry: string;
+}) => {
+	values.number = values.number.replace(/\s/g, '')
+	values.cvc = values.cvc.toString()
+	console.log(values)
+}
+
 const CompanyWallet = () => {
 	const { darkModeStatus } = useDarkMode();
 
+	// const [cardList, setCardList] = useState<
+	// 	{ id: number; name: string; number: string; expiry: string; cvc: number | string }[]
+	// >([
+	// 	{
+	// 		id: 1,
+	// 		name: 'John Doe',
+	// 		number: '4134 1111 1111 1134',
+	// 		expiry: '12/21',
+	// 		cvc: 123,
+	// 	},
+	// 	{
+	// 		id: 2,
+	// 		name: 'John Doe',
+	// 		number: '5534 1111 1111 1198',
+	// 		expiry: '12/24',
+	// 		cvc: 234,
+	// 	},
+	// 	{
+	// 		id: 3,
+	// 		name: 'John Doe',
+	// 		number: '3700 000000 00002',
+	// 		expiry: '12/24',
+	// 		cvc: 234,
+	// 	},
+	// ]);
 	const [cardList, setCardList] = useState<
 		{ id: number; name: string; number: string; expiry: string; cvc: number | string }[]
-	>([
-		{
-			id: 1,
-			name: 'John Doe',
-			number: '4134 1111 1111 1134',
-			expiry: '12/21',
-			cvc: 123,
-		},
-		{
-			id: 2,
-			name: 'John Doe',
-			number: '5534 1111 1111 1198',
-			expiry: '12/24',
-			cvc: 234,
-		},
-		{
-			id: 3,
-			name: 'John Doe',
-			number: '3700 000000 00002',
-			expiry: '12/24',
-			cvc: 234,
-		},
-	]);
+	>([]);
 	const [selectedCardId, setSelectedCardId] = useState<number>(2);
 	const [modalStatus, setModalStatus] = useState<boolean>(false);
 	const selectedCard = cardList.find((f) => f.id === selectedCardId);
-
+	const [focused, setFocused] = useState<Focused>('number');
+	const [waiting, setWaiting] = useState<boolean>(false);
+	const handleInputFocus = ({ target }: { target: { name: Focused } }) => setFocused(target.name);
 	const formik = useFormik({
 		initialValues: {
 			name: '',
@@ -105,12 +129,14 @@ const CompanyWallet = () => {
 			cvc: '',
 		},
 		validate,
-		onSubmit: () => {
-			setCardList([...cardList, { id: cardList.length + 1, ...formik.values }]);
+		onSubmit: (values) => {
+			saveCard(values)
 		},
 	});
-	const [focused, setFocused] = useState<Focused>('number');
-	const handleInputFocus = ({ target }: { target: { name: Focused } }) => setFocused(target.name);
+
+	useEffect(() => {
+		console.log(cardList)
+	}, [cardList])
 
 	return (
 		<>
@@ -118,7 +144,7 @@ const CompanyWallet = () => {
 				<CardHeader>
 					<CardLabel icon='Style' iconColor='info'>
 						<CardTitle tag='div' className='h5'>
-							My Wallet
+							Carteira
 						</CardTitle>
 					</CardLabel>
 					<CardActions>
@@ -127,10 +153,11 @@ const CompanyWallet = () => {
 							icon='CreditCard'
 							isLight
 							onClick={() => setModalStatus(true)}>
-							Add New
+							Adicionar Cartão
 						</Button>
 					</CardActions>
 				</CardHeader>
+
 				<CardBody>
 					<div className='row g-3'>
 						<div className='col-12'>
@@ -151,32 +178,54 @@ const CompanyWallet = () => {
 						<div className='col-12'>
 							<div
 								className={classNames('rounded-3', {
-									'bg-l10-dark': !darkModeStatus,
-									'bg-dark': darkModeStatus,
+									'bg-l10-dark': cardList.length > 0 && !darkModeStatus,
+									'bg-dark': cardList.length > 0 && darkModeStatus,
 								})}>
 								<div className='row row-cols-2 g-3 pb-3 px-3 mt-0'>
-									{cardList.map((c) => (
-										<div key={c.id} className='col'>
-											<Button
-												color='dark'
-												isLight={
-													darkModeStatus
-														? c.id === selectedCardId
-														: c.id !== selectedCardId
-												}
-												className='w-100 text-capitalize'
-												rounded={1}
-												onClick={() => setSelectedCardId(c.id)}>
-												{`${Payment.fns.cardType(
-													c.number,
-												)} - ${c.number.slice(
-													Payment.fns.cardType(c.number) === 'amex'
-														? -5
-														: -4,
-												)}`}
-											</Button>
+									
+									{ cardList.length > 0 ?
+										cardList.map((c) => (
+											<div key={c.id} className='col'>
+												<Button
+													color='dark'
+													isLight={
+														darkModeStatus
+															? c.id === selectedCardId
+															: c.id !== selectedCardId
+													}
+													className='w-100 text-capitalize'
+													rounded={1}
+													onClick={() => setSelectedCardId(c.id)}>
+													{`${Payment.fns.cardType(
+														c.number,
+													)} - ${c.number.slice(
+														Payment.fns.cardType(c.number) === 'amex'
+															? -5
+															: -4,
+													)}`}
+												</Button>
+											</div>
+										))
+										:
+										<div className='col-12 d-flex flex-column'>
+											<div className=''>
+												<div className='d-flex align-items-end gap-2'>
+													<h1>Nenhum cartão adicionado</h1>
+													<Button
+														color='light'
+														icon='AddCircle'
+														size='lg'
+														isLink={true}
+														onClick={() => setModalStatus(true)}>
+														
+													</Button>
+												</div>
+												<div className='d-flex align-items-end'>
+													<p>Adicione um cartão para começar a usar a carteira</p>
+												</div>
+											</div>
 										</div>
-									))}
+									}
 								</div>
 							</div>
 						</div>
@@ -192,7 +241,7 @@ const CompanyWallet = () => {
 				titleId='add-new-card'
 				isCentered>
 				<ModalHeader setIsOpen={setModalStatus}>
-					<ModalTitle id='add-new-card'>Card List</ModalTitle>
+					<ModalTitle id='add-new-card'>Lista de Cartões</ModalTitle>
 				</ModalHeader>
 				<ModalBody>
 					<div className='row'>
@@ -208,10 +257,11 @@ const CompanyWallet = () => {
 								issuer={Payment.fns.cardType(formik.values.number)}
 								focused={focused}
 							/>
-							<form className='row g-4' noValidate onSubmit={formik.handleSubmit}>
-								<FormGroup className='col-12' id='name' label='Name'>
+
+							<form className='row g-4' noValidate  onSubmit={formik.handleSubmit}>
+								<FormGroup className='col-12' id='name' label='Nome'>
 									<Input
-										placeholder='Full Name'
+										placeholder='Nome do Cartão'
 										autoComplete='ccName'
 										onChange={formik.handleChange}
 										value={formik.values.name}
@@ -220,10 +270,11 @@ const CompanyWallet = () => {
 										isValid={formik.isValid}
 										isTouched={formik.touched.name}
 										invalidFeedback={formik.errors.name}
-										validFeedback='Looks good!'
+										validFeedback='Ótimo!'
 									/>
 								</FormGroup>
-								<FormGroup className='col-6' id='number' label='Credit Card Number'>
+								
+								<FormGroup className='col-6' id='number' label='Número do Cartão'>
 									<Input
 										type='text'
 										mask={
@@ -232,7 +283,7 @@ const CompanyWallet = () => {
 												: '9999 9999 9999 9999'
 										}
 										autoComplete='cc-number'
-										placeholder='Digit Numbers'
+										placeholder='Digite o número do cartão'
 										required
 										onChange={formik.handleChange}
 										value={formik.values.number}
@@ -241,14 +292,15 @@ const CompanyWallet = () => {
 										isValid={formik.isValid}
 										isTouched={formik.touched.number}
 										invalidFeedback={formik.errors.number}
-										validFeedback='Looks good!'
+										validFeedback='Ótimo!'
 									/>
 								</FormGroup>
-								<FormGroup className='col-3' id='cvc' label='CVC Number'>
+
+								<FormGroup className='col-3' id='cvc' label='CVC'>
 									<Input
 										type='number'
 										autoComplete='cc-csc'
-										placeholder='CVC Number'
+										placeholder='CVC'
 										required
 										onChange={formik.handleChange}
 										value={formik.values.cvc}
@@ -257,14 +309,15 @@ const CompanyWallet = () => {
 										isValid={formik.isValid}
 										isTouched={formik.touched.cvc}
 										invalidFeedback={formik.errors.cvc}
-										validFeedback='Looks good!'
+										validFeedback='Ótimo!'
 									/>
 								</FormGroup>
-								<FormGroup className='col-3' id='expiry' label='Expiry'>
+
+								<FormGroup className='col-3' id='expiry' label='Validade'>
 									<Input
 										type='text'
 										autoComplete='cc-exp'
-										placeholder='MM/YY'
+										placeholder='MM/AA'
 										mask='99/99'
 										required
 										onChange={formik.handleChange}
@@ -274,67 +327,91 @@ const CompanyWallet = () => {
 										isValid={formik.isValid}
 										isTouched={formik.touched.expiry}
 										invalidFeedback={formik.errors.expiry}
-										validFeedback='Looks good!'
+										validFeedback='Ótimo!'
 									/>
 								</FormGroup>
+
 								<div className='col'>
-									<Button
+									{
+										!waiting ?
+										<Button
+										isDisable={!formik.isValid && !!formik.submitCount}
 										type='submit'
 										color='info'
 										icon='Save'
-										isDisable={!formik.isValid && !!formik.submitCount}>
-										Save
-									</Button>
+									>
+											Adicionar
+										</Button>
+										:
+										<div className='d-flex px-3 py-2'>
+											<Spinner 
+												
+												color='info'
+												size='20px'
+											/>
+										</div>
+									}
 								</div>
 							</form>
+
 						</div>
+
 						<div className='col-md-6'>
-							<table className='table table-modern table-hover'>
-								<colgroup>
-									<col style={{ width: 25 }} />
-									<col style={{ width: 75 }} />
-									<col />
-									<col />
-								</colgroup>
-								<thead>
-									<tr>
-										<th>#</th>
-										<th>Type</th>
-										<th>Name</th>
-										<th>Expiry</th>
-									</tr>
-								</thead>
-								<tbody>
-									{cardList.map((c, index) => (
-										<tr key={c.id}>
-											<td>{index + 1}</td>
-											<td aria-label='Payment'>
-												<div
-													className={`payment-type-${Payment.fns.cardType(
-														c.number,
-													)}`}
-												/>
-											</td>
-											<td className='text-capitalize'>
-												<div className='fw-bold fs-6 mb-0'>
-													{Payment.fns.cardType(c.number)}
-												</div>
-												<div className='text-muted mt-n1'>
-													<small>
-														{c.number.slice(
-															Payment.fns.cardType(c.number) ===
-																'amex'
-																? -5
-																: -4,
-														)}
-													</small>
-												</div>
-											</td>
-											<td>{c.expiry}</td>
+							{ cardList.length > 0 ?
+								<table className='table table-modern table-hover'>
+									<colgroup>
+										<col style={{ width: 25 }} />
+										<col style={{ width: 75 }} />
+										<col />
+										<col />
+									</colgroup>
+									<thead>
+										<tr>
+											<th>#</th>
+											<th>Tipo</th>
+											<th>Nome</th>
+											<th>Validade</th>
 										</tr>
-									))}
-								</tbody>
-							</table>
+									</thead>
+									<tbody>
+										{cardList.map((c, index) => (
+											<tr key={c.id}>
+												<td>{index + 1}</td>
+												<td aria-label='Payment'>
+													<div
+														className={`payment-type-${Payment.fns.cardType(
+															c.number,
+														)}`}
+													/>
+												</td>
+												<td className='text-capitalize'>
+													<div className='fw-bold fs-6 mb-0'>
+														{Payment.fns.cardType(c.number)}
+													</div>
+													<div className='text-muted mt-n1'>
+														<small>
+															{c.number.slice(
+																Payment.fns.cardType(c.number) ===
+																	'amex'
+																	? -5
+																	: -4,
+															)}
+														</small>
+													</div>
+												</td>
+												<td>{c.expiry}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+								:
+								<div className='col-12 d-flex flex-column'>
+									<div className='d-flex flex-column align-items-center'>
+										<img src={HumanShield} alt='Human Shield' style={{ width: '300px', marginRight: '-100px' }} />
+										{/* <h1>Nenhum cartão adicionado</h1> */}
+									</div>
+								</div>
+							}
 						</div>
 					</div>
 				</ModalBody>

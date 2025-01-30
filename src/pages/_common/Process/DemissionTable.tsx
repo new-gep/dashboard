@@ -665,7 +665,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				break;
 		}
 
-		if(step == 1 && manipulatingTable.demission.solicitation == 'company'){
+		console.log('manipulatingTable',manipulatingTable)
+		if(step == 1 && manipulatingTable && manipulatingTable.demission?.solicitation == 'company'){
 			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator);
 			if(response.status == 200){
 				setStatusAllSignature(response.pictures)
@@ -899,9 +900,9 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 	const actionController = async (job: any) => {
 		let response;
-		switch (job.demission.step) {
+		switch (job.demission?.step) {
 			case 1:
-				if (job.demission.solicitation == 'collaborator') {
+				if (job.demission?.solicitation == 'collaborator') {
 					setLoadingStates((prevStates) => ({
 						...prevStates,
 						[collaborators.CPF_collaborator]: true,
@@ -922,7 +923,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						[collaborators.CPF_collaborator]: true,
 					}));
 					response = await Job_Check_Dismissal(job.id)
-					console.log('response',response)
 					if(response.status == 200){
 						setDatesDynamicManipulating(response.date);
 						// const obligation = Object.keys(response.date.obligation);
@@ -1176,8 +1176,10 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			const params = {
 				status: avaliation ? 'approved' : 'reproved',
 				picture:
-					view == 'signature' && step == 1
-						? `Dismissal_Signature_Communication`
+					view == 'signature' && step == 1 && manipulatingTable.demission?.solicitation == 'company'
+						? `Dismissal_Signature_Communication` : 
+						step == 1 && manipulatingTable.demission?.solicitation == 'collaborator'?
+						'Dismissal_Hand'
 						: `Dismissal_Signature_Kit`,
 				id_user: userData.id,
 			};
@@ -1186,13 +1188,22 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				switch (manipulatingTable.demission.step) {
 					case 1:
 						if (avaliation) {
-							setStatusSignature(true)
+							if(manipulatingTable.demission?.solicitation == 'company'){
+								setStatusSignature(true)
+							}else{
+								handleUpcomingEdit()
+								updateStatusCandidate(manipulatingTable, null, true);
+							}
 							toast(
 								<Toasts
 									icon={'Check'}
 									iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
 									title={'Sucesso!'}>
-									Assinatura aprovada com sucesso
+									{ manipulatingTable.demission?.solicitation == 'company' ?
+									'Assinatura aprovada com sucesso' 
+									:
+									'Carta de demissão aprovada com sucesso'
+									}
 								</Toasts>,
 								{
 									closeButton: true,
@@ -1200,14 +1211,22 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								},
 							);
 						} else {
+							if(manipulatingTable.demission?.solicitation == 'company'){
+								setStatusSignature(false)
+							}else{
+								handleUpcomingEdit()
+							}
 							updateStatusCandidate(manipulatingTable, null, false);
-							setStatusSignature(false)
 							toast(
 								<Toasts
 									icon={'Check'}
 									iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
 									title={'Sucesso!'}>
-									Assinatura rejeitada com sucesso
+									{ manipulatingTable.demission?.solicitation == 'company' ?
+									'Assinatura rejeitada com sucesso' 
+									:
+									'Carta de demissão rejeitada com sucesso'
+									}
 								</Toasts>,
 								{
 									closeButton: true,
@@ -1611,6 +1630,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					const stepOneCollaborators = response.job.filter(
 						(job: { demission: { step: number } }) => job.demission.step === 1,
 					);
+					setCollaborators(response.job)
+					console.log('stepOneCollaborators',stepOneCollaborators)
 					setCollaboratorsStep(stepOneCollaborators);
 					return;
 				}
@@ -2172,7 +2193,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						{controllerBodyManipulating == 'communication' && (
 							<>
 								{manipulatingTable &&
-								manipulatingTable.demission.solicitation == 'company' ? (
+								manipulatingTable.demission?.solicitation == 'company' ? (
 									<>
 										<span>
 											Abaixo, selecione e adicione seus arquivos, e envie para

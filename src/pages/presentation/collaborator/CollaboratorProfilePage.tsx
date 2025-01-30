@@ -87,7 +87,7 @@ const CollaboratorProfilePage = () => {
 						}
 					}
 				}
-			}
+			};
 		};
 		fetchData();
 	}, [cpf, listen]);

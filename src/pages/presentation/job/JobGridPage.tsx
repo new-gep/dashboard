@@ -438,6 +438,7 @@ const ProductsGridPage = () => {
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
+			
 			<Modal 
 				isOpen={deleteModal} 
 				setIsOpen={setDeleteModal} >
@@ -463,6 +464,7 @@ const ProductsGridPage = () => {
 						</Button>
 				</ModalFooter>
 			</Modal>
+			
 			<Page>
 				<div className='display-4 fw-bold py-3'>
 					{ Array.isArray(data) && data.length > 0 ?

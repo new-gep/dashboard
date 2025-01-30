@@ -394,6 +394,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												<FormGroup
 													isFloating
 													label='Inscrição Municipal'
+													
 												>
 													<Input placeholder='' value={datesSingUp.municipal_registration} required 
 														onChange={(e: any) => {
