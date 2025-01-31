@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 // @ts-ignore
 import ReactCreditCards, { Focused } from 'react-credit-cards-2';
 import Payment from 'payment';
@@ -12,14 +12,20 @@ import Card, {
 	CardTitle,
 } from '../../../components/bootstrap/Card';
 import Button from '../../../components/bootstrap/Button';
-import Modal, { ModalBody, ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
+import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 import ReactCreditCardsContainer from '../../../components/extras/ReactCreditCardsContainer';
 import useDarkMode from '../../../hooks/useDarkMode';
 import HumanShield from '../../../assets/humans/shield.png';
 import Spinner from '../../../components/bootstrap/Spinner';
-
+import Card_Company from '../../../api/post/card_company/create';
+import AuthContext from '../../../contexts/authContext';
+import { toast } from 'react-toastify';
+import Toasts from '../../../components/bootstrap/Toasts';
+import AllCardCompany from '../../../api/get/card_company/AllCardCompany';
+import PatchCardCompanyDefault from '../../../api/patch/card_company/Default';
+import DeleteCardCompany from '../../../api/delete/card_company/default';
 const validate = (values: {
 	name: string;
 	number: string;
@@ -27,7 +33,7 @@ const validate = (values: {
 	expiry: string;
 }) => {
 	const errors: Record<string, string> = {};
-	
+
 	if (!values.name) {
 		errors.name = 'Obrigatório';
 	} else if (values.name.length < 7) {
@@ -48,7 +54,6 @@ const validate = (values: {
 		errors.cvc = 'Deve ter 3 números';
 	}
 
-
 	//# Antiga validação
 	// if (!values.expiry || values.expiry.includes('_')) {
 	// 	errors.expiry = 'Obrigatório';
@@ -58,31 +63,22 @@ const validate = (values: {
 
 	//# Nova validação para validar a data de validade
 	const [month, year] = values.expiry.split('/').map(Number);
-	const currentYear = new Date().getFullYear() % 100;
-	const currentMonth = new Date().getMonth() + 1; // Janeiro é 0
+	const currentYear = new Date().getFullYear() % 100; // Pegamos os últimos dois dígitos do ano
+	const currentMonth = new Date().getMonth() + 1; // Janeiro é 0, então somamos 1
 
 	if (
-	!year ||
-	!month ||
-	year < currentYear ||
-	(year === currentYear && month < currentMonth)
+		isNaN(month) ||
+		isNaN(year) || // Garante que month e year sejam números válidos
+		month < 1 ||
+		month > 12 || // Mês deve estar entre 1 e 12
+		year < currentYear || // Ano não pode estar no passado
+		(year === currentYear && month < currentMonth) // Se for o mesmo ano, o mês não pode estar no passado
 	) {
 		errors.expiry = 'Data de validade inválida';
 	}
 
 	return errors;
 };
-
-const saveCard = (values: {
-	name: string;
-	number: string;
-	cvc: number | string;
-	expiry: string;
-}) => {
-	values.number = values.number.replace(/\s/g, '')
-	values.cvc = values.cvc.toString()
-	console.log(values)
-}
 
 const CompanyWallet = () => {
 	const { darkModeStatus } = useDarkMode();
@@ -112,11 +108,14 @@ const CompanyWallet = () => {
 	// 		cvc: 234,
 	// 	},
 	// ]);
+	const { userData } = useContext(AuthContext);
 	const [cardList, setCardList] = useState<
 		{ id: number; name: string; number: string; expiry: string; cvc: number | string }[]
 	>([]);
+	const [actionCard, setActionCard] = useState<any>(null);
 	const [selectedCardId, setSelectedCardId] = useState<number>(2);
 	const [modalStatus, setModalStatus] = useState<boolean>(false);
+	const [modalDelete, setModalDelete] = useState<boolean>(false);
 	const selectedCard = cardList.find((f) => f.id === selectedCardId);
 	const [focused, setFocused] = useState<Focused>('number');
 	const [waiting, setWaiting] = useState<boolean>(false);
@@ -130,13 +129,144 @@ const CompanyWallet = () => {
 		},
 		validate,
 		onSubmit: (values) => {
-			saveCard(values)
+			saveCard(values);
 		},
 	});
 
+	const saveCard = async (values: {
+		name: string;
+		number: string;
+		cvc: number | string;
+		expiry: string;
+	}) => {
+		setWaiting(true);
+
+		if (actionCard === 'add') {
+			values.number = values.number.replace(/\s/g, '');
+			values.cvc = values.cvc.toString();
+			const props = {
+				name: values.name,
+				number: values.number,
+				cvc: values.cvc,
+				expiry: values.expiry,
+				CNPJ: userData.cnpj,
+				user_create: userData.id,
+			};
+			const response = await Card_Company(props);
+			if (response.status === 201) {
+				toast(
+					<Toasts
+						icon={'Check'}
+						iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={'🥳 Parabéns! '}>
+						Cartão adicionado com sucesso.
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 4000, //
+					},
+				);
+				setModalStatus(false);
+				setCardList([...cardList, response.data]);
+			} else {
+				toast(
+					<Toasts
+						icon={'Close'}
+						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={'Erro'}>
+						Erro ao adicionar cartão, tente novamente.
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 4000, //
+					},
+				);
+			}
+			setWaiting(false);
+			formik.resetForm();
+			setModalStatus(false);
+		} else if (actionCard === 'edit' && selectedCard) {
+			values.number = values.number.replace(/\s/g, '');
+			values.cvc = values.cvc.toString();
+			const props = {
+				name: values.name,
+				number: values.number,
+				cvc: values.cvc,
+				expiry: values.expiry,
+				CNPJ: userData.cnpj,
+				user_update: userData.id,
+			};
+			const response = await PatchCardCompanyDefault(props, selectedCard.id);
+			if (response.status === 200) {
+				setCardList(
+					cardList.map((card) => (card.id === selectedCard.id ? response.data : card)),
+				);
+				toast(
+					<Toasts icon={'Check'} iconColor={'success'} title={'🥳 Parabéns! '}>
+						Cartão editado com sucesso.
+					</Toasts>,
+				);
+				setModalStatus(false);
+			} else {
+				toast(
+					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+						Erro ao editar cartão, tente novamente.
+					</Toasts>,
+				);
+			}
+			setWaiting(false);
+		} else if (actionCard === 'delete' && selectedCard) {
+			deleteCard(selectedCard);
+		}
+	};
+
+	const editCard = async (selectedCard: any) => {
+		if (selectedCard) {
+			setModalStatus(true);
+			setSelectedCardId(selectedCard.id);
+			formik.setValues({
+				name: selectedCard.name,
+				number: selectedCard.number,
+				expiry: selectedCard.expiry,
+				cvc: '',
+			});
+		} else {
+			console.error('Cartão selecionado não encontrado.');
+		}
+	};
+
+	const deleteCard = async (selectedCard: any) => {
+		const response = await DeleteCardCompany(selectedCard.id);
+		if (response.status === 200) {
+			setCardList(cardList.filter((card) => card.id !== selectedCard.id));
+			setModalDelete(false);
+			toast(
+				<Toasts icon={'Check'} iconColor={'success'} title={'🥳 Parabéns! '}>
+					Cartão excluído com sucesso.
+				</Toasts>,
+			);
+		} else {
+			toast(
+				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+					Erro ao excluir cartão, tente novamente.
+				</Toasts>,
+			);
+		}
+	};
+
+
 	useEffect(() => {
-		console.log(cardList)
-	}, [cardList])
+		if (userData) {
+			const fetchData = async () => {
+				const response = await AllCardCompany(userData.cnpj);
+				console.log(response.data);
+				if (response.status === 200) {
+					setCardList(response.data);
+				}
+			};
+			fetchData();
+		}
+	}, [userData]);
 
 	return (
 		<>
@@ -152,7 +282,11 @@ const CompanyWallet = () => {
 							color='info'
 							icon='CreditCard'
 							isLight
-							onClick={() => setModalStatus(true)}>
+							onClick={() => {
+								setActionCard('add');
+								formik.resetForm();
+								setModalStatus(true);
+							}}>
 							Adicionar Cartão
 						</Button>
 					</CardActions>
@@ -162,17 +296,43 @@ const CompanyWallet = () => {
 					<div className='row g-3'>
 						<div className='col-12'>
 							{selectedCard && (
-								<ReactCreditCardsContainer
-									issuer={Payment.fns.cardType(selectedCard.number)}>
-									<ReactCreditCards
-										cvc={selectedCard.cvc}
-										expiry={selectedCard.expiry}
-										name={selectedCard.name}
-										number={selectedCard.number.replace(/\d(?!(\d*)$)/g, '*')}
-										preview
-										issuer={Payment.fns.cardType(selectedCard.number)}
-									/>
-								</ReactCreditCardsContainer>
+								<>
+									<div className='d-flex justify-content-end'>
+										<div className='d-flex gap-2'>
+											<Button
+												color='warning'
+												icon='Edit'
+												isLink={true}
+												onClick={() => {
+													setActionCard('edit');
+													editCard(selectedCard);
+												}}></Button>
+
+											<Button
+												color='danger'
+												icon='Delete'
+												isLink={true}
+												onClick={() => {
+													setActionCard('delete');
+													setModalDelete(true);
+												}}></Button>
+										</div>
+									</div>
+									<ReactCreditCardsContainer
+										issuer={Payment.fns.cardType(selectedCard.number)}>
+										<ReactCreditCards
+											cvc={selectedCard.cvc}
+											expiry={selectedCard.expiry}
+											name={selectedCard.name}
+											number={selectedCard.number.replace(
+												/\d(?!(\d*)$)/g,
+												'*',
+											)}
+											preview
+											issuer={Payment.fns.cardType(selectedCard.number)}
+										/>
+									</ReactCreditCardsContainer>
+								</>
 							)}
 						</div>
 						<div className='col-12'>
@@ -182,8 +342,7 @@ const CompanyWallet = () => {
 									'bg-dark': cardList.length > 0 && darkModeStatus,
 								})}>
 								<div className='row row-cols-2 g-3 pb-3 px-3 mt-0'>
-									
-									{ cardList.length > 0 ?
+									{cardList.length > 0 ? (
 										cardList.map((c) => (
 											<div key={c.id} className='col'>
 												<Button
@@ -206,7 +365,7 @@ const CompanyWallet = () => {
 												</Button>
 											</div>
 										))
-										:
+									) : (
 										<div className='col-12 d-flex flex-column'>
 											<div className=''>
 												<div className='d-flex align-items-end gap-2'>
@@ -216,16 +375,19 @@ const CompanyWallet = () => {
 														icon='AddCircle'
 														size='lg'
 														isLink={true}
-														onClick={() => setModalStatus(true)}>
-														
-													</Button>
+														onClick={() =>
+															setModalStatus(true)
+														}></Button>
 												</div>
 												<div className='d-flex align-items-end'>
-													<p>Adicione um cartão para começar a usar a carteira</p>
+													<p>
+														Adicione um cartão para começar a usar a
+														carteira
+													</p>
 												</div>
 											</div>
 										</div>
-									}
+									)}
 								</div>
 							</div>
 						</div>
@@ -233,7 +395,6 @@ const CompanyWallet = () => {
 				</CardBody>
 			</Card>
 
-			
 			<Modal
 				setIsOpen={setModalStatus}
 				isOpen={modalStatus}
@@ -258,7 +419,7 @@ const CompanyWallet = () => {
 								focused={focused}
 							/>
 
-							<form className='row g-4' noValidate  onSubmit={formik.handleSubmit}>
+							<form className='row g-4' noValidate onSubmit={formik.handleSubmit}>
 								<FormGroup className='col-12' id='name' label='Nome'>
 									<Input
 										placeholder='Nome do Cartão'
@@ -273,7 +434,7 @@ const CompanyWallet = () => {
 										validFeedback='Ótimo!'
 									/>
 								</FormGroup>
-								
+
 								<FormGroup className='col-6' id='number' label='Número do Cartão'>
 									<Input
 										type='text'
@@ -332,32 +493,31 @@ const CompanyWallet = () => {
 								</FormGroup>
 
 								<div className='col'>
-									{
-										!waiting ?
+									{!waiting ? (
 										<Button
-										isDisable={!formik.isValid && !!formik.submitCount}
-										type='submit'
-										color='info'
-										icon='Save'
-									>
-											Adicionar
+											isDisable={!formik.isValid && !!formik.submitCount}
+											type='submit'
+											color='info'
+											icon='Save'>
+											{actionCard === 'add'
+												? 'Adicionar'
+												: actionCard === 'edit'
+													? 'Editar'
+													: actionCard === 'delete'
+														? 'Excluir'
+														: ''}
 										</Button>
-										:
+									) : (
 										<div className='d-flex px-3 py-2'>
-											<Spinner 
-												
-												color='info'
-												size='20px'
-											/>
+											<Spinner color='info' size='20px' />
 										</div>
-									}
+									)}
 								</div>
 							</form>
-
 						</div>
 
 						<div className='col-md-6'>
-							{ cardList.length > 0 ?
+							{cardList.length > 0 ? (
 								<table className='table table-modern table-hover'>
 									<colgroup>
 										<col style={{ width: 25 }} />
@@ -404,17 +564,53 @@ const CompanyWallet = () => {
 										))}
 									</tbody>
 								</table>
-								:
+							) : (
 								<div className='col-12 d-flex flex-column'>
 									<div className='d-flex flex-column align-items-center'>
-										<img src={HumanShield} alt='Human Shield' style={{ width: '300px', marginRight: '-100px' }} />
+										<img
+											src={HumanShield}
+											alt='Human Shield'
+											style={{ width: '300px', marginRight: '-100px' }}
+										/>
 										{/* <h1>Nenhum cartão adicionado</h1> */}
 									</div>
 								</div>
-							}
+							)}
 						</div>
 					</div>
 				</ModalBody>
+			</Modal>
+
+			<Modal setIsOpen={setModalDelete} isOpen={modalDelete} size='xl' titleId='delete-card'>
+				<ModalHeader setIsOpen={setModalDelete}>
+					<ModalTitle id='delete-card'>
+						Excluir Cartão <span className='text-danger text-capitalize'>{selectedCard?.name}</span>
+					</ModalTitle>
+				</ModalHeader>
+
+				<ModalBody>
+					<p>
+						Tem certeza que deseja excluir o cartão{' '}
+						<span className='text-danger text-capitalize'>{selectedCard?.name}</span> ?
+					</p>
+				</ModalBody>
+				
+				<ModalFooter>
+					<Button color='info'
+						isLink
+						onClick={() => setModalDelete(false)}
+					>
+						Fechar
+					</Button>
+					<Button 
+						color='danger' 
+						icon='Delete'
+						isLight
+						onClick={() => deleteCard(selectedCard)}
+					>
+						Excluir
+					</Button>
+				</ModalFooter>
 			</Modal>
 		</>
 	);

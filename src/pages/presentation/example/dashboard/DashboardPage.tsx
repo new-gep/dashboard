@@ -26,6 +26,7 @@ import CommonDashboardWaitingAnswer from './common/CommonDashboardWaitingAnswer'
 import CommonMyWallet from '../../../_common/CommonMyWallet';
 import CommonDashboardJob from './common/CommonDashboardJob';
 import ThemeContext from '../../../../contexts/themeContext';
+import LockSystem from '../../../_common/LockSystem/LockSystem';
 
 const DashboardPage = () => {
 	const { mobileDesign } = useContext(ThemeContext);
@@ -49,7 +50,9 @@ const DashboardPage = () => {
 	const [activeTab, setActiveTab] = useState<TTabs>(TABS.YEARLY);
 
 	return (
-		<PageWrapper title={demoPagesMenu.sales.subMenu.dashboard.text}>
+		<>
+			<LockSystem />
+			<PageWrapper title={demoPagesMenu.sales.subMenu.dashboard.text}>
 			{/* <SubHeader>
 				<SubHeaderLeft>
 					<span className='h4 mb-0 fw-bold'>Overview</span>
@@ -113,8 +116,9 @@ const DashboardPage = () => {
 					</div>
 				</div>
 			</Page>
-		</PageWrapper>
-	);
+			</PageWrapper>
+		</>
+	);	
 };
 
 export default DashboardPage;
