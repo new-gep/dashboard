@@ -55,6 +55,8 @@ import Signatures from '../../../api/get/picture/Admission_Signatures';
 //
 import Job_Demissional from '../../../api/get/job/Job_Demissional';
 import DismissalSignatures from '../../../api/get/picture/Dismissal_Signatures';
+import Collaborator from '../../../api/get/collaborator/Collaborator';
+import PatchCollaboratorDefault from '../../../api/patch/collaborator/Default';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -642,10 +644,11 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				)
 				break;
 			case 'dismissal_kit_dynamic':
-				responseSignature = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '1', dynamic.replace(/\//g, ''));
-				responseDocument  = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '0', dynamic.replace(/\//g, ''));
-			
+				responseSignature = await JobFile(manipulatingTable.id, 'dismissal_kit_dynamic', '1', dynamic.replace(/\//g, ''));
+				responseDocument  = await JobFile(manipulatingTable.id, 'dismissal_kit_dynamic', '0', dynamic.replace(/\//g, ''));
+				console.log('responseSignature x*x',responseSignature.status)
 				const formattedFileNameNewKit = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\//g, '');
+
 				toast(
 					<Toasts
 						icon={ 'Check' }
@@ -665,7 +668,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				break;
 		}
 
-		console.log('manipulatingTable',manipulatingTable)
 		if(step == 1 && manipulatingTable && manipulatingTable.demission?.solicitation == 'company'){
 			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator);
 			if(response.status == 200){
@@ -686,7 +688,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		};
 
 		if(step == 3){
-			console.log('aqui step 3')
 			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator);
 			if(response.status == 200){
 				setStatusAllSignature(response.pictures)
@@ -697,7 +698,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				}else{
 					//@ts-ignore
 					const filteredPictures = response.pictures.some(item =>
-						item.picture.toLowerCase() === `dismissal_signature_kit` &&
+						item.picture.toLowerCase() === `dismissal_signature` &&
 						item.status === 'approved'
 					 );					  
 					setStatusSignature(filteredPictures);
@@ -716,7 +717,9 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			setPathDocumentSignature(responseSignature.path)
 			setTypeDocumentSignature(responseSignature.type)
 			setTypeDocumentSignatureFull(responseSignature.typeDocumentSignature ? responseSignature.typeDocumentSignature : null)
+			console.log('responseSignature.pathDocumentSignature',responseSignature.typeDocumentSignature )
 			setPathDocumentSignatureFull(responseSignature.pathDocumentSignature ? responseSignature.pathDocumentSignature : null)
+
 		};
 		setLoadingSearchDocument(false)
 
@@ -1011,24 +1014,26 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				}));
 				response = await Job_Check_Dismissal(job.id)
 				if(response.status == 200){
+					let documentDynamic;
 					setDatesDynamicManipulating(response.date)
 					// const obligation = Object.keys(response.date.obligation);
 					let dynamic = Object.values(response.date.dynamic.document);
-					let signature = response.date.documentSignature
-					dynamic = dynamic
-					//@ts-ignore
-					.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
-					//@ts-ignore
-					.filter(item => item !== "");
-					const documentDynamic = dynamic.every(document =>
-						Object.values(signature)
-						//@ts-ignore
-						  .filter(value => value.trim() !== "") // Ignorar valores vazios
-						  .includes(document)
-					);
+					let signature = Object.values(response.date.documentSignature)
+
+					if (dynamic.length == signature.length) {
+						console.log('dynamic',dynamic)
+						console.log('signature',signature)
+						const response =  dynamic.every((valor, indice) => valor === signature[indice]);
+						console.log('response',response)
+						if(response){
+							documentDynamic = true;
+						}
+					}
+
 					if(documentDynamic){
-						updateStatusCandidate(job);
+						updateStatusCandidate(job, null, true);
 					};
+
 				}
 				setManipulatingTable(job);
 				setControllerBodyManipulating('kitDismissal');
@@ -1179,9 +1184,11 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					view == 'signature' && step == 1 && manipulatingTable.demission?.solicitation == 'company'
 						? `Dismissal_Signature_Communication` : 
 						step == 1 && manipulatingTable.demission?.solicitation == 'collaborator'?
-						'Dismissal_Hand'
-						: `Dismissal_Signature_Kit`,
+						'Dismissal_Hand' :
+						step == 2 ? 'Dismissal_Medical_Examination' :
+						`Dismissal_Signature`,
 				id_user: userData.id,
+
 			};
 			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
 			if (response.status == 200) {
@@ -1541,12 +1548,19 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		manipulating.demission.step = step + 1
 		manipulating.demission.status = null
 		const params = {
-			demission: JSON.stringify(manipulating)
+			demission: JSON.stringify(manipulating.demission)
 		};
 		const update = await Job(params, manipulating.id);
-		if(update.status == 200){	
+		console.log(update)
+
+		const props = {
+			id_work:null,
+		}
+		const collaborator = await PatchCollaboratorDefault(props, manipulating.CPF_collaborator);
+		if(update.status == 200 && collaborator.status == 200){	
 			const stepCollaborator = collaborators.filter(
 				(collaborator: any) => collaborator.demission.step === step,
+
 			);
 			setCollaboratorsStep(stepCollaborator);
 			toast(
@@ -1864,12 +1878,13 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				</ModalFooter>
 			</Modal>
 
-			{manipulatingTable && (
+			{manipulatingTable && documentAvaliation !== 'add' && (
 				<SignedDocument
 					where={'dismissal'}
 					dynamic={isDynamic}
 					closeAfterSave={closeAfterSaveDocumentSignature}
 					nameDocument={documentAvaliation}
+					step={step}
 					id={manipulatingTable.id}
 					modal={modalSignedDocument}
 					setModal={setModalSignedDocument}
@@ -2897,7 +2912,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 																		icon='Mode'
 																		color='storybook'
 																		onClick={() => {
-																			setAvalidDocument(true)
+																			setAvalidDocument( true)
 																			setView('signature');
 																			setOpenDocument(true);
 																		}}>

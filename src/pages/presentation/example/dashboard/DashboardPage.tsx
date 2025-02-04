@@ -51,7 +51,7 @@ const DashboardPage = () => {
 
 	return (
 		<>
-			<LockSystem />
+			{/* <LockSystem /> */}
 			<PageWrapper title={demoPagesMenu.sales.subMenu.dashboard.text}>
 			{/* <SubHeader>
 				<SubHeaderLeft>

@@ -15,17 +15,37 @@ export default function SelectPlan(props: SelectPlanProps){
 
 
     const handlePlan = (plan: any) => {
-        console.log(plan);
         switch(plan){
             case '1':
-                props.setPlan('plan1');
+                props.setPlan({
+                    name: 'Startup Company',
+                    icon: 'CustomRocketLaunch',
+                    price: '219',
+                    discount: '0',
+                    collaborators: 10,
+
+                });
                 break;
             case '2':
-                props.setPlan('plan2');
+
+                props.setPlan({
+                    name: 'Mid-Size Company',
+                    icon: 'Maps Home Work',
+                    price: '500',
+                    discount: '0',
+                    collaborators: 10,
+                });
                 break;
+
             case '3':
-                props.setPlan('plan3');
-                break;
+                props.setPlan({
+                    name: 'Large Company',
+                    icon: 'CustomFactory',
+                    price: '800',
+                    discount: '0',
+                    collaborators: 10,
+
+                });
         }
         props.setStep(2);
     }

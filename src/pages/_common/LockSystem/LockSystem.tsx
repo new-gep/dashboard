@@ -6,6 +6,8 @@ import { CardBody } from '../../../components/bootstrap/Card';
 import Icon from '../../../components/icon/Icon';
 import SelectPlan from './step/1-selectPlan';
 import PaymentPlan from './step/2-paymentPlan';
+import Wizard, { WizardItem } from '../../../components/Wizard';
+import Congratulation from './step/Congratulation';
 
 export default function LockSystem(){
     const [modalStatus, setModalStatus] = useState(true);
@@ -26,22 +28,25 @@ export default function LockSystem(){
             fullScreen
             isStaticBackdrop
         >
-            <ModalHeader>
-                <ModalTitle id='add-new-card'>Planos</ModalTitle>
-            </ModalHeader>
-            <ModalBody>
-                {step > 1 && 
+            <ModalHeader setIsOpen={step === 3 ? setModalStatus : undefined}>
+                {step > 1 && step < 3 && 
                     <div>   
                         <Button className='flex d-flex align-items-center justify-content-center gap-2' 
                             onClick={() => setStep(step - 1)}
+
                         >
                             <Icon icon='ArrowBack' />
                             Voltar
                         </Button>
                     </div>
                 }
+         
+            </ModalHeader>
+            
+            <ModalBody>
                 {step === 1 && <SelectPlan setStep={setStep} setPlan={setPlan} plan={plan}/>}
-                {step === 2 && <PaymentPlan/>}
+                {step === 2 && <PaymentPlan plan={plan}/>}
+                {step === 3 && <Congratulation/>}
 
             </ModalBody>
         </Modal>

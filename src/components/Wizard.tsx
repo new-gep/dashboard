@@ -46,6 +46,7 @@ WizardItem.defaultProps = {
 	title: undefined,
 };
 
+
 interface IWizardProps extends ICardProps {
 	children: ReactElement<IWizardItemProps> | ReactElement<IWizardItemProps>[];
 	color?: TColor;

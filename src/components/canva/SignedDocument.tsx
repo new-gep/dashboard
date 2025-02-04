@@ -13,6 +13,7 @@ import Icon from '../icon/Icon';
 import AuthContext from '../../contexts/authContext';
 
 interface Props {
+  step?:any;
   where?:string | null;
   document: any;
   nameDocument:string | null;
@@ -24,7 +25,7 @@ interface Props {
   closeAfterSave?:any
 }
 
-export default function SignedDocument({modal, setModal ,document, assignature, nameDocument, dynamic, id, closeAfterSave, where = null}: Props) {
+export default function SignedDocument({modal, setModal ,document, assignature, nameDocument, dynamic, id, closeAfterSave, where = null, step = null}: Props) {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLCanvasElement>(null);
   const { userData } = useContext(AuthContext);
@@ -54,7 +55,7 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
       if(where){
         PropsUploadJob = {
           file:dataURL,
-          name:dynamic ? 'dismissal_communication_dynamic': nameDocument ,
+          name:dynamic ? step == '1' ? 'dismissal_communication_dynamic' : 'dismissal_dynamic' : nameDocument ,
           id  :id,
           dynamic:dynamic ? nameDocument : null,
         };
@@ -195,20 +196,24 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
   };
 
   const removeSelectedObject = () => {
-    // Obtém o objeto atualmente selecionado no canvas
-    const activeObject = canvas.getActiveObject();
-    
-    // Verifica se há um objeto selecionado
-    if (activeObject) {
-      // Remove o objeto do canvas
-      canvas.remove(activeObject);
-      // Re-renderiza o canvas para refletir a mudança
-      canvas.renderAll();
-    } else {
-      // Exibe uma mensagem se nenhum objeto estiver selecionado
-      alert('Por favor, selecione um objeto para remover.');
-    }
+    try{
+      // Obtém o objeto atualmente selecionado no canvas
+      const activeObject = canvas.getActiveObject();
+      // Verifica se há um objeto selecionado
+      if (activeObject) {
+        // Remove o objeto do canvas
+        canvas.remove(activeObject);
+        // Re-renderiza o canvas para refletir a mudança
+        canvas.renderAll();
+      } else {
+          // Exibe uma mensagem se nenhum objeto estiver selecionado
+          alert('Por favor, selecione um objeto para remover.');
+        }
+      }catch(e){
+        console.log(e)
+      }
   };
+
 
   useEffect(() => {
     window.document.addEventListener('keydown', handleKeyDown);
