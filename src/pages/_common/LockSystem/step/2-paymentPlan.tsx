@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Button from '../../../../components/bootstrap/Button';
 import Card from '../../../../components/bootstrap/Card';
 import { CardBody, CardHeader, CardTitle } from '../../../../components/bootstrap/Card';
@@ -9,8 +9,70 @@ import Payment from 'payment';
 import 'react-credit-cards-2/es/styles-compiled.css';
 import Icon from '../../../../components/icon/Icon';
 import SubHeader, { SubheaderSeparator } from '../../../../layout/SubHeader/SubHeader';
-
 import Pix from './pix.png';
+import AllCardCompany from '../../../../api/get/card_company/AllCardCompany';
+import AuthContext from '../../../../contexts/authContext';
+import { useFormik } from 'formik';
+import Card_Company from '../../../../api/post/card_company/create';
+import Toasts from '../../../../components/bootstrap/Toasts';
+import { toast } from 'react-toastify';
+import FormGroup from '../../../../components/bootstrap/forms/FormGroup';
+import Input from '../../../../components/bootstrap/forms/Input';
+import Checks, { ChecksGroup } from '../../../../components/bootstrap/forms/Checks';
+const validate = (values: {
+	name: string;
+	number: string;
+	cvc: number | string;
+	expiry: string;
+}) => {
+	const errors: Record<string, string> = {};
+
+	if (!values.name) {
+		errors.name = 'Obrigatório';
+	} else if (values.name.length < 7) {
+		errors.name = 'Deve ter 7 caracteres ou mais';
+	} else if (!values.name.includes(' ')) {
+		errors.name = 'Deve conter nome e sobrenome';
+	}
+
+	if (!values.number || values.number.includes('_')) {
+		errors.number = 'Obrigatório';
+	} else if (!Payment.fns.validateCardNumber(values.number)) {
+		errors.number = 'Número de cartão inválido';
+	}
+
+	if (!values.cvc) {
+		errors.cvc = 'Obrigatório';
+	} else if (values.cvc.toString().length !== 3) {
+		errors.cvc = 'Deve ter 3 números';
+	}
+
+	//# Antiga validação
+	// if (!values.expiry || values.expiry.includes('_')) {
+	// 	errors.expiry = 'Obrigatório';
+	// } else if (parseInt(values.expiry.slice(-2), 10) <= 20) {
+	// 	errors.expiry = 'Data de validade inválida';
+	// }
+
+	//# Nova validação para validar a data de validade
+	const [month, year] = values.expiry.split('/').map(Number);
+	const currentYear = new Date().getFullYear() % 100; // Pegamos os últimos dois dígitos do ano
+	const currentMonth = new Date().getMonth() + 1; // Janeiro é 0, então somamos 1
+
+	if (
+		isNaN(month) ||
+		isNaN(year) || // Garante que month e year sejam números válidos
+		month < 1 ||
+		month > 12 || // Mês deve estar entre 1 e 12
+		year < currentYear || // Ano não pode estar no passado
+		(year === currentYear && month < currentMonth) // Se for o mesmo ano, o mês não pode estar no passado
+	) {
+		errors.expiry = 'Data de validade inválida';
+	}
+
+	return errors;
+};
+
 export default function PaymentPlan({ plan }: { plan: any }) {
 	const [paymentMethod, setPaymentMethod] = useState('creditCard');
 	const [cardDetails, setCardDetails] = useState({
@@ -20,28 +82,31 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 		cvc: '',
 	});
 	const [focused, setFocused] = useState<Focused>('number');
-	const [savedCards, setSavedCards] = useState([
-		// Exemplo de cartões salvos
-		{ id: 1, number: '4111 1111 1111 1111', name: 'John Doe', expiry: '12/23', cvc: '123' },
-		{ id: 2, number: '5500 0000 0000 0004', name: 'Jane Doe', expiry: '11/24', cvc: '456' },
-	]);
 	const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
 	const [saveCardChecked, setSaveCardChecked] = useState<boolean>(false);
 	const [generateQRCode, setGenerateQRCode] = useState<boolean>(false);
 	const [generateTicket, setGenerateTicket] = useState<boolean>(false);
+	const [discount, setDiscount] = useState<number>(plan.discount);
+	const [total, setTotal] = useState<number>(plan.price - discount);
+	const [coupon, setCoupon] = useState<string>('');
+	const { userData } = useContext(AuthContext);
+	const [cardList, setCardList] = useState<
+		{ id: number; name: string; number: string; expiry: string; cvc: number | string }[]
+	>([]);
 
-	// Dados de exemplo do pedido
-	const orderSummary = {
-		productImage: 'https://via.placeholder.com/100', // Substitua pela URL da imagem do produto
-		productName: 'BMW 3 Series',
-		price: '$12000.18 Lakh',
-		deliveryTime: '11 Jan 2022, 10:00 am',
-		commission: '-$140.00',
-		invoice: '000-1234-BMW-001',
-		discount: '10%',
-		subtotal: '$11800.18',
-		total: '$11800.18',
-	};
+	const formik = useFormik({
+		initialValues: {
+			name: '',
+			number: '',
+			expiry: '',
+			cvc: '',
+			saveCard: false,
+		},
+		validate,
+		onSubmit: (values) => {
+			saveCard(values);
+		},
+	});
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -51,13 +116,14 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 	const handleInputFocus = ({ target }: { target: { name: Focused } }) => setFocused(target.name);
 
 	const handleCardSelect = (id: number) => {
-		const selectedCard = savedCards.find((card) => card.id === id);
+		const selectedCard = cardList.find((card) => card.id === id);
 		if (selectedCard) {
-			setCardDetails({
-				number: selectedCard.number,
+			formik.setValues({
 				name: selectedCard.name,
+				number: selectedCard.number,
 				expiry: selectedCard.expiry,
-				cvc: selectedCard.cvc,
+				cvc: '',
+				saveCard: false,
 			});
 			setSelectedCardId(id);
 			setSaveCardChecked(false);
@@ -65,7 +131,13 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 	};
 
 	const handleNewCard = () => {
-		setCardDetails({ number: '', name: '', expiry: '', cvc: '' });
+		formik.setValues({
+			name: '',
+			number: '',
+			expiry: '',
+			cvc: '',
+			saveCard: false,
+		});
 		setSelectedCardId(null);
 		setSaveCardChecked(false);
 	};
@@ -74,15 +146,57 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 		setSaveCardChecked(e.target.checked);
 	};
 
-	const saveCard = () => {
+	const saveCard = async (values: {
+		name: string;
+		number: string;
+		cvc: number | string;
+		expiry: string;
+	}) => {
+		// setWaiting(true);
 		if (saveCardChecked) {
-			const newCard = {
-				id: savedCards.length + 1,
-				...cardDetails,
+			values.number = values.number.replace(/\s/g, '');
+			values.cvc = values.cvc.toString();
+			const props = {
+				name: values.name,
+				number: values.number,
+				cvc: values.cvc,
+				expiry: values.expiry,
+				CNPJ: userData.cnpj,
+				user_create: userData.id,
 			};
-			setSavedCards([...savedCards, newCard]);
+			const response = await Card_Company(props);
+			if (response.status === 201) {
+				toast(
+					<Toasts
+						icon={'Check'}
+						iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={'🥳 Parabéns! '}>
+						Cartão adicionado com sucesso.
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 4000, //
+					},
+				);
+				// setModalStatus(false);
+				setCardList([...cardList, response.data]);
+			} else {
+				toast(
+					<Toasts
+						icon={'Close'}
+						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={'Erro'}>
+						Erro ao adicionar cartão, tente novamente.
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 4000, //
+					},
+				);
+			}
 		}
-		setCardDetails({ number: '', name: '', expiry: '', cvc: '' });
+
+		// setWaiting(false);
 	};
 
 	const handleGenerateTicket = () => {
@@ -95,29 +209,102 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 		setGenerateQRCode(true);
 	};
 
+	const handleApplyDiscount = () => {
+		if (coupon == '') {
+			toast(
+				<Toasts
+					icon={'Close'}
+					iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={'Erro'}>
+					Digite um cupom de desconto.
+				</Toasts>,
+			);
+			return;
+		}
+		if (coupon === 'JesusFiel') {
+			const discount = Math.round(parseFloat(plan.price) * 0.1);
+			plan.discount = discount;
+			setDiscount(discount);
+			setTotal(plan.price - discount);
+			toast(
+				<Toasts
+					icon={'Check'}
+					iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={'🥳 Parabéns! '}>
+					Cupom aplicado com sucesso.
+				</Toasts>,
+			);
+		} else {
+			toast(
+				<Toasts
+					icon={'Close'}
+					iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title={'Erro'}>
+					Cupom incorreto.
+				</Toasts>,
+			);
+		}
+	};
+
+	useEffect(() => {
+		if (userData) {
+			const fetchData = async () => {
+				const response = await AllCardCompany(userData.cnpj);
+				console.log(response);
+				if (response.status === 200) {
+					setCardList(response.data);
+				}
+			};
+			fetchData();
+		}
+	}, [userData]);
+
 	return (
 		<div className='container-fluid gap-2' style={{ height: '100vh' }}>
 			<h1>Escolha o Método de Pagamento</h1>
-			<div className='d-flex gap-3 my-4'>
-				<Button
-					isLink
-					color={paymentMethod === 'creditCard' ? 'success' : 'light'}
-					onClick={() => setPaymentMethod('creditCard')}>
-					Cartão de Crédito
-				</Button>
-				<Button
-					isLink
-					color={paymentMethod === 'ticket' ? 'success' : 'light'}
-					onClick={() => setPaymentMethod('ticket')}>
-					Boleto
-				</Button>
+			<div className='d-flex  justify-content-between my-3'>
+				<div className='d-flex  gap-3'>
+					<div className='d-flex justify-content-center align-items-center'>
+						<Button
+							isLink
+							color={paymentMethod === 'creditCard' ? 'success' : 'light'}
+							onClick={() => setPaymentMethod('creditCard')}>
+							Cartão de Crédito
+						</Button>
+					</div>
+					<div className='d-flex justify-content-center align-items-center'>
+						<Button
+							isLink
+							color={paymentMethod === 'ticket' ? 'success' : 'light'}
+							onClick={() => setPaymentMethod('ticket')}>
+							Boleto
+						</Button>
+					</div>
+					<div className='d-flex justify-content-center align-items-center'>
+						<Button
+							isLink
+							color={paymentMethod === 'pix' ? 'success' : 'light'}
+							onClick={() => setPaymentMethod('pix')}>
+							Pix
+						</Button>
+					</div>
+				</div>
 
-				<Button
-					isLink
-					color={paymentMethod === 'pix' ? 'success' : 'light'}
-					onClick={() => setPaymentMethod('pix')}>
-					Pix
-				</Button>
+				<div className='d-flex gap-3 col-4'>
+					<FormGroup className='row' id='cupom' label='Cupom de Desconto'>
+						<Input
+							onChange={(e: any) => setCoupon(e.target.value)}
+							value={coupon}
+							type='text'
+							placeholder='Digite o cupom de desconto'
+						/>
+					</FormGroup>
+					<div className='d-flex align-items-end justify-content-end'>
+						<Button onClick={handleApplyDiscount} isLink color='success'>
+							Aplicar
+						</Button>
+					</div>
+				</div>
 			</div>
 
 			{paymentMethod === 'creditCard' && (
@@ -157,7 +344,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 								/>
 							</div>
 
-							{savedCards.map((card) => (
+							{cardList.map((card) => (
 								<div
 									key={card.id}
 									className='position-relative'
@@ -182,7 +369,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 										}}
 									/>
 									<ReactCreditCards
-										cvc={card.cvc}
+										cvc={''}
 										expiry={card.expiry}
 										name={card.name}
 										number={card.number.replace(/\d(?!(\d*)$)/g, '*')}
@@ -193,87 +380,110 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 								</div>
 							))}
 						</div>
-						<div className='col-md-4 col-12 px-1'>
-							<form>
-								<div className='mb-3'>
-									<label htmlFor='number' className='form-label'>
-										Número do Cartão
-									</label>
-									<input
+						<div className='col-md-4 col-12 px-5'>
+							<form
+								className='d-flex flex-column gap-3'
+								onSubmit={formik.handleSubmit}>
+								<FormGroup className='row' id='number' label='Número'>
+									<Input
+										disabled={selectedCardId !== null}
 										type='text'
-										className='form-control'
-										id='number'
-										name='number'
-										value={cardDetails.number}
-										onChange={handleInputChange}
+										mask={
+											Payment.fns.cardType(formik.values.number) === 'amex'
+												? '9999 999999 99999'
+												: '9999 9999 9999 9999'
+										}
+										autoComplete='cc-number'
+										placeholder='Digite o número do cartão'
+										required
+										onChange={formik.handleChange}
+										value={formik.values.number}
 										onFocus={handleInputFocus}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.number}
+										invalidFeedback={formik.errors.number}
+										validFeedback='Ótimo!'
 									/>
-								</div>
-								<div className='mb-3'>
-									<label htmlFor='name' className='form-label'>
-										Nome no Cartão
-									</label>
-									<input
-										type='text'
-										className='form-control'
-										id='name'
-										name='name'
-										value={cardDetails.name}
-										onChange={handleInputChange}
+								</FormGroup>
+
+								<FormGroup className='row' id='name' label='Nome'>
+									<Input
+										disabled={selectedCardId !== null}
+										placeholder='Nome do Cartão'
+										autoComplete='ccName'
+										onChange={formik.handleChange}
+										value={formik.values.name}
 										onFocus={handleInputFocus}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.name}
+										invalidFeedback={formik.errors.name}
+										validFeedback='Ótimo!'
 									/>
-								</div>
+								</FormGroup>
+
 								<div className='row'>
-									<div className='col-md-6 mb-3'>
-										<label htmlFor='expiry' className='form-label'>
-											Validade
-										</label>
-										<input
-											type='text'
-											className='form-control'
-											id='expiry'
-											name='expiry'
-											value={cardDetails.expiry}
-											onChange={handleInputChange}
+									<FormGroup className='col-6' id='cvc' label='CVC'>
+										<Input
+											type='number'
+											autoComplete='cc-csc'
+											placeholder='CVC'
+											required
+											onChange={formik.handleChange}
+											value={formik.values.cvc}
 											onFocus={handleInputFocus}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											isTouched={formik.touched.cvc}
+											invalidFeedback={formik.errors.cvc}
+											validFeedback='Ótimo!'
 										/>
-									</div>
-									<div className='col-md-6 mb-3'>
-										<label htmlFor='cvc' className='form-label'>
-											CVC
-										</label>
-										<input
+									</FormGroup>
+
+									<FormGroup className='col-6' id='expiry' label='Validade'>
+										<Input
+											disabled={selectedCardId !== null}
 											type='text'
-											className='form-control'
-											id='cvc'
-											name='cvc'
-											value={cardDetails.cvc}
-											onChange={handleInputChange}
+											autoComplete='cc-exp'
+											placeholder='MM/AA'
+											mask='99/99'
+											required
+											onChange={formik.handleChange}
+											value={formik.values.expiry}
 											onFocus={handleInputFocus}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											isTouched={formik.touched.expiry}
+											invalidFeedback={formik.errors.expiry}
+											validFeedback='Ótimo!'
 										/>
-									</div>
+									</FormGroup>
 								</div>
-								<div className='d-flex justify-content-between mt-3 px-3 '>
+
+								<div
+									className={`d-flex ${selectedCardId === null ? 'justify-content-between' : 'justify-content-end'} mt-3 px-3 `}>
 									{selectedCardId === null && (
-										<div className='form-check mb-3'>
-											<input
-												type='checkbox'
-												className='form-check-input'
+										<ChecksGroup className='d-flex justify-content-between mt-3 '>
+											<Checks
 												id='saveCard'
-												checked={saveCardChecked}
+												label='Salvar Cartão'
 												onChange={handleSaveCardChange}
+												checked={saveCardChecked}
+												isValid={formik.isValid}
+												isTouched={formik.touched.saveCard}
+												invalidFeedback={formik.errors.saveCard}
 											/>
-											<label className='form-check-label' htmlFor='saveCard'>
-												Salvar Cartão
-											</label>
-										</div>
+										</ChecksGroup>
 									)}
-									<Button color='success'>Pagar</Button>
+									<Button type='submit' color='success'>
+										Pagar
+									</Button>
 								</div>
 							</form>
 						</div>
 						<div className='col-md-4 col-12 p-3 text-center px-5'>
-                            <h5>Resumo do Pedido</h5>
+							<h5>Resumo do Pedido</h5>
 							<div>
 								<div className='d-flex flex-column gap-3'>
 									<div className='d-flex h-fit justify-content-center'>
@@ -285,14 +495,14 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									<p>R$ {plan.price},00</p>
 								</div>
 
-
 								<ul className='list-unstyled'>
 									<li>
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Desconto:</span>{' '}
-											<span className='text-danger'>R$ - {plan.discount},00</span>
+											<span className='text-danger'>R$ - {discount},00</span>
 										</div>
 									</li>
+
 									<li>
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Subtotal:</span>{' '}
@@ -300,7 +510,6 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 										</div>
 									</li>
 									<li>
-
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Colaboradores:</span>{' '}
 											<span>{plan.collaborators}+</span>
@@ -311,11 +520,10 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									<li>
 										<div className='d-flex justify-content-between'>
 											<strong>Total:</strong>{' '}
-											<span className='text-success'>R$ {plan.price - plan.discount},00</span>
+											<span className='text-success'>R$ {total},00</span>
 										</div>
 									</li>
 								</ul>
-
 							</div>
 						</div>
 					</CardBody>
@@ -388,7 +596,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 						</div>
 
 						<div className='col-md-6 col-12 p-3 text-center px-5'>
-                            <h5>Resumo do Pedido</h5>
+							<h5>Resumo do Pedido</h5>
 							<div>
 								<div className='d-flex flex-column gap-3'>
 									<div className='d-flex h-fit justify-content-center'>
@@ -400,24 +608,20 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									<p>R$ {plan.price},00</p>
 								</div>
 
-
 								<ul className='list-unstyled'>
 									<li>
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Desconto:</span>{' '}
-											<span className='text-danger'>R$ - {plan.discount},00</span>
+											<span className='text-danger'>R$ - {discount},00</span>
 										</div>
 									</li>
 									<li>
-
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Subtotal:</span>{' '}
 											<span>R$ {plan.price},00</span>
 										</div>
 									</li>
 									<li>
-
-
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Colaboradores:</span>{' '}
 											<span>{plan.collaborators}+</span>
@@ -428,12 +632,10 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									<li>
 										<div className='d-flex justify-content-between'>
 											<strong>Total:</strong>{' '}
-											<span className='text-success'>R$ {plan.price - plan.discount},00</span>
+											<span className='text-success'>R$ {total},00</span>
 										</div>
 									</li>
 								</ul>
-
-
 							</div>
 						</div>
 					</CardBody>
@@ -500,12 +702,11 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									<p>R$ {plan.price},00</p>
 								</div>
 
-
 								<ul className='list-unstyled'>
 									<li>
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Desconto:</span>{' '}
-											<span className='text-danger'>R$ - {plan.discount},00</span>
+											<span className='text-danger'>R$ - {discount},00</span>
 										</div>
 									</li>
 
@@ -517,7 +718,6 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									</li>
 
 									<li>
-
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Colaboradores:</span>{' '}
 											<span>{plan.collaborators}+</span>
@@ -528,12 +728,10 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									<li>
 										<div className='d-flex justify-content-between'>
 											<strong>Total:</strong>{' '}
-											<span className='text-success'>R$ {plan.price - plan.discount},00</span>
+											<span className='text-success'>R$ {total},00</span>
 										</div>
 									</li>
 								</ul>
-
-
 							</div>
 						</div>
 					</CardBody>

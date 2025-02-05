@@ -1551,8 +1551,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			demission: JSON.stringify(manipulating.demission)
 		};
 		const update = await Job(params, manipulating.id);
-		console.log(update)
-
 		const props = {
 			id_work:null,
 		}

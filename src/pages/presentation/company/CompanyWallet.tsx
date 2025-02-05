@@ -259,7 +259,6 @@ const CompanyWallet = () => {
 		if (userData) {
 			const fetchData = async () => {
 				const response = await AllCardCompany(userData.cnpj);
-				console.log(response.data);
 				if (response.status === 200) {
 					setCardList(response.data);
 				}
