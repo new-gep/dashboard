@@ -1545,7 +1545,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			)
 			return
 		};
-		manipulating.demission.step = step + 1
+		manipulating.demission.step = 'finish'
 		manipulating.demission.status = null
 		const params = {
 			demission: JSON.stringify(manipulating.demission)
