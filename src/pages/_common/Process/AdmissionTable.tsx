@@ -154,7 +154,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				  signature.toLowerCase().includes(required.toLowerCase())
 				)
 			  );
-			  const responseSignature = await Signatures(manipulatingTable.cpf);
+			  const responseSignature = await Signatures(manipulatingTable.cpf, manipulatingTable.id);
 			  //@ts-ignore
 			  allSignatureApproved = responseSignature.pictures.every(picture => picture.status === 'approved');
 			  if (obligationExists && dynamicExists && allSignatureApproved) {
@@ -549,7 +549,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		};
 
 		if(step == 3){
-			const response = await Signatures(manipulatingTable.cpf);
+			const response = await Signatures(manipulatingTable.cpf, manipulatingTable.id);
 			if(response.status == 200){
 				setStatusAllSignature(response.pictures)
 				//@ts-ignore
@@ -632,7 +632,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			case 3:
 				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
 				setManipulatingTable(candidate)
-				response = await Signatures(candidate.cpf);
+				response = await Signatures(candidate.cpf, candidate.id);
 				let allSignatureApproved:boolean = false
 				if(response.status == 200){
 					//@ts-ignore
@@ -723,7 +723,8 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			const params = {
 				status : avaliation ? 'approved': 'reproved',
 				picture: view == 'signature' ? `Admission_Signature`: documentAvaliation,
-				id_user: userData.id
+				id_user: userData.id,
+				id_work: manipulatingTable.id
 			}
 			const response:any = await PicturePath(params, manipulatingTable.cpf);
 			if(response.status == 200){
@@ -798,7 +799,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 								}
 							)
 						}
-						const response = await Signatures(manipulatingTable.cpf);
+						const response = await Signatures(manipulatingTable.cpf, manipulatingTable.id);
 						if(response.status == 200){
 							setStatusAllSignature(response.pictures)
 						}else{

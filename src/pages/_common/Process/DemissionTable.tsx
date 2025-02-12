@@ -51,7 +51,6 @@ import Job_Check_Admissional from '../../../api/get/job/Job_Check_Admissional';
 import Job_Check_Dismissal from '../../../api/get/job/Job_Check_Dismissal';
 import Job_Dynamic from '../../../api/delete/job/job_dynamic';
 import SignedDocument from '../../../components/canva/SignedDocument';
-import Signatures from '../../../api/get/picture/Admission_Signatures';
 //
 import Job_Demissional from '../../../api/get/job/Job_Demissional';
 import DismissalSignatures from '../../../api/get/picture/Dismissal_Signatures';
@@ -669,7 +668,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		}
 
 		if(step == 1 && manipulatingTable && manipulatingTable.demission?.solicitation == 'company'){
-			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator);
+			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator, manipulatingTable.id);
 			if(response.status == 200){
 				setStatusAllSignature(response.pictures)
 				if(document != 'dismissal_communication_dynamic'){
@@ -688,7 +687,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		};
 
 		if(step == 3){
-			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator);
+			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator, manipulatingTable.id);
 			if(response.status == 200){
 				setStatusAllSignature(response.pictures)
 				if(document != 'dismissal_kit_dynamic'){
@@ -1188,6 +1187,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						step == 2 ? 'Dismissal_Medical_Examination' :
 						`Dismissal_Signature`,
 				id_user: userData.id,
+				id_work: manipulatingTable.id
 
 			};
 			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
