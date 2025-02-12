@@ -1789,6 +1789,7 @@ const MaterialIcons = [
 	'ZoomIn',
 	'ZoomOut',
 	'ZoomOutMap',
+	'Olw'
 ];
 
 export default MaterialIcons;

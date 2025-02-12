@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 // @ts-ignore
 import ReactCreditCards, { Focused } from 'react-credit-cards-2';
 import Payment from 'payment';
@@ -17,6 +17,8 @@ import FormGroup from '../../components/bootstrap/forms/FormGroup';
 import Input from '../../components/bootstrap/forms/Input';
 import ReactCreditCardsContainer from '../../components/extras/ReactCreditCardsContainer';
 import useDarkMode from '../../hooks/useDarkMode';
+import AllCardCompany from '../../api/get/card_company/AllCardCompany';
+import AuthContext from '../../contexts/authContext';
 
 const validate = (values: {
 	name: string;
@@ -64,34 +66,14 @@ const validate = (values: {
 	return errors;
 };
 
+
 const CommonMyWallet = () => {
 	const { darkModeStatus } = useDarkMode();
 
+	const { userData } = useContext(AuthContext);
 	const [cardList, setCardList] = useState<
 		{ id: number; name: string; number: string; expiry: string; cvc: number | string }[]
-	>([
-		{
-			id: 1,
-			name: 'John Doe',
-			number: '4134 1111 1111 1134',
-			expiry: '12/21',
-			cvc: 123,
-		},
-		{
-			id: 2,
-			name: 'John Doe',
-			number: '5534 1111 1111 1198',
-			expiry: '12/24',
-			cvc: 234,
-		},
-		{
-			id: 3,
-			name: 'John Doe',
-			number: '3700 000000 00002',
-			expiry: '12/24',
-			cvc: 234,
-		},
-	]);
+	>([]);
 	const [selectedCardId, setSelectedCardId] = useState<number>(2);
 	const [modalStatus, setModalStatus] = useState<boolean>(false);
 	const selectedCard = cardList.find((f) => f.id === selectedCardId);
@@ -110,6 +92,23 @@ const CommonMyWallet = () => {
 	});
 	const [focused, setFocused] = useState<Focused>('number');
 	const handleInputFocus = ({ target }: { target: { name: Focused } }) => setFocused(target.name);
+	useEffect(() => {
+		if (userData) {
+			const fetchData = async () => {
+				const response = await AllCardCompany(userData.cnpj);
+				if (response.status === 200) {
+					setCardList(response.data);
+					if(Array.isArray(response.data) && response.data.length > 0 && response.data[0].id){
+						setSelectedCardId(response.data[0].id)
+					}
+				}
+			};
+			fetchData();
+		}else{
+			console.log(userData)
+		}
+	}, [userData]);
+	
 
 	return (
 		<>
@@ -117,10 +116,10 @@ const CommonMyWallet = () => {
 				<CardHeader>
 					<CardLabel icon='Style' iconColor='info'>
 						<CardTitle tag='div' className='h5'>
-							My Wallet
+							Carteira
 						</CardTitle>
 					</CardLabel>
-					<CardActions>
+					{/* <CardActions>
 						<Button
 							color='info'
 							icon='CreditCard'
@@ -128,7 +127,7 @@ const CommonMyWallet = () => {
 							onClick={() => setModalStatus(true)}>
 							Add New
 						</Button>
-					</CardActions>
+					</CardActions> */}
 				</CardHeader>
 				<CardBody>
 					<div className='row g-3'>

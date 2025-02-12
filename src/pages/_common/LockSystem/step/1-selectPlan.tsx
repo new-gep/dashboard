@@ -78,6 +78,7 @@ export default function SelectPlan(props: SelectPlanProps){
                 </CardBody>
             </Card>
         </div>
+        
         <div className='col-md-3'>
             <Card>
                 <CardBody>

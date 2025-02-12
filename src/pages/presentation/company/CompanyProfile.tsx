@@ -44,6 +44,7 @@ import Spinner from '../../../components/bootstrap/Spinner';
 import GetCompanyFindOne from '../../../api/get/company/FindOne';
 import PatchCompanyDefault from '../../../api/patch/company/Default';
 import DeleteCompanyFile from '../../../api/delete/company/File';
+import CompanyUser from './CompanyUser';
 
 interface IPreviewItemProps {
 	title: string;
@@ -72,61 +73,55 @@ interface IValues {
 	street: string;
 	number: string;
 	district: string;
-	city : string;
+	city: string;
 	state: string;
-	uf   : string;
-	zip  : string;
-
-};
+	uf: string;
+	zip: string;
+}
 
 const validationSchema = Yup.object().shape({
 	cnpj: Yup.string()
-	  .matches(/^\d{14}$/, 'CNPJ deve ter 14 números')
-	  .required('CNPJ é obrigatório'),
+		.matches(/^\d{14}$/, 'CNPJ deve ter 14 números')
+		.required('CNPJ é obrigatório'),
 	company_name: Yup.string()
-	  .min(3, 'Razão Social deve ter pelo menos 3 caracteres')
-	  .max(100, 'Razão Social deve ter no máximo 100 caracteres')
-	  .required('Razão Social é obrigatória'),
+		.min(3, 'Razão Social deve ter pelo menos 3 caracteres')
+		.max(100, 'Razão Social deve ter no máximo 100 caracteres')
+		.required('Razão Social é obrigatória'),
 	state_registration: Yup.string()
-	  .max(20, 'Inscrição Estadual deve ter no máximo 20 caracteres')
-	  .required('Inscrição Municipal é obrigatória'),
+		.max(20, 'Inscrição Estadual deve ter no máximo 20 caracteres')
+		.required('Inscrição Municipal é obrigatória'),
 	municipal_registration: Yup.string()
-	  .max(20, 'Inscrição Municipal deve ter no máximo 20 caracteres')
-	  .required('Inscrição Municipal é obrigatória'),
-	email: Yup.string()
-	  .email('E-mail inválido')
-	  .required('E-mail é obrigatório'),
+		.max(20, 'Inscrição Municipal deve ter no máximo 20 caracteres')
+		.required('Inscrição Municipal é obrigatória'),
+	email: Yup.string().email('E-mail inválido').required('E-mail é obrigatório'),
 	phone: Yup.string()
-	  .matches(/^\d{10,11}$/, 'Telefone deve ter entre 10 e 11 números')
-	  .required('Telefone é obrigatório'),
+		.matches(/^\d{10,11}$/, 'Telefone deve ter entre 10 e 11 números')
+		.required('Telefone é obrigatório'),
 	responsible: Yup.string()
-	  .min(3, 'Responsável deve ter pelo menos 3 caracteres')
-	  .max(50, 'Responsável deve ter no máximo 50 caracteres')
-	  .required('Responsável é obrigatório'),
+		.min(3, 'Responsável deve ter pelo menos 3 caracteres')
+		.max(50, 'Responsável deve ter no máximo 50 caracteres')
+		.required('Responsável é obrigatório'),
 	street: Yup.string()
-	  .min(3, 'Logradouro deve ter pelo menos 3 caracteres')
-	  .max(100, 'Logradouro deve ter no máximo 100 caracteres')
-	  .required('Logradouro é obrigatório'),
-	number: Yup.string()
-	  .matches(/^\d*$/, 'Número deve ser numérico'), // Não obrigatório, mas deve ser numérico
+		.min(3, 'Logradouro deve ter pelo menos 3 caracteres')
+		.max(100, 'Logradouro deve ter no máximo 100 caracteres')
+		.required('Logradouro é obrigatório'),
+	number: Yup.string().matches(/^\d*$/, 'Número deve ser numérico'), // Não obrigatório, mas deve ser numérico
 	district: Yup.string()
-	  .min(3, 'Bairro deve ter pelo menos 3 caracteres')
-	  .max(50, 'Bairro deve ter no máximo 50 caracteres')
-	  .required('Bairro é obrigatório'),
+		.min(3, 'Bairro deve ter pelo menos 3 caracteres')
+		.max(50, 'Bairro deve ter no máximo 50 caracteres')
+		.required('Bairro é obrigatório'),
 	city: Yup.string()
-	  .min(3, 'Cidade deve ter pelo menos 3 caracteres')
-	  .max(50, 'Cidade deve ter no máximo 50 caracteres')
-	  .required('Cidade é obrigatória'),
-	state: Yup.string()
-	  .required('Estado é obrigatório'),
+		.min(3, 'Cidade deve ter pelo menos 3 caracteres')
+		.max(50, 'Cidade deve ter no máximo 50 caracteres')
+		.required('Cidade é obrigatória'),
+	state: Yup.string().required('Estado é obrigatório'),
 	uf: Yup.string()
-	  .matches(/^[A-Z]{2}$/, 'UF deve ter exatamente 2 letras maiúsculas')
-	  .required('UF é obrigatório'),
+		.matches(/^[A-Z]{2}$/, 'UF deve ter exatamente 2 letras maiúsculas')
+		.required('UF é obrigatório'),
 	zip: Yup.string()
-	  .matches(/^\d{8}$/, 'CEP deve ter exatamente 8 números')
-	  .required('CEP é obrigatório'),
+		.matches(/^\d{8}$/, 'CEP deve ter exatamente 8 números')
+		.required('CEP é obrigatório'),
 });
-  
 
 const CompanyPage = () => {
 	const navigate = useNavigate();
@@ -144,6 +139,8 @@ const CompanyPage = () => {
 		ACCOUNT_DETAIL: 'Informação',
 		SIGNATURE: 'Assinatura',
 		MY_WALLET: 'Carteira',
+		PLAN: 'Plano',
+		USER: 'Usuários'
 	};
 
 	const [activeTab, setActiveTab] = useState(TABS.ACCOUNT_DETAIL);
@@ -229,17 +226,15 @@ const CompanyPage = () => {
 				},
 			);
 			return;
-		};
-
-		
+		}
 	};
-	
+
 	const uploadLogo = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const files = event.target.files;
 		if (files && files.length > 0) {
 			const file = files[0];
 			// Define o arquivo no estado
-			
+
 			// Validação do tipo de arquivo
 			if (file.type.startsWith('image/')) {
 				setNewLogoPath(file);
@@ -259,15 +254,15 @@ const CompanyPage = () => {
 					},
 				);
 			}
-	
+
 			// Opcional: Resetar o input file após processamento
 			event.target.value = ''; // Permite resetar o campo caso necessário
 		}
 	};
 
 	const removeLogo = async () => {
-		const response = await DeleteCompanyFile(`company/${userData.cnpj}/Logo`)
-		if(response.status == 200){
+		const response = await DeleteCompanyFile(`company/${userData.cnpj}/Logo`);
+		if (response.status == 200) {
 			toast(
 				<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
 					Logo deletada com sucesso
@@ -277,9 +272,9 @@ const CompanyPage = () => {
 					autoClose: 3000,
 				},
 			);
-			setLogoPath(null)
-			setNewLogoPath(null)
-			return
+			setLogoPath(null);
+			setNewLogoPath(null);
+			return;
 		}
 		toast(
 			<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
@@ -293,10 +288,10 @@ const CompanyPage = () => {
 	};
 
 	const updateCompany = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		try{
-			if(newLogoPathh){ 
-				console.log('caiu aqui')
+		e.preventDefault();
+		try {
+			if (newLogoPathh) {
+				console.log('caiu aqui');
 				const PropsUpload = {
 					file: newLogoPathh,
 					document: 'Logo',
@@ -306,12 +301,12 @@ const CompanyPage = () => {
 				if (response.status !== 200) {
 					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
 						Algo deu errado, não foi possível atualizar a <b>Logo</b>.
-					</Toasts>
-					return
-				};
+					</Toasts>;
+					return;
+				}
 			}
-			const response = await PatchCompanyDefault(formik.values, userData.cnpj) 
-			if(response.status == 200){
+			const response = await PatchCompanyDefault(formik.values, userData.cnpj);
+			if (response.status == 200) {
 				toast(
 					<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
 						{response.message}
@@ -321,8 +316,8 @@ const CompanyPage = () => {
 						autoClose: 3000,
 					},
 				);
-				return
-			}else{
+				return;
+			} else {
 				toast(
 					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
 						{response.message}
@@ -333,13 +328,11 @@ const CompanyPage = () => {
 					},
 				);
 			}
-
-		}catch(e){
+		} catch (e) {
 			<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
 				Algo deu errado, tente mais tarde.
-			</Toasts>
+			</Toasts>;
 		}
-
 	};
 
 	useEffect(() => {
@@ -363,7 +356,11 @@ const CompanyPage = () => {
 		<PageWrapper title={demoPagesMenu.editPages.subMenu.editWizard.text}>
 			<SubHeader>
 				<SubHeaderLeft>
-					{ logoPath ? <Avatar src={logoPath} size={32} /> : <Avatar src={CompanyLogoDefault} size={32} /> }
+					{logoPath ? (
+						<Avatar src={logoPath} size={32} />
+					) : (
+						<Avatar src={CompanyLogoDefault} size={32} />
+					)}
 					{companyDates && (
 						<span>
 							<strong>{companyDates.company_name}</strong>
@@ -415,6 +412,26 @@ const CompanyPage = () => {
 											{TABS.MY_WALLET}
 										</Button>
 									</div>
+									<div className='col-12'>
+										<Button
+											icon='Person'
+											color='info'
+											className='w-100 p-3'
+											isLight={TABS.PLAN !== activeTab}
+											onClick={() => setActiveTab(TABS.USER)}>
+											{TABS.USER}
+										</Button>
+									</div>
+									<div className='col-12'>
+										<Button
+											icon='ShoppingCart'
+											color='warning'
+											className='w-100 p-3'
+											isLight={TABS.PLAN !== activeTab}
+											onClick={() => setActiveTab(TABS.PLAN)}>
+											{TABS.PLAN}
+										</Button>
+									</div>
 								</div>
 							</CardBody>
 						</Card>
@@ -433,9 +450,9 @@ const CompanyPage = () => {
 										<CardBody>
 											<div className='row g-4 align-items-center'>
 												<div className='col-xl-auto'>
-													{ logoPath ?
-														<Avatar src={logoPath}  />
-														:
+													{logoPath ? (
+														<Avatar src={logoPath} />
+													) : (
 														<div
 															style={{ width: 122, height: 122 }}
 															className={`rounded-circle  ${darkModeStatus ? 'bg-white' : 'bg-info'}`}>
@@ -448,7 +465,7 @@ const CompanyPage = () => {
 																alt='Company Logo'
 															/>
 														</div>
-													}
+													)}
 												</div>
 												<div className='col-xl'>
 													<div className='row g-4'>
@@ -466,8 +483,7 @@ const CompanyPage = () => {
 																	color='dark'
 																	isLight
 																	icon='Delete'
-																	onClick={removeLogo}
-																>
+																	onClick={removeLogo}>
 																	Deletar
 																</Button>
 															)}
@@ -502,9 +518,7 @@ const CompanyPage = () => {
 															value={formik.values.cnpj}
 															isValid={formik.isValid}
 															isTouched={formik.touched.cnpj}
-															invalidFeedback={
-																formik.errors.cnpj
-															}
+															invalidFeedback={formik.errors.cnpj}
 															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
@@ -519,8 +533,12 @@ const CompanyPage = () => {
 															onBlur={formik.handleBlur}
 															value={formik.values.state_registration}
 															isValid={formik.isValid}
-															isTouched={formik.touched.state_registration}
-															invalidFeedback={formik.errors.state_registration}
+															isTouched={
+																formik.touched.state_registration
+															}
+															invalidFeedback={
+																formik.errors.state_registration
+															}
 															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
@@ -552,9 +570,14 @@ const CompanyPage = () => {
 														<Input
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
-															value={formik.values.municipal_registration}
+															value={
+																formik.values.municipal_registration
+															}
 															isValid={formik.isValid}
-															isTouched={formik.touched.municipal_registration}
+															isTouched={
+																formik.touched
+																	.municipal_registration
+															}
 															invalidFeedback={
 																formik.errors.municipal_registration
 															}
@@ -606,18 +629,13 @@ const CompanyPage = () => {
 															value={formik.values.phone}
 															isValid={formik.isValid}
 															isTouched={formik.touched.phone}
-															invalidFeedback={
-																formik.errors.phone
-															}
+															invalidFeedback={formik.errors.phone}
 															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
 												</div>
 												<div className='col-12'>
-													<FormGroup
-														id='email'
-														label='Email'
-														isFloating>
+													<FormGroup id='email' label='Email' isFloating>
 														<Input
 															type='email'
 															placeholder='Email address'
@@ -627,9 +645,7 @@ const CompanyPage = () => {
 															value={formik.values.email}
 															isValid={formik.isValid}
 															isTouched={formik.touched.email}
-															invalidFeedback={
-																formik.errors.email
-															}
+															invalidFeedback={formik.errors.email}
 															validFeedback='Ótimo!'
 														/>
 													</FormGroup>
@@ -641,10 +657,7 @@ const CompanyPage = () => {
 								<WizardItem id='step2' title='Endereço'>
 									<div className='row g-4'>
 										<div className='col-lg-12'>
-											<FormGroup
-												id='street'
-												label='Rua'
-												isFloating>
+											<FormGroup id='street' label='Rua' isFloating>
 												<Input
 													onChange={formik.handleChange}
 													onBlur={formik.handleBlur}
@@ -657,10 +670,7 @@ const CompanyPage = () => {
 											</FormGroup>
 										</div>
 										<div className='col-lg-8'>
-											<FormGroup
-												id='district'
-												label='Bairro'
-												isFloating>
+											<FormGroup id='district' label='Bairro' isFloating>
 												<Input
 													onChange={formik.handleChange}
 													onBlur={formik.handleBlur}
@@ -673,10 +683,7 @@ const CompanyPage = () => {
 											</FormGroup>
 										</div>
 										<div className='col-lg-4'>
-											<FormGroup
-												id='number'
-												label='Número'
-												isFloating>
+											<FormGroup id='number' label='Número' isFloating>
 												<Input
 													onChange={formik.handleChange}
 													onBlur={formik.handleBlur}
@@ -726,7 +733,10 @@ const CompanyPage = () => {
 														{ value: 'Pernambuco', text: 'PE' },
 														{ value: 'Piauí', text: 'PI' },
 														{ value: 'Rio de Janeiro', text: 'RJ' },
-														{ value: 'Rio Grande do Norte', text: 'RN' },
+														{
+															value: 'Rio Grande do Norte',
+															text: 'RN',
+														},
 														{ value: 'Rio Grande do Sul', text: 'RS' },
 														{ value: 'Rondônia', text: 'RO' },
 														{ value: 'Roraima', text: 'RR' },
@@ -735,13 +745,17 @@ const CompanyPage = () => {
 														{ value: 'Sergipe', text: 'SE' },
 														{ value: 'Tocantins', text: 'TO' },
 													]}
-													onChange={(event: React.SyntheticEvent<HTMLSelectElement>) => {
-														const selectedOption = (event.target as HTMLSelectElement).selectedOptions[0];
-														const state = selectedOption.getAttribute('value');
+													onChange={(
+														event: React.SyntheticEvent<HTMLSelectElement>,
+													) => {
+														const selectedOption = (
+															event.target as HTMLSelectElement
+														).selectedOptions[0];
+														const state =
+															selectedOption.getAttribute('value');
 														const UF = selectedOption.textContent;
 														formik.setFieldValue('state', state);
-														formik.setFieldValue('uf'   , UF);
-
+														formik.setFieldValue('uf', UF);
 													}}
 													onBlur={formik.handleBlur}
 													value={formik.values.state}
@@ -773,25 +787,39 @@ const CompanyPage = () => {
 													Visualização da sua empresa
 												</Label>
 												<ChecksGroup>
-														<Checks
-															type='switch'
-															id={`isVisible`}
-															name='isVisible'
-															label={'Anônimo'}
-															checked={formik.values.isVisible == '1' ? true : false}
-															value={formik.values.isVisible}
-															onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-																const value = event.target.checked ? '1' : '0'; // Define '1' para true e '0' para false
-																formik.setFieldValue('isVisible', value); // Atualiza o campo no Formik
-															}}
-														/>
+													<Checks
+														type='switch'
+														id={`isVisible`}
+														name='isVisible'
+														label={'Anônimo'}
+														checked={
+															formik.values.isVisible == '1'
+																? true
+																: false
+														}
+														value={formik.values.isVisible}
+														onChange={(
+															event: React.ChangeEvent<HTMLInputElement>,
+														) => {
+															const value = event.target.checked
+																? '1'
+																: '0'; // Define '1' para true e '0' para false
+															formik.setFieldValue(
+																'isVisible',
+																value,
+															); // Atualiza o campo no Formik
+														}}
+													/>
 												</ChecksGroup>
-												
 											</FormGroup>
 										</div>
 										<div className='col-12'>
 											<p>
-												Ao optar pelo  <span className='fw-bold'>anonimato</span>, as informações da sua empresa serão ocultadas de candidatos e outras empresas, o que pode dificultar sua identificação.
+												Ao optar pelo{' '}
+												<span className='fw-bold'>anonimato</span>, as
+												informações da sua empresa serão ocultadas de
+												candidatos e outras empresas, o que pode dificultar
+												sua identificação.
 											</p>
 										</div>
 									</div>
@@ -802,10 +830,7 @@ const CompanyPage = () => {
 											<h3 className='mt-4'>Review</h3>
 											<h4 className='mt-4'>Informação e Detalhes</h4>
 										</div>
-										<PreviewItem
-											title='CNPJ'
-											value={formik.values.cnpj}
-										/>
+										<PreviewItem title='CNPJ' value={formik.values.cnpj} />
 										<PreviewItem
 											title='Inscrição Municipal'
 											value={formik.values.municipal_registration}
@@ -825,21 +850,12 @@ const CompanyPage = () => {
 											title='Responsável'
 											value={formik.values.responsible}
 										/>
-										<PreviewItem
-											title='Telefone'
-											value={formik.values.phone}
-										/>
-										<PreviewItem
-											title='Email'
-											value={formik.values.email}
-										/>
+										<PreviewItem title='Telefone' value={formik.values.phone} />
+										<PreviewItem title='Email' value={formik.values.email} />
 										<div className='col-9 offset-3'>
 											<h3 className='mt-4'>Endereço</h3>
 										</div>
-										<PreviewItem
-											title='Rua'
-											value={formik.values.street}
-										/>
+										<PreviewItem title='Rua' value={formik.values.street} />
 										<PreviewItem
 											title='Bairro'
 											value={formik.values.district}
@@ -853,7 +869,10 @@ const CompanyPage = () => {
 										<div className='col-9 offset-3'>
 											<h4 className='mt-4'>Visibilidade</h4>
 										</div>
-										<PreviewItem title='Anônimato' value={formik.values.isVisible == '1' ? 'Sim' : 'Não'} />
+										<PreviewItem
+											title='Anônimato'
+											value={formik.values.isVisible == '1' ? 'Sim' : 'Não'}
+										/>
 										{/* <PreviewItem
 											title='Push Notifications'
 											value={notificationTypes.map(
@@ -940,7 +959,87 @@ const CompanyPage = () => {
 								</CardFooter>
 							</Card>
 						)}
+						{TABS.PLAN === activeTab && (
+							<Card stretch>
+								<CardHeader>
+									<CardLabel icon='ShoppingCart' iconColor='warning'>
+										<CardTitle>{TABS.PLAN}</CardTitle>
+									</CardLabel>
+								</CardHeader>
+
+								<CardBody className='pb-0 d-flex justify-content-center' isScrollable>
+									<div className='col-md-4'>
+										<Card>
+											<CardBody className=''>
+												<div className='row pt-5 g-4 text-center'>
+													<div className='col-12'>
+														<Icon
+															icon='CustomRocketLaunch'
+															size='4x'
+															color='warning'
+														/>
+													</div>
+													<div className='col-12'>
+														<h4>Startup Company</h4>
+													</div>
+													<div className='col-12'>
+														<h3 className='display-4 fw-bold'>
+															<span className='display-4 fw-bold'>
+																$
+															</span>
+															219
+															<span className='display-6'>/mês</span>
+														</h3>
+													</div>
+													<div className='col-12'>
+														<div className='lead'>
+															<Icon
+																icon='Done Outline'
+																color='success'
+															/>{' '}
+															Exclusive Workspace
+														</div>
+														<div className='lead'>
+															<Icon
+																icon='Done Outline'
+																color='success'
+															/>{' '}
+															Internet Connection
+														</div>
+														<div className='lead text-muted'>
+															<Icon icon='Close' color='danger' />{' '}
+															Meeting Room
+														</div>
+														<div className='lead text-muted'>
+															<Icon icon='Close' color='danger' />{' '}
+															Small Rest Room
+														</div>
+													</div>
+													<div className='col-12'>
+														<p>Lorem ipsum dolor sit amet.</p>
+													</div>
+												</div>
+											</CardBody>
+										</Card>
+									</div>
+								</CardBody>
+
+								<CardFooter>
+									<CardFooterLeft>
+										<Button
+											color='warning'
+											isLink
+											type='reset'
+											isDisable
+											onClick={() => {}}>
+											Atualizar Plano
+										</Button>
+									</CardFooterLeft>
+								</CardFooter>
+							</Card>
+						)}
 						{TABS.MY_WALLET === activeTab && <CompanyWallet />}
+						{TABS.USER === activeTab && <CompanyUser />}
 					</div>
 				</div>
 			</Page>

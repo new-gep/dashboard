@@ -261,6 +261,7 @@ const CompanyWallet = () => {
 				const response = await AllCardCompany(userData.cnpj);
 				if (response.status === 200) {
 					setCardList(response.data);
+					setSelectedCardId(response.data[0].id)
 				}
 			};
 			fetchData();

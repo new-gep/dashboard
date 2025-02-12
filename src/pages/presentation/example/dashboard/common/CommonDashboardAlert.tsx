@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Alert, { AlertHeading } from '../../../../../components/bootstrap/Alert';
 
 const CommonDashboardAlert = () => {
+
+	useEffect(()=>{
+		
+	},[])
+
 	return (
 		<Alert
 			icon='Verified'
@@ -11,9 +16,9 @@ const CommonDashboardAlert = () => {
 			className='shadow-3d-primary'
 			isDismissible>
 			<AlertHeading tag='h2' className='h4'>
-				Congratulations! 🎉
+				Parabéns! 🎉
 			</AlertHeading>
-			<span>You have reached your monthly sales targets.</span>
+			<span>O pagamento do seu plano está em dia.</span>
 		</Alert>
 	);
 };

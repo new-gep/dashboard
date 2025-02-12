@@ -76,9 +76,9 @@ const DashboardPage = () => {
 			</SubHeader> */}
 			<Page container='fluid'>
 				<div className='row'>
-					{/* <div className='col-12'>
+					<div className='col-12'>
 						<CommonDashboardAlert />
-					</div> */}
+					</div>
 
 					<div className='col-xl-4'>
 						<CommonDashboardUserCard />
@@ -106,11 +106,11 @@ const DashboardPage = () => {
 					
 					<div className='col-xxl-4 col-xl-6'>
 						<CommonDashboardWaitingAnswer />
-					</div>
+					</div> */}
 
 					<div className='col-xxl-4 col-xl-6'>
 						<CommonMyWallet />
-					</div>  */}
+					</div>
 					<div className='col-xxl-8'>
 						<CommonDashboardJob />
 					</div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import Header, { HeaderLeft } from '../../../layout/Header/Header';
+import Header, {HeaderLeft ,HeaderRight } from '../../../layout/Header/Header';
 import CommonHeaderChat from './CommonHeaderChat';
 import Search from '../../../components/Search';
 import CommonHeaderRight from './CommonHeaderRight';
@@ -8,9 +8,12 @@ const DashboardHeader = () => {
 	return (
 		<Header>
 			<HeaderLeft>
-				<Search />
+				{/* <Search /> */}
+				<></>
 			</HeaderLeft>
-			<CommonHeaderRight afterChildren={<CommonHeaderChat />} />
+			<HeaderRight>
+				<CommonHeaderRight afterChildren={<CommonHeaderChat />} />
+			</HeaderRight>
 		</Header>
 	);
 };
