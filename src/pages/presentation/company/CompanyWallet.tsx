@@ -82,32 +82,6 @@ const validate = (values: {
 
 const CompanyWallet = () => {
 	const { darkModeStatus } = useDarkMode();
-
-	// const [cardList, setCardList] = useState<
-	// 	{ id: number; name: string; number: string; expiry: string; cvc: number | string }[]
-	// >([
-	// 	{
-	// 		id: 1,
-	// 		name: 'John Doe',
-	// 		number: '4134 1111 1111 1134',
-	// 		expiry: '12/21',
-	// 		cvc: 123,
-	// 	},
-	// 	{
-	// 		id: 2,
-	// 		name: 'John Doe',
-	// 		number: '5534 1111 1111 1198',
-	// 		expiry: '12/24',
-	// 		cvc: 234,
-	// 	},
-	// 	{
-	// 		id: 3,
-	// 		name: 'John Doe',
-	// 		number: '3700 000000 00002',
-	// 		expiry: '12/24',
-	// 		cvc: 234,
-	// 	},
-	// ]);
 	const { userData } = useContext(AuthContext);
 	const [cardList, setCardList] = useState<
 		{ id: number; name: string; number: string; expiry: string; cvc: number | string }[]

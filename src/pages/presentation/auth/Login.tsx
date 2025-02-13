@@ -19,7 +19,7 @@ import LogoDark from '../../../assets/logo/logo_yellow.png'
 import Icon from '../../../components/icon/Icon';
 import Cnpj from '../../../api/get/Cnpj';
 import Company from '../../../api/post/Company';
-import User from '../../../api/get/User';
+import User from '../../../api/get/user/SingIn';
 import Mask from '../../../function/Mask';
 interface ILoginHeaderProps {
 	isNewUser?: boolean;
