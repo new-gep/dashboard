@@ -276,8 +276,8 @@ const CollaboratorList = () => {
 							}
 							return(
 								<div key={job.collaborator.id} className='col'>
-									<Card>
-										<CardBody>
+									<Card key={job.collaborator.id}>
+										<CardBody key={job.collaborator.id}>
 											<div className='row g-3'>
 												<div className='col d-flex'>
 													<div className='flex-shrink-0'>

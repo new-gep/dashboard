@@ -19,62 +19,11 @@ import CreateUser from '../../../api/post/user/Create';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import Toasts from '../../../components/bootstrap/Toasts';
+import Mask from '../../../function/Mask';
+import DeleteDefaultUser from '../../../api/delete/user/default';
+import UpdateByAdmin from '../../../api/patch/user/updateByAdmin';
 
-const validate = (values: {
-	name: string;
-	email: string;
-	password: string;
-	confirmPassword: string;
-	avatar: string;
-	user: string;
-	phone: string;
-}) => {
-	const errors: any = {};
 
-	if (!values.name) {
-		errors.name = 'Nome é obrigatório';
-	} else if (values.name.length < 3) {
-		errors.name = 'Nome deve ter pelo menos 3 caracteres';
-	}
-
-	if (!values.email) {
-		errors.email = 'Email é obrigatório';
-	} else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-		errors.email = 'Email inválido';
-	}
-
-	if (!values.phone) {
-		errors.phone = 'Celular é obrigatório';
-	} else if (values.phone.replace(/\D/g, '').length !== 11) {
-		errors.phone = 'Celular deve ter 11 dígitos numéricos';
-	}
-
-	if (!values.user) {
-		errors.user = 'Usuário é obrigatório';
-	} else if (values.user.length < 5) {
-		errors.user = 'Usuário deve ter pelo menos 5 caracteres';
-	}
-
-	if (!values.password) {
-		errors.password = 'Senha é obrigatória';
-	} else if (values.password.length < 6) {
-		errors.password = 'Senha deve ter pelo menos 6 caracteres';
-	}
-
-	if (!values.confirmPassword) {
-		errors.confirmPassword = 'Confirmar Senha é obrigatório';
-	} else if (values.password !== values.confirmPassword) {
-		errors.confirmPassword = 'As senhas não conferem';
-	}
-
-	if (!values.avatar) {
-		errors.avatar = 'Avatar é obrigatório';
-	}
-	
-	console.log(errors);
-
-	return errors;
-};
 
 const CompanyUser = () => {
 	const { userData } = useContext(AuthContext);
@@ -83,7 +32,67 @@ const CompanyUser = () => {
 	const [isEditMode, setIsEditMode] = useState<boolean>(false);
 	const [currentUser, setCurrentUser] = useState<any>(null);
 	const [modalAvatar, setModalAvatar] = useState<boolean>(false);
+	const [modalDelete, setModalDelete] = useState<boolean>(false);
 	const [selectedAvatar, setSelectedAvatar] = useState<string>('');
+	const [searchTerm, setSearchTerm] = useState<string>('');
+
+	const validate = (values: {
+		name: string;
+		email: string;
+		password: string;
+		confirmPassword: string;
+		avatar: string;
+		user: string;
+		phone: string;
+	}) => {
+		const errors: any = {};
+	
+		if (!values.name) {
+			errors.name = 'Nome é obrigatório';
+		} else if (values.name.length < 3) {
+			errors.name = 'Nome deve ter pelo menos 3 caracteres';
+		}
+	
+		if (!values.email) {
+			errors.email = 'Email é obrigatório';
+		} else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+			errors.email = 'Email inválido';
+		}
+	
+		if (!values.phone) {
+			errors.phone = 'Celular é obrigatório';
+		} else if (values.phone.replace(/\D/g, '').length !== 11) {
+			errors.phone = 'Celular deve ter 11 dígitos numéricos';
+		}
+	
+		if (!values.user) {
+			errors.user = 'Usuário é obrigatório';
+		} else if (values.user.length < 5) {
+			errors.user = 'Usuário deve ter pelo menos 5 caracteres';
+		}
+	
+		if (!isEditMode || (isEditMode && values.password)) {
+			if (!values.password) {
+				errors.password = 'Senha é obrigatória';
+			} else if (values.password.length < 6) {
+				errors.password = 'Senha deve ter pelo menos 6 caracteres';
+			}
+	
+			if (!values.confirmPassword) {
+				errors.confirmPassword = 'Confirmar Senha é obrigatório';
+			} else if (values.password !== values.confirmPassword) {
+				errors.confirmPassword = 'As senhas não conferem';
+			}
+		}
+	
+		if (!values.avatar) {
+			errors.avatar = 'Avatar é obrigatório';
+		}
+		
+		console.log(errors);
+	
+		return errors;
+	};
 
 	const formik = useFormik({
 		initialValues: {
@@ -118,7 +127,6 @@ const CompanyUser = () => {
 			password: values.password,
 		}
 		const response = await CreateUser(propsUser);
-		console.log(response);
 		if(response.status === 201){
 			setUsers([...users, response.user]);
 			toast(
@@ -141,10 +149,65 @@ const CompanyUser = () => {
 				</Toasts>,
 			);
 		}
-	}
+	};
 
 	const editUser = async (values: any) => {
-		console.log(values);
+
+		const PropsUpdateUser = {
+			name: values.name,
+			email: values.email,
+			phone: values.phone,
+			password: values.password,
+			avatar: values.avatar,
+		};
+		const response = await UpdateByAdmin(currentUser.id, PropsUpdateUser);
+		console.log(response);
+		if(response.status === 200){
+			setIsModalOpen(false);
+			setUsers(users.map((user) => {
+				if (user.id === currentUser.id) {
+					return {
+						...user,
+						name: values.name,
+						email: values.email,
+						phone: values.phone,
+						avatar: values.avatar,
+					};
+				}
+				return user;
+			}));
+			toast(
+				<Toasts icon={'Check'} iconColor={'success'} title={'Parabéns!'}>
+					Usuário editado com sucesso.
+				</Toasts>,
+			);
+		}else{
+			toast(
+				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+					Erro ao editar usuário, tente novamente.
+				</Toasts>,
+			);
+		}
+	};
+
+	const deleteUser = async (id: string) => {
+		const response = await DeleteDefaultUser(id);
+		if(response.status === 200){
+			setModalDelete(false);
+			setIsModalOpen(false);
+			setUsers(users.filter((user) => user.id !== id));
+			toast(
+				<Toasts icon={'Check'} iconColor={'success'} title={'Parabéns!'}>
+					Usuário excluído com sucesso.
+				</Toasts>,
+			);
+		}else{
+			toast(
+				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+					Erro ao excluir usuário, tente novamente.
+				</Toasts>,
+			);
+		}
 	};
 
 	const openModal = (user: any = null) => {
@@ -295,95 +358,88 @@ const CompanyUser = () => {
 						}
 
 						<section className='row gap-5 flex justify-content-center' style={{ maxHeight: '400px', overflowY: 'auto' }}>
+							<div className='col-12 m-4'>
+								<input
+									type='text'
+									className='form-control'
+									placeholder=' Buscar usuário pelo nome...'
+									onChange={(e: any) => setSearchTerm(e.target.value)}
+								/>
+							</div>
+
 							{users && users.length > 1 ? (
-								users.map((user) => {
-									if(user.hierarchy === '0'){
-										return
-									}
-									return (
-										<Card className='col-12 col-md-5 col-lg-5'>	
-											<CardBody>
-												<div className='row g-3'>
-													<div className='col d-flex'>
-														<div className='flex-shrink-0'>
-															<div className='position-relative'>
-																<div
-																	className='ratio ratio-1x1'
-																	style={{ width: 100 }}>
+								users
+									.filter((user) => user.name.toLowerCase().includes(searchTerm.toLowerCase()))
+									.map((user) => {
+										if (user.hierarchy === '0') {
+											return null;
+										}
+										return (
+											<Card className='col-12 col-md-5 col-lg-5'>
+												<CardBody>
+													<div className='row g-3'>
+														<div className='col d-flex'>
+															<div className='flex-shrink-0'>
+																<div className='position-relative'>
 																	<div
-																		className={classNames(
-																			// `bg-l25-${user.color}`,
-																			'rounded-2',
-																			'd-flex align-items-center justify-content-center',
-																			'overflow-hidden',
-																			'shadow',
-																		)}>
-																		<Avatar
-																			// @ts-ignore
-																			src={AvatarPicture[user.avatar]}
-																			color='storybook'
-																			rounded={3}
-																		/>
+																		className='ratio ratio-1x1'
+																		style={{ width: 100 }}>
+																		<div
+																			className={classNames(
+																				'rounded-2',
+																				'd-flex align-items-center justify-content-center',
+																				'overflow-hidden',
+																				'shadow',
+																			)}>
+																			<Avatar
+																				// @ts-ignore
+																				src={AvatarPicture[user.avatar]}
+																				color='storybook'
+																				rounded={3}
+																			/>
+																		</div>
 																	</div>
 																</div>
-																{/* { (
-																				<span className='position-absolute top-100 start-85 translate-middle badge border border-2 border-light rounded-circle bg-success p-2'>
-																					<span className='visually-hidden'>
-																						Online user
-																					</span>
-																				</span>
-																			)} */}
 															</div>
-														</div>
-														<div className='flex-grow-1 ms-3 d-flex justify-content-between'>
-															<div className='w-100'>
-																<div className='row'>
-																	<div className='col'>
-																		<div className='d-flex flex-column gap-3 align-items-start'>
-																			<div className='fw-bold fs-5 me-2'>
-																				{/* {`${user.name} ${user.surname}`} */}
-																				{/* {Mask(
-																					'firstName',
-																					job.collaborator.name,
-																				)}{' '}
-																				{Mask(
-																					'secondName',
-																					job.collaborator.name,
-																				)} */}
+															<div className='flex-grow-1 ms-3 d-flex justify-content-between'>
+																<div className='w-100'>
+																	<div className='row'>
+																		<div className='col gap-2 d-flex flex-column align-items-start'>
+																			<div className='d-flex flex-column gap-3 align-items-start'>
+																				<div className='fw-bold fs-5 me-2'>
+																					{/* {`${user.name} ${user.surname}`} */}
+																				</div>
+
+																				<small
+																					className={`border border-warning text-warning border-2 fw-bold px-2 py-1 rounded-1`}>
+																					Usuário
+																				</small>
 																			</div>
 
-																			<small
-																				className={`border ${true ? 'border-danger text-danger' : 'border-success text-success'} border-2 fw-bold px-2 py-1 rounded-1`}>
-																				{true
-																					? 'Inativo'
-																					: 'Ativo'}
-																			</small>
+																			<div className='text-muted text-capitalize'>
+																				{`${Mask('firstName', user.name)} ${Mask('secondName', user.name)}`}
+																			</div>
 																		</div>
-
-																		<div className='text-muted'>
-																			{/* @{job.function} */}
+																		<div className='col-auto'>
+																			<Button
+																				icon='Info'
+																				color='dark'
+																				isLight
+																				hoverShadow='sm'
+																				tag='a'
+																				onClick={() => openModal(user)}
+																				aria-label='More info'
+																			/>
 																		</div>
-																	</div>
-																	<div className='col-auto'>
-																		<Button
-																			icon='Info'
-																			color='dark'
-																			isLight
-																			hoverShadow='sm'
-																			tag='a'
-																			onClick={() => openModal(user)}
-																			aria-label='More info'
-																		/>
 																	</div>
 																</div>
 															</div>
 														</div>
 													</div>
-												</div>
-											</CardBody>
-										</Card>
-									);
-								})
+												</CardBody>
+											</Card>
+										);
+									})
 							) : (
 								<div className='d-flex flex-column justify-content-center align-items-center mt-5'>
 									<h2>Nenhum Usuário Cadastrado</h2>
@@ -400,6 +456,7 @@ const CompanyUser = () => {
 			</Card>
 
 			<Modal isStaticBackdrop={true}  isOpen={isModalOpen} setIsOpen={setIsModalOpen} size='lg' isCentered>
+				
 				{/* Selection Avatar */}
 				<Modal  isOpen={modalAvatar} setIsOpen={setModalAvatar} >
 					<ModalHeader >
@@ -431,11 +488,26 @@ const CompanyUser = () => {
 						</Button>
 					</ModalFooter>
 				</Modal>
-				
+
+				{/* Modal Delete */}
+				<Modal isOpen={modalDelete} setIsOpen={setModalDelete}  isCentered >
+					<ModalHeader setIsOpen={setModalDelete}>
+						<ModalTitle id='modal-title' className='d-flex align-items-center gap-2'>
+							Excluir Usuário
+						</ModalTitle>
+					</ModalHeader>
+					<ModalBody>
+						<h4>Tem certeza que deseja excluir o usuário <span className='fw-bold text-danger'>{currentUser && currentUser.name}</span> ?</h4>
+						<p className='text-muted'>Esta ação é reversível, esse perfil poderá ser recuperado caso necessário.</p>
+					</ModalBody>
+					<ModalFooter>
+						<Button color='danger' isLight icon='Delete' isLink onClick={()=>(deleteUser(currentUser.id))}>Excluir</Button>	
+					</ModalFooter>
+				</Modal>
+
 				<ModalHeader setIsOpen={setIsModalOpen}>
 					<ModalTitle id='modal-title'>{isEditMode ? (currentUser && currentUser.hierarchy !== '0' && userData.hierarchy === '0' ? 'Editar Usuário' : 'Visualizar Usuário') : '+ Novo Usuário'}</ModalTitle>
 				</ModalHeader>
-
 
 				<ModalBody>
 					<div className='d-flex  justify-content-center item-center'>
@@ -475,7 +547,7 @@ const CompanyUser = () => {
 									isTouched={formik.touched.name}
 									invalidFeedback={formik.errors.name}
 									validFeedback='Ótimo!'
-									disabled={currentUser && currentUser.hierarchy === '0' && (userData.hierarchy !== '0' || currentUser.id === userData.id)}
+									disabled={currentUser && ((userData.hierarchy === '0' && currentUser.id === userData.id) || userData.hierarchy === '1')}
 								/>
 							</FormGroup>
 							<FormGroup className='col-6' id='email' label='Email'>
@@ -487,7 +559,7 @@ const CompanyUser = () => {
 									isTouched={formik.touched.email}
 									invalidFeedback={formik.errors.email}
 									validFeedback='Ótimo!'
-									disabled={currentUser && currentUser.hierarchy === '0' && (userData.hierarchy !== '0' || currentUser.id === userData.id)}
+									disabled={currentUser && ((userData.hierarchy === '0' && currentUser.id === userData.id) || userData.hierarchy === '1')}
 								/>	
 							</FormGroup>
 							<FormGroup className='col-6' id='phone' label='Celular'>
@@ -500,7 +572,7 @@ const CompanyUser = () => {
 									isTouched={formik.touched.phone}
 									invalidFeedback={formik.errors.phone}
 									validFeedback='Ótimo!'
-									disabled={currentUser && currentUser.hierarchy === '0' && (userData.hierarchy !== '0' || currentUser.id === userData.id)}
+									disabled={currentUser && ((userData.hierarchy === '0' && currentUser.id === userData.id) || userData.hierarchy === '1')}
 								/>
 							</FormGroup>
 							{ 
@@ -546,8 +618,15 @@ const CompanyUser = () => {
 							}
 						</section>
 							{  ((currentUser && currentUser.hierarchy !== '0' && userData.hierarchy === '0') || !currentUser) &&
-								<ModalFooter className='mt-2'>
-										<Button color='success' isLight  icon='Save'
+								<ModalFooter className='mt-2 justify-content-between'>
+									<Button color='danger' isLink 
+										onClick={()=>{
+											setModalDelete(true);
+										}}
+									>
+										Excluir
+									</Button>
+									<Button color='success' isLight  icon='Save'
 										type='submit'
 									>
 										Salvar

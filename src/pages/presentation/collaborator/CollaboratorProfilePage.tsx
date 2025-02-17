@@ -332,7 +332,7 @@ const CollaboratorProfilePage = () => {
 											<Button 
 												onClick={()=>{setModalChangeWork(true)}}
 												icon='Sync' 
-												isLight={true}
+												isLink={true}
 												color='light'
 											/>
 										}
@@ -489,7 +489,7 @@ const CollaboratorProfilePage = () => {
 														icon='AttachFile'
 														color='info'
 														className='w-100 p-3'
-														isLight={TABS.COLLABORATOR !== activeTab}
+														isLink={TABS.COLLABORATOR !== activeTab}
 														onClick={() =>
 															setActiveTab(TABS.COLLABORATOR)
 														}>
@@ -501,7 +501,7 @@ const CollaboratorProfilePage = () => {
 														icon='check'
 														color='success'
 														className='w-100 p-3'
-														isLight={TABS.ADMISSION !== activeTab}
+														isLink={TABS.ADMISSION !== activeTab}
 														onClick={() =>
 															setActiveTab(TABS.ADMISSION)
 														}>
@@ -513,7 +513,7 @@ const CollaboratorProfilePage = () => {
 														icon='close'
 														color='danger'
 														className='w-100 p-3'
-														isLight={TABS.RESIGNATION !== activeTab}
+														isLink={TABS.RESIGNATION !== activeTab}
 														onClick={() =>
 															setActiveTab(TABS.RESIGNATION)
 														}>
@@ -525,7 +525,7 @@ const CollaboratorProfilePage = () => {
 														icon='AttachMoney'
 														color='warning'
 														className='w-100 p-3'
-														isLight={TABS.PAYSTUB !== activeTab}
+														isLink={TABS.PAYSTUB !== activeTab}
 														onClick={() => setActiveTab(TABS.PAYSTUB)}>
 														{TABS.PAYSTUB}
 													</Button>
@@ -535,7 +535,7 @@ const CollaboratorProfilePage = () => {
 														icon='LocationOn'
 														color='secondary'
 														className='w-100 p-3'
-														isLight={TABS.POINT !== activeTab}
+														isLink={TABS.POINT !== activeTab}
 														onClick={() => setActiveTab(TABS.POINT)}>
 														{TABS.POINT}
 													</Button>
@@ -545,7 +545,7 @@ const CollaboratorProfilePage = () => {
 														icon='MedicalServices'
 														color='light'
 														className='w-100 p-3'
-														isLight={TABS.ATTEST !== activeTab}
+														isLink={TABS.ATTEST !== activeTab}
 														onClick={() => setActiveTab(TABS.ATTEST)}>
 														{TABS.ATTEST}
 													</Button>

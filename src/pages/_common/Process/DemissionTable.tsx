@@ -1636,19 +1636,25 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			try{
+			try {
 				const response = await Job_Demissional(userData.cnpj);
+				console.log('response aqui', response);
 				if (response.status == 200) {
 					const stepOneCollaborators = response.job.filter(
-						(job: { demission: { step: number } }) => job.demission.step === 1,
+						(job: { demission: { step: number } }) => {
+							if (!job) {
+								return false; // Retorne false para excluir o item
+							}
+							return job.demission.step === 1;
+						}
 					);
-					setCollaborators(response.job)
-					console.log('stepOneCollaborators',stepOneCollaborators)
+					setCollaborators(response.job);
+					console.log('stepOneCollaborators', stepOneCollaborators);
 					setCollaboratorsStep(stepOneCollaborators);
 					return;
 				}
-			}catch(e){
-				console.log(e)
+			} catch (e) {
+				console.log(e);
 			} finally {
 				setLoaderTable(true);
 			}

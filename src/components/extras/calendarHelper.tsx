@@ -1,9 +1,12 @@
 import PropTypes from 'prop-types';
 import { Views } from 'react-big-calendar';
 import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br';
 import React, { FC } from 'react';
 import Button, { ButtonGroup } from '../bootstrap/Button';
 import Dropdown, { DropdownItem, DropdownMenu, DropdownToggle } from '../bootstrap/Dropdown';
+
+dayjs.locale('pt-br');
 
 export const getUnitType = (viewMode: 'month' | 'week' | 'work_week' | 'day' | 'agenda') => {
 	let unitType = null;
@@ -44,9 +47,9 @@ export const getLabel = (
 export const getTodayButtonLabel = (
 	viewMode: 'month' | 'week' | 'work_week' | 'day' | 'agenda',
 ) => {
-	if (viewMode === Views.MONTH || viewMode === Views.AGENDA) return 'This month';
-	if (viewMode === Views.WEEK || viewMode === Views.WORK_WEEK) return 'This week';
-	return 'Today';
+	if (viewMode === Views.MONTH || viewMode === Views.AGENDA) return 'Este mês';
+	if (viewMode === Views.WEEK || viewMode === Views.WORK_WEEK) return 'Esta semana';
+	return 'Hoje';
 };
 
 export const getViews = () => {
@@ -74,7 +77,7 @@ export const CalendarTodayButton: FC<ICalendarTodayButtonProps> = ({
 				// @ts-ignore
 				onClick={() => setDate(dayjs(date).add(-1, unitType).toDate())}
 				icon='ChevronLeft'
-				aria-label='Prev'
+				aria-label='Anterior'
 			/>
 			{/* @ts-ignore */}
 			<Button color='info' isLight onClick={() => setDate(dayjs().toDate())}>
@@ -86,7 +89,7 @@ export const CalendarTodayButton: FC<ICalendarTodayButtonProps> = ({
 				// @ts-ignore
 				onClick={() => setDate(dayjs(date).add(1, unitType).toDate())}
 				icon='ChevronRight'
-				aria-label='Next'
+				aria-label='Próximo'
 			/>
 		</ButtonGroup>
 	);
@@ -122,10 +125,10 @@ export const CalendarViewModeButtons: FC<ICalendarViewModeButtonsProps> = ({
 						(viewMode === Views.DAY && 'calendar_view_day') ||
 						'view_agenda'
 					}>
-					{(viewMode === Views.MONTH && 'Month') ||
-						(viewMode === Views.WEEK && 'Week') ||
-						(viewMode === Views.WORK_WEEK && 'Work Week') ||
-						(viewMode === Views.DAY && 'Day') ||
+					{(viewMode === Views.MONTH && 'Mês') ||
+						(viewMode === Views.WEEK && 'Semana') ||
+						(viewMode === Views.WORK_WEEK && 'Semana de Trabalho') ||
+						(viewMode === Views.DAY && 'Dia') ||
 						'Agenda'}
 				</Button>
 			</DropdownToggle>
@@ -136,7 +139,7 @@ export const CalendarViewModeButtons: FC<ICalendarViewModeButtonsProps> = ({
 						icon='calendar_view_month'
 						isActive={viewMode === Views.MONTH}
 						onClick={() => setViewMode(Views.MONTH)}>
-						Month
+						Mês
 					</Button>
 				</DropdownItem>
 				<DropdownItem>
@@ -145,7 +148,7 @@ export const CalendarViewModeButtons: FC<ICalendarViewModeButtonsProps> = ({
 						icon='calendar_view_week'
 						isActive={viewMode === Views.WEEK}
 						onClick={() => setViewMode(Views.WEEK)}>
-						Week
+						Semana
 					</Button>
 				</DropdownItem>
 				<DropdownItem>
@@ -154,7 +157,7 @@ export const CalendarViewModeButtons: FC<ICalendarViewModeButtonsProps> = ({
 						icon='view_week'
 						isActive={viewMode === Views.WORK_WEEK}
 						onClick={() => setViewMode(Views.WORK_WEEK)}>
-						Work Week
+						Semana de Trabalho
 					</Button>
 				</DropdownItem>
 				<DropdownItem>
@@ -163,7 +166,7 @@ export const CalendarViewModeButtons: FC<ICalendarViewModeButtonsProps> = ({
 						icon='calendar_view_day'
 						isActive={viewMode === Views.DAY}
 						onClick={() => setViewMode(Views.DAY)}>
-						Day
+						Dia
 					</Button>
 				</DropdownItem>
 				<DropdownItem>

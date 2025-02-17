@@ -1110,16 +1110,16 @@ export const mainMenu = {
 				path: 'admission/fluid-list',
 				icon: 'ManageAccounts',
 			},
-			holerite: {
-				id: 'admission',
+			payStub: {
+				id: 'payStub',
 				text: 'Holerite',
-				path: 'admission/fluid-list',
+				path: 'payStub/home',
 				icon: 'AttachMoney',
 			},
 			point: {
-				id: 'admission',
-				text: 'Holerite',
-				path: 'admission/fluid-list',
+				id: 'point',
+				text: 'Ponto',
+				path: 'point/home',
 				icon: 'LocationOn',
 			},
 			dismissal: {

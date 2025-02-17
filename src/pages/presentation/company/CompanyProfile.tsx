@@ -529,6 +529,7 @@ const CompanyPage = () => {
 														label='Inscrição Estadual'
 														isFloating>
 														<Input
+															disabled={true}
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
 															value={formik.values.state_registration}
@@ -568,6 +569,7 @@ const CompanyPage = () => {
 														label='Inscrição Municipal'
 														isFloating>
 														<Input
+															disabled={true}
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
 															value={
@@ -1031,6 +1033,7 @@ const CompanyPage = () => {
 											isLink
 											type='reset'
 											isDisable
+											icon='Sync'
 											onClick={() => {}}>
 											Atualizar Plano
 										</Button>

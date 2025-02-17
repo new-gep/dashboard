@@ -66,6 +66,8 @@ const APP = {
 	PROCESS:{
 		ADMISSION: lazy(() => import('../pages/presentation/process/AdmissionList')),
 		DISMISSAL: lazy(() => import('../pages/presentation/process/DemissionList')),
+		POINT: lazy(() => import('../pages/presentation/process/PointList')),
+		PAY_STUB: lazy(() => import('../pages/presentation/process/PayStubList')),
 	},
 	JOB: {
 		TRANSACTIONS: lazy(() => import('../pages/presentation/job/TransActionsPage')),
@@ -328,6 +330,14 @@ const presentation: RouteProps[] = [
 	{
 		path: mainMenu.process.subMenu.dismissal.path,
 		element: <APP.PROCESS.DISMISSAL />,
+	},
+	{
+		path: mainMenu.process.subMenu.point.path,
+		element: <APP.PROCESS.POINT />,
+	},
+	{
+		path: mainMenu.process.subMenu.payStub.path,
+		element: <APP.PROCESS.PAY_STUB />,
 	},
 	/**
 	 * App > Collaborator

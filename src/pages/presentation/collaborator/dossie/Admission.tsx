@@ -15,20 +15,59 @@ export default function DossieAdmission(datesJob: any) {
 	const [typeDocument, setTypeDocument] = useState<any>(false);
 	const [pathDocumentMain, setPathDocumentMain] = useState<any>('');
 	const [pathDocumentSecondary, setPathDocumentSecondary] = useState<any>('');
-    
+    const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
 
 	const searchDocument = async (type:string, document: string) => {
+		setLoading((prev) => ({ ...prev, [document]: true }));
 		let response;
+		
         if(type == 'obligation'){
+			console.log(jobId, document, '1')
 			response = await JobFile(jobId, document, '1');
+			if(response.status == 404){
+				toast(
+					<Toasts
+						icon={'WarningAmber'}
+						iconColor={'warning'}
+						title={'Opa!'}>
+						Documento não encontrado.
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 3000, //
+					},
+				);
+				setLoading((prev) => ({ ...prev, [document]: false }));
+				return
+			}
         }else{
+			// console.log(jobId, 'dynamic', '1', document)
             response = await JobFile(jobId, 'dynamic', '1', document);
+			if(response.status == 404){
+				toast(
+					<Toasts
+						icon={'WarningAmber'}
+						iconColor={'warning'}
+						title={'Opa!'}>
+						Documento não encontrado.
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 3000, //
+					},
+				);
+				setLoading((prev) => ({ ...prev, [document]: false }));
+				return
+			}
         }
 		if(document == 'medical'){
 			setTypeDocument(response.type)
 			setPathDocumentMain(response.path)
+			setModal(true);
+			setLoading((prev) => ({ ...prev, [document]: false }));
 			return
 		}
+		console.log(response)
 		setTypeDocument(response.typeDocumentSignature);
 		switch (response.typeDocumentSignature) {
 			case 'pdf':
@@ -43,8 +82,8 @@ export default function DossieAdmission(datesJob: any) {
 				}
 				break;
 		}
-
 		setModal(true);
+		setLoading((prev) => ({ ...prev, [document]: false }));
 	};
 
 	const documentName = (type: string, document: string) => {
@@ -106,28 +145,33 @@ export default function DossieAdmission(datesJob: any) {
 					{job &&
 						job.date.obligation &&
 						Object.entries(job.date.obligation).map(([key, value]: [string, any]) => {
-							// Certifique-se de que o valor seja verdadeiro antes de criar o botão
 							if (value) {
 								return (
 									<div className='col-12' key={key}>
 										<Button
-											className='col-12 p-3'
+											className='col-12 p-3 d-flex justify-content-center align-items-center'
 											isLight={true}
 											color='primary'
-											onClick={() => searchDocument('obligation',key)}>
-											<span className='fw-bold'>{documentName('obligation',key)}</span>
+											onClick={() => searchDocument('obligation', key)}
+											isDisable={loading[key]}
+										>
+											{loading[key] ? (
+												<Spinner color='primary' />
+											) : (
+												<span className='fw-bold'>{documentName('obligation', key)}</span>
+											)}
 										</Button>
 									</div>
 								);
 							}
-							return null; // Ignora valores falsos
+							return null;
 						})}
 
 					{job &&
-						job.date.obligation &&
+						job.date.dynamic &&
+						job.date.dynamic.document &&
 						Object.entries(job.date.dynamic.document).map(
 							([key, value]: [string, any]) => {
-								// Certifique-se de que o valor seja verdadeiro antes de criar o botão
 								if (value) {
 									return (
 										<>
@@ -138,16 +182,24 @@ export default function DossieAdmission(datesJob: any) {
 													className='col-12 p-3'
 													isLight={true}
 													color='primary'
-													onClick={() => searchDocument('dynamic',value)}>
-													<span className='fw-bold'>{documentName('dynamic',value)}</span>
+													onClick={() => searchDocument('dynamic', value)}
+													isDisable={loading[value]}>
+													{loading[value] ? (
+														<>
+															<Spinner color='primary' />
+														</>
+													) : (
+														<span className='fw-bold'>{documentName('dynamic', value)}</span>
+													)}
 												</Button>
 											</div>
 										</>
 									);
 								}
-								return null; // Ignora valores falsos
+								return null;
 							},
-						)}
+						)
+					}
 				</>
 			)}
 		</section>

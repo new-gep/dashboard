@@ -3,6 +3,7 @@ interface PropsUpdateUser {
 	name ?: string;
 	email?: string;
 	phone?: string;
+    hierarchy?: string;
 	password?: string
 	confirmPassword ?: string;
 	avatar ?: any;
