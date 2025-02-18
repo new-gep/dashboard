@@ -1190,6 +1190,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				id_work: manipulatingTable.id
 
 			};
+
 			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
 			if (response.status == 200) {
 				switch (manipulatingTable.demission.step) {

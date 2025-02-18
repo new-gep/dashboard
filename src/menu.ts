@@ -1120,7 +1120,7 @@ export const mainMenu = {
 				id: 'point',
 				text: 'Ponto',
 				path: 'point/home',
-				icon: 'LocationOn',
+				icon: 'AccessAlarms',
 			},
 			dismissal: {
 				id: 'dismissal',

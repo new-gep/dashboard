@@ -23,10 +23,11 @@ import { toast } from 'react-toastify';
 import Toasts from '../../../components/bootstrap/Toasts';
 import OffCanvas from '../../../components/bootstrap/OffCanvas';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
+import Service_Upload from '../../../api/post/company/Service_Upload';
 import InputGroup from '../../../components/bootstrap/forms/InputGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 
-const PointTable = ({
+const PayStubTable = ({
 	selectedMonth,
 }: {
 	selectedMonth: { monthEN: string; month: string; year: number };
@@ -41,9 +42,14 @@ const PointTable = ({
 	const [upcomingEventsEditOffcanvas, setUpcomingEventsEditOffcanvas] = useState<boolean>(false);
 	const navigate = useNavigate();
 
-	const handleImport = (file: File) => {
+	const handleImport = async (file: File) => {
 		// Lógica para importar dados
-		console.log('Importar dados');
+		const response = await Service_Upload({
+			file: file,
+			user: userData.id,
+			type: 'paystub',
+		});
+
 	};
 
 	const handleExport = () => {
@@ -162,9 +168,9 @@ const PointTable = ({
 			)}
 			<Card stretch={true}>
 				<CardHeader borderSize={1}>
-					<CardLabel icon='AccessAlarms' iconColor='primary'>
+					<CardLabel icon='AttachMoney' iconColor='success'>
 						<CardTitle tag='div' className='h5'>
-							Processo de Ponto
+							Processo de Holerite
 						</CardTitle>
 					</CardLabel>
 					<CardActions>
@@ -392,4 +398,4 @@ const PointTable = ({
 	);
 };
 
-export default PointTable;
+export default PayStubTable;
