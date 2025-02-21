@@ -26,6 +26,8 @@ import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Service_Upload from '../../../api/post/company/Service_Upload';
 import InputGroup from '../../../components/bootstrap/forms/InputGroup';
 import Input from '../../../components/bootstrap/forms/Input';
+import Company_Redis from '../../../api/post/company/Redis';
+import Icon from '../../../components/icon/Icon';
 
 const PayStubTable = ({
 	selectedMonth,
@@ -40,16 +42,51 @@ const PayStubTable = ({
 	const [manipulating, setManipulating] = useState<null | any>(null);
 	const [manipulatingMenu, setManipulatingMenu] = useState<null | any>(null);
 	const [upcomingEventsEditOffcanvas, setUpcomingEventsEditOffcanvas] = useState<boolean>(false);
+	const [cache, setCache] = useState<any>(false);
 	const navigate = useNavigate();
 
 	const handleImport = async (file: File) => {
-		// Lógica para importar dados
+		toast(
+			<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso!'}>
+				Processamento iniciado com sucesso, o relatório será enviado para o seu e-mail.<br/>
+				<span className='font-weight-bold text-success'>{userData.email}</span>
+			</Toasts>,
+			{
+				closeButton: true,
+				autoClose: 5000, //
+			},
+		);
+		setCache(true);
 		const response = await Service_Upload({
+			cnpj: userData.cnpj,
 			file: file,
 			user: userData.id,
 			type: 'paystub',
 		});
-
+		if (response.status == 200) {
+			toast(
+				<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso!'}>
+					Processamento realizado com sucesso, o relatório será enviado para o seu e-mail.
+					<br/>
+					<span className='font-weight-bold text-success'>{userData.email}</span>
+				</Toasts>,
+				{
+					closeButton: true,
+					autoClose: 5000, //
+				},
+			);
+		}else{
+			toast(
+				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+					Erro ao processar o relatório, verifique se o arquivo está correto.
+				</Toasts>,
+				{
+					closeButton: true,
+					autoClose: 5000, //
+				},
+			);
+		}
+		setCache(false);
 	};
 
 	const handleExport = () => {
@@ -104,12 +141,30 @@ const PayStubTable = ({
 	};
 
 	useEffect(() => {
+		const style = document.createElement('style');
+		style.innerHTML = `
+		  @keyframes spin {
+			from { transform: rotate(360deg); }
+			to { transform: rotate(0deg); }
+		  }
+		`;
+		document.head.appendChild(style);
+		return () => {
+		  document.head.removeChild(style);
+		};
+	}, []);
+
+	useEffect(() => {
 		const fetchData = async () => {
 			if (userData) {
 				try {
+					const cache = await Company_Redis({
+						action: 'get',
+						key: `Company_${userData.cnpj}_Import_Service`,
+					});
+					setCache(cache);
 					const response = await JobCollaboratorCompany(userData.cnpj);
 					setData(response.collaborator);
-					console.log('response aqui', response);
 				} catch (error) {
 					console.error('Erro ao buscar dados:', error);
 				}
@@ -117,6 +172,8 @@ const PayStubTable = ({
 		};
 		fetchData();
 	}, [userData]);
+
+
 
 	return (
 		<section>
@@ -197,14 +254,73 @@ const PayStubTable = ({
 								}
 							}}
 						/>
-						<Button
-							color='info'
-							icon='CloudUpload'
-							isLight
-							target='_blank'
-							onClick={() => document.getElementById('fileInput')?.click()}>
-							Importar
-						</Button>
+						{cache ? 
+							<Button
+								className='d-flex align-items-center gap-2'
+								color='warning'
+								onClick={async () => {
+									const verifyCache = await Company_Redis({
+										action: 'get',
+										key: `Company_${userData.cnpj}_Import_Service`,
+									});
+									if(verifyCache){
+										toast(
+											<Toasts icon={'Warning'} iconColor={'warning'} title={'Atenção!'}>
+												Estamos processando os dados, aguarde alguns instantes.
+											</Toasts>,
+											{
+												closeButton: true,
+												autoClose: 5000, //
+											},
+										)
+									}else{
+										toast(
+											<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso!'}>
+												Processamento realizado com sucesso, o relatório será enviado para o seu e-mail.
+												<br/>
+												<span className='font-weight-bold text-success'>{userData.email}</span>
+											</Toasts>,
+											{
+												closeButton: true,
+												autoClose: 5000, //
+											},
+										);
+										setCache(false);
+									}
+								}}
+							>
+								<Icon icon="Sync" size="lg" style={{ animation: 'spin 1s linear infinite' }}/>
+								Processando
+							</Button>
+							:
+							<Button
+								color='info'
+								icon='CloudUpload'
+								isLight
+								target='_blank'
+								onClick={async () => {
+									const verifyCache = await Company_Redis({
+										action: 'get',
+										key: `Company_${userData.cnpj}_Import_Service`,
+									});
+									if(verifyCache){
+										setCache(true);
+										toast(
+											<Toasts icon={'Warning'} iconColor={'warning'} title={'Atenção!'}>
+												Processamento já iniciado, aguarde alguns instantes.
+											</Toasts>,
+											{
+												closeButton: true,
+												autoClose: 5000, //
+											}
+										);
+										return;
+									}
+									document.getElementById('fileInput')?.click();
+								}}>
+								Importar
+							</Button> 
+						}
 					</CardActions>
 				</CardHeader>
 
@@ -396,6 +512,7 @@ const PayStubTable = ({
 			</OffCanvas>
 		</section>
 	);
+
 };
 
 export default PayStubTable;

@@ -120,7 +120,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			dates.password = ''
 		};
 		const response = await User(datesSingIn)
-		switch (response.status) {
+		console.log(response)
+		switch (response && response.status) {
 			case 200:
 				if(response.token){
 					setDatesSingIn(() => ({

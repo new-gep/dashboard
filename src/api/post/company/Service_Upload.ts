@@ -3,13 +3,15 @@ interface PropsUploadService {
     file: File    | string,
     user: string | null,
     type  : string  | null,
+    cnpj: string | null,
 };
 
 export default async function Service_Upload(propsUploadCompany:PropsUploadService) {
     try {
-        if(!propsUploadCompany.user || !propsUploadCompany.type){
+        if(!propsUploadCompany.user || !propsUploadCompany.type || !propsUploadCompany.cnpj){
             console.log('propsUploadCompany.user', propsUploadCompany.user);
             console.log('propsUploadCompany.type', propsUploadCompany.type);
+            console.log('propsUploadCompany.cnpj', propsUploadCompany.cnpj);
             return
         }
         // Crie o objeto FormData
@@ -18,6 +20,7 @@ export default async function Service_Upload(propsUploadCompany:PropsUploadServi
         formData.append("file", propsUploadCompany.file);
         formData.append("user", propsUploadCompany.user); 
         formData.append("type", propsUploadCompany.type);
+        formData.append("cnpj", propsUploadCompany.cnpj);
 
         // Envia a solicitação com Axios
         console.log('URL:', `${process.env.REACT_APP_API}company/service/upload`);
