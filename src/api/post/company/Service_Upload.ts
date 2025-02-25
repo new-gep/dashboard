@@ -4,16 +4,34 @@ interface PropsUploadService {
     user: string | null,
     type  : string  | null,
     cnpj: string | null,
+    mothAndYear: any,
 };
 
 export default async function Service_Upload(propsUploadCompany:PropsUploadService) {
     try {
-        if(!propsUploadCompany.user || !propsUploadCompany.type || !propsUploadCompany.cnpj){
+        if(!propsUploadCompany.user || !propsUploadCompany.type || !propsUploadCompany.cnpj || !propsUploadCompany.mothAndYear){
             console.log('propsUploadCompany.user', propsUploadCompany.user);
             console.log('propsUploadCompany.type', propsUploadCompany.type);
             console.log('propsUploadCompany.cnpj', propsUploadCompany.cnpj);
+            console.log('propsUploadCompany.mothAndYear', propsUploadCompany.mothAndYear);
             return
         }
+        const [year, month] = propsUploadCompany.mothAndYear.split('-');
+
+        // Converte o mês para número (por exemplo, "02" para 2)
+        const monthNumber = parseInt(month, 10);
+
+        // Array com os nomes dos meses em inglês
+        const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+        ];
+
+        // Recupera o nome do mês (lembrando que o array inicia em 0)
+        const monthName = monthNames[monthNumber - 1];
+
+
+
         // Crie o objeto FormData
         const formData = new FormData();
         
@@ -21,6 +39,8 @@ export default async function Service_Upload(propsUploadCompany:PropsUploadServi
         formData.append("user", propsUploadCompany.user); 
         formData.append("type", propsUploadCompany.type);
         formData.append("cnpj", propsUploadCompany.cnpj);
+        formData.append("month", monthName);
+        formData.append("year", year);
 
         // Envia a solicitação com Axios
         console.log('URL:', `${process.env.REACT_APP_API}company/service/upload`);

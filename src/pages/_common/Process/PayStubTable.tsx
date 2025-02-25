@@ -28,6 +28,9 @@ import InputGroup from '../../../components/bootstrap/forms/InputGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 import Company_Redis from '../../../api/post/company/Redis';
 import Icon from '../../../components/icon/Icon';
+import Modal, { ModalBody, ModalFooter } from '../../../components/bootstrap/Modal';
+import { ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
+import FindAllByMonthAndYear from '../../../api/get/service/FindAll';
 
 const PayStubTable = ({
 	selectedMonth,
@@ -42,7 +45,10 @@ const PayStubTable = ({
 	const [manipulating, setManipulating] = useState<null | any>(null);
 	const [manipulatingMenu, setManipulatingMenu] = useState<null | any>(null);
 	const [upcomingEventsEditOffcanvas, setUpcomingEventsEditOffcanvas] = useState<boolean>(false);
+	const [modalImport, setModalImport] = useState<boolean>(false);
+	const [selectedMonthImport, setSelectedMonthImport] = useState<{ monthEN: string; month: string; year: number }>({ monthEN: '', month: '', year: 0 });
 	const [cache, setCache] = useState<any>(false);
+	const [loading, setLoading] = useState<boolean>(false);
 	const navigate = useNavigate();
 
 	const handleImport = async (file: File) => {
@@ -57,13 +63,15 @@ const PayStubTable = ({
 			},
 		);
 		setCache(true);
+		setModalImport(false);
 		const response = await Service_Upload({
 			cnpj: userData.cnpj,
 			file: file,
 			user: userData.id,
 			type: 'paystub',
+			mothAndYear: selectedMonthImport.month
 		});
-		if (response.status == 200) {
+		if (response && response.status == 200) {
 			toast(
 				<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso!'}>
 					Processamento realizado com sucesso, o relatório será enviado para o seu e-mail.
@@ -76,17 +84,31 @@ const PayStubTable = ({
 				},
 			);
 		}else{
-			toast(
-				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
-					Erro ao processar o relatório, verifique se o arquivo está correto.
+			setTimeout(() => {
+				toast(
+					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+						Erro ao processar o relatório, verifique se o arquivo está correto.
 				</Toasts>,
 				{
 					closeButton: true,
-					autoClose: 5000, //
-				},
-			);
+					autoClose: 7000, //
+					},
+				);
+			}, 5000);
 		}
 		setCache(false);
+	};
+
+	const openInputFile = async () => {
+		if(selectedMonthImport.month == ''){
+			toast(
+				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+					Selecione o mês e ano para importar o holerite.
+				</Toasts>,
+			);
+			return;
+		}
+		document.getElementById('fileInput')?.click();
 	};
 
 	const handleExport = () => {
@@ -140,6 +162,7 @@ const PayStubTable = ({
 		console.log('item aqui', manipulating);
 	};
 
+	// Rotacionar o icone de loading
 	useEffect(() => {
 		const style = document.createElement('style');
 		style.innerHTML = `
@@ -154,17 +177,44 @@ const PayStubTable = ({
 		};
 	}, []);
 
+	// 
 	useEffect(() => {
 		const fetchData = async () => {
+			setLoading(true);
+			if(userData){
+				console.log('selectedMonth', selectedMonth);
+				const response = await FindAllByMonthAndYear('PayStub', userData.cnpj, selectedMonth.monthEN, selectedMonth.year.toString());
+				console.log('response', response);
+				if(response && response.status == 200){
+					console.log('response', response.collaborators);
+					setData(response.collaborators);
+				}
+				setLoading(false);
+			}
+			
+		}
+		fetchData();
+	}, [selectedMonth]);
+
+	// Buscar dados
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
 			if (userData) {
 				try {
 					const cache = await Company_Redis({
 						action: 'get',
 						key: `Company_${userData.cnpj}_Import_Service`,
 					});
-					setCache(cache);
-					const response = await JobCollaboratorCompany(userData.cnpj);
-					setData(response.collaborator);
+					if(cache.status == 200){
+						setCache(cache.data);
+					}
+					
+					const response = await FindAllByMonthAndYear('PayStub', userData.cnpj, 'January', '2025');
+					if(response && response.status == 200){
+						console.log('response', response.collaborators);
+						setData(response.collaborators);
+					}	
 				} catch (error) {
 					console.error('Erro ao buscar dados:', error);
 				}
@@ -174,9 +224,43 @@ const PayStubTable = ({
 	}, [userData]);
 
 
-
 	return (
 		<section>
+			<Modal
+				isOpen={modalImport}
+				setIsOpen={setModalImport}
+			>
+				<ModalHeader>
+					<ModalTitle className='d-flex justify-content-end align-items-start gap-2' id={'import-modal'}>
+						<div className='d-flex flex-column justify-content-end'>
+							<h1 className='h4 font-weight-bold'>Importar</h1>
+							<p className='text-muted small'>Selecione o mês e ano para importar o holerite.</p>
+						</div>
+					</ModalTitle>
+				</ModalHeader>
+				<ModalBody>
+					<FormGroup label='Selecione o mês e ano'>
+						<Input 
+							className='text-capitalize'
+							placeholder='Selecione o mês e ano'
+							type='month' 
+							value={selectedMonthImport.month} 
+							onChange={(e: any) => setSelectedMonthImport({ ...selectedMonthImport, month: e.target.value })}
+						/>
+					</FormGroup>
+				</ModalBody>
+				<ModalFooter className='d-flex justify-content-end gap-2'>
+					<Button color='info' isLink onClick={() => setModalImport(false)}>
+						Cancelar
+					</Button>
+					<Button color='success' icon='CloudUpload' isLight onClick={async () => {
+						openInputFile()
+					}}>
+						Importar
+					</Button>
+				</ModalFooter>
+			</Modal>
+
 			{menu && (
 				<ul
 					id='context-menu'
@@ -263,7 +347,7 @@ const PayStubTable = ({
 										action: 'get',
 										key: `Company_${userData.cnpj}_Import_Service`,
 									});
-									if(verifyCache){
+									if(verifyCache && verifyCache.status == 200){
 										toast(
 											<Toasts icon={'Warning'} iconColor={'warning'} title={'Atenção!'}>
 												Estamos processando os dados, aguarde alguns instantes.
@@ -298,25 +382,27 @@ const PayStubTable = ({
 								icon='CloudUpload'
 								isLight
 								target='_blank'
-								onClick={async () => {
-									const verifyCache = await Company_Redis({
-										action: 'get',
-										key: `Company_${userData.cnpj}_Import_Service`,
-									});
-									if(verifyCache){
-										setCache(true);
-										toast(
-											<Toasts icon={'Warning'} iconColor={'warning'} title={'Atenção!'}>
-												Processamento já iniciado, aguarde alguns instantes.
-											</Toasts>,
-											{
-												closeButton: true,
-												autoClose: 5000, //
-											}
-										);
-										return;
-									}
-									document.getElementById('fileInput')?.click();
+								onClick={async ()=>{
+									// const verifyCache = await Company_Redis({
+									// 	action: 'get',
+									// 	key: `Company_${userData.cnpj}_Import_Service`,
+									// });
+							
+									// if(verifyCache && verifyCache.status == 200){
+									// 	setCache(true);
+									// 	toast(
+									// 		<Toasts icon={'Warning'} iconColor={'warning'} title={'Atenção!'}>
+									// 			Processamento já iniciado, aguarde alguns instantes.
+									// 		</Toasts>,
+									// 		{
+									// 			closeButton: true,
+									// 			autoClose: 5000, //
+									// 		}
+									// 	);
+									// 	return;
+									// };
+
+									setModalImport(true)
 								}}>
 								Importar
 							</Button> 
@@ -325,104 +411,115 @@ const PayStubTable = ({
 				</CardHeader>
 
 				<CardBody className='table-responsive' onClick={closeMenu}>
-					<table className='table table-modern'>
-						<thead>
-							<tr>
-								<th>Contato</th>
-								<th>Nome</th>
-								<th>Contrato</th>
-								<th className='text-center'>Status</th>
-								<td aria-labelledby='Actions' />
-							</tr>
-						</thead>
-						<tbody>
-							{data && data.length > 0 ? (
-								data.map((item, index) => (
-									<tr key={index} onContextMenu={(e) => toggleMenu(e, item)}>
-										<td>
-											<div>
-												<div>{Mask('phone', item.collaborator.phone)}</div>
-												<div className='small text-muted'>
-													{item.collaborator.email}
+					{loading ? (
+						<div className="d-flex justify-content-center align-items-center" style={{ height: '200px' }}>
+							<Icon icon="Sync" size="lg" style={{ animation: 'spin 1s linear infinite' }} />
+						</div>
+					) : (
+						<table className='table table-modern'>
+							<thead>
+								<tr>
+									<th>Contato</th>
+									<th>Nome</th>
+									<th>Contrato</th>
+									<th className='text-center'>Status</th>
+									<td aria-labelledby='Actions' />
+								</tr>
+							</thead>
+							<tbody>
+								{data && data.length > 0 ? (
+									data.map((item, index) => (
+										
+										<tr key={index} onContextMenu={(e) => toggleMenu(e, item)}>
+											<td>
+												<div>
+													<div>{Mask('phone', item.collaborator.phone)}</div>
+													<div className='small text-muted'>
+														{item.collaborator.email}
+													</div>
 												</div>
-											</div>
-										</td>
-										<td>
-											<div className='d-flex'>
-												<div className='flex-shrink-0'>
-													<img
-														className='rounded-circle'
-														src={item.picture}
-														width={36}
-														height={36}
-														// srcSet={item.assigned.srcSet}
-														// color={item.assigned.color}
-													/>
+											</td>
+											<td>
+												<div className='d-flex'>
+													<div className='flex-shrink-0'>
+														<img
+															className='rounded-circle'
+															src={item.picture}
+															width={36}
+															height={36}
+															// srcSet={item.assigned.srcSet}
+															// color={item.assigned.color}
+														/>
+													</div>
+													<div className='flex-grow-1 ms-3 d-flex align-items-center text-nowrap'>
+														{`${Mask('firstName', item.collaborator.name)} ${Mask('secondName', item.collaborator.name)}`}
+													</div>
 												</div>
-												<div className='flex-grow-1 ms-3 d-flex align-items-center text-nowrap'>
-													{`${Mask('firstName', item.collaborator.name)} ${Mask('secondName', item.collaborator.name)}`}
-												</div>
-											</div>
-										</td>
-										<td>
-											<p className='text-nowrap text-uppercase'>
-												{item.collaborator && item.job.contract}
-											</p>
-										</td>
-										<td className='text-center'>
-											<DropdownToggle hasIcon={false}>
+											</td>
+											<td>
+												<p className='text-nowrap text-uppercase'>
+													{item.collaborator && item.job.contract}
+												</p>
+											</td>
+											<td className='text-center'>
+												<DropdownToggle hasIcon={false}>
+													<Button
+														isLink
+														color={
+															item.signature && item.signature ?
+																item.signature.service.status.toLowerCase() == 'approved' ?
+																'success' 
+																:
+																item.signature.service.status.toLowerCase() == 'rejected' ?
+																'danger'
+																:
+																'warning'
+															:
+															'light'
+														}
+														icon='Circle'
+														className='text-nowrap'>
+														{item.signature && item.signature ?
+																item.signature.service.status.toLowerCase() == 'approved' ?
+																'Aprovado' 
+																:
+																item.signature.service.status.toLowerCase() == 'rejected' ?
+																'Rejeitado'
+																:
+																'Em espera'
+															:
+															'Assinatura pendente'
+														}
+													</Button>
+												</DropdownToggle>
+											</td>
+											<td>
 												<Button
-													isLink
-													color={
-														item.status && item.verify
-															? 'success'
-															: item.status == null &&
-																  item.verify == null
-																? 'warning'
-																: item.status == false &&
-																	  item.verify == null
-																	? 'light'
-																	: 'danger'
-													}
-													icon='Circle'
-													className='text-nowrap'>
-													{item.status && item.verify
-														? 'Aprovado'
-														: item.status == null && item.verify == null
-															? 'Em espera'
-															: item.status == false &&
-																  item.verify == null
-																? 'Rejeitado'
-																: 'Reprovado'}
+													isOutline={!darkModeStatus}
+													color='dark'
+													isLight={darkModeStatus}
+													className={classNames('text-nowrap col-12 ', {
+														'border-light': !darkModeStatus,
+													})}
+													icon={'PhotoLibrary'}
+													onClick={() => {
+														handleOpenOffcanvas(item);
+													}}>
+													Buscar
 												</Button>
-											</DropdownToggle>
-										</td>
-										<td>
-											<Button
-												isOutline={!darkModeStatus}
-												color='dark'
-												isLight={darkModeStatus}
-												className={classNames('text-nowrap col-12 ', {
-													'border-light': !darkModeStatus,
-												})}
-												icon={'PhotoLibrary'}
-												onClick={() => {
-													handleOpenOffcanvas(item);
-												}}>
-												Buscar
-											</Button>
+											</td>
+										</tr>
+									))
+								) : (
+									<tr>
+										<td colSpan={4} className='text-center'>
+											Nenhum dado disponível
 										</td>
 									</tr>
-								))
-							) : (
-								<tr>
-									<td colSpan={4} className='text-center'>
-										Nenhum dado disponível
-									</td>
-								</tr>
-							)}
-						</tbody>
-					</table>
+								)}
+							</tbody>
+						</table>
+					)}
 				</CardBody>
 			</Card>
 
