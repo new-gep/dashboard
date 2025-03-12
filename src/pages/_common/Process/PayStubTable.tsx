@@ -167,7 +167,6 @@ const PayStubTable = ({
 	};
 
 	const handleOpenOffcanvas = (item: any) => {
-		console.log('item aquxxi', item);
 		setManipulating(item);
 		setUpcomingEventsEditOffcanvas(true);
 	};
@@ -186,14 +185,12 @@ const PayStubTable = ({
 			setModalSelectPayStub(true);
 		}
 		setModalAction('viewDocument');
-		console.log('item aqui', manipulating);
 	};
-	
 
 	const ViewSignature = () => {
 		if (manipulating?.signature?.picture) {
-			console.log('manipulating', manipulating.signature.picture.path)
 			setManipulatingPath(manipulating.signature.picture.path);
+			setModalAction('viewsignature');
 			setModalDocument(true);
 			return;
 		}
@@ -205,12 +202,9 @@ const PayStubTable = ({
 	};
 
 	const ViewSignedDocument = () => {
+		setModalAction('viewDocumentFull');
 		setModalSelectPayStub(true);
-		setModalAction('viewSignedDocument');
-		console.log('item aqui', manipulating);
 	};
-
-
 
 	// Rotacionar o icone de loading
 	useEffect(() => {
@@ -286,7 +280,12 @@ const PayStubTable = ({
 
 	return (
 		<section>
-			<Modal isStaticBackdrop={true} isOpen={modalImport} setIsOpen={setModalImport}>
+			<Modal 
+				isStaticBackdrop={true} 
+				isOpen={modalImport} 
+				setIsOpen={setModalImport}
+				size={`sm`}
+			>
 				<ModalHeader>
 					<ModalTitle
 						className='d-flex justify-content-end align-items-start gap-2'
@@ -336,6 +335,7 @@ const PayStubTable = ({
 				setIsOpen={setModalSelectPayStub}
 				size={`sm`}
 				isStaticBackdrop={true}>
+
 				<ModalHeader setIsOpen={setModalSelectPayStub}>
 					<ModalTitle id='signature-modal'>Selecione o Holerite</ModalTitle>
 				</ModalHeader>
@@ -345,9 +345,11 @@ const PayStubTable = ({
 						manipulating.service &&
 						manipulating.service.length > 0 &&
 						manipulating.service.map((item: any, index: number) => {
+							console.log('item aqui', item);
 							const key = Object.keys(item)[0]; // Pega a chave dinâmica
 							const serviceData = item[key].item; // Acessa o conteúdo do objeto
 							const pictureData = item[key].pictureService;
+							const pictureFullData = item[key].pictureFull;
 							return (
 								<div key={index} className='d-flex flex-column gap-2 '>
 									<div>
@@ -355,9 +357,28 @@ const PayStubTable = ({
 											color='primary'
 											isLink={true}
 											onClick={() => {
-												setManipulatingPath(pictureData.path);
-												setModalSelectPayStub(false);
-												setModalDocument(true);
+												// console.log('pictureData', pictureData);
+												if(modalAction == 'viewDocument'){
+													setManipulatingPath(pictureData.path);
+													setModalSelectPayStub(false);
+													setModalAction('document');
+													setModalDocument(true);
+												}else if(modalAction == 'viewDocumentFull'){
+													if(pictureFullData && pictureFullData.path){
+														setManipulatingPath(pictureFullData.path);
+														setModalDocument(true);
+													}else{
+														toast(
+															<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+																Documento completo não encontrado.
+															</Toasts>,
+														);
+													}
+
+												}else{
+													console.log('modalAction:', modalAction)
+												}
+												
 											}}>	
 											Holerite {index}
 										</Button>
@@ -398,11 +419,16 @@ const PayStubTable = ({
 
 				<ModalFooter className='d-flex justify-content-between'>
 					<div>
-						<Button isLink={true} color='light' icon='ArrowBack' onClick={() => {
-							setModalDocument(false);
-							setModalSelectPayStub(true);
+						<Button isLink={true} color='light' icon={ modalAction == 'document' ? 'ArrowBack' : 'Close'} onClick={() => {
+							if(modalAction == 'document'){
+								setModalDocument(false);
+								setModalSelectPayStub(true);
+							}else{
+								console.log('aqui')
+								setModalDocument(false);
+							}
 						}}>
-							Voltar
+							{modalAction == 'document' ? 'Voltar' : 'Fechar'}
 						</Button>
 					</div>
 					{ modalAction !== 'viewDocument' &&
