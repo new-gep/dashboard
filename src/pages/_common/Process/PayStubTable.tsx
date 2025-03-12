@@ -33,6 +33,7 @@ import { ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
 import FindAllByMonthAndYear from '../../../api/get/service/FindAll';
 import Spinner from '../../../components/bootstrap/Spinner';
 import { priceFormat } from '../../../helpers/helpers';
+import ServiceSignedDocument from '../../../components/canva/signatures/Service';
 
 const PayStubTable = ({
 	selectedMonth,
@@ -54,6 +55,10 @@ const PayStubTable = ({
 	const [modalImport, setModalImport] = useState<boolean>(false);
 	const [modalDocument, setModalDocument] = useState<boolean>(false);
 	const [modalAction, setModalAction] = useState<string>('');
+	const [modalSignedDocument, setModalSignedDocument] = useState<boolean>(false);
+	// Signature
+	const [allDocument, setAllDocument] = useState<any>();
+	const [allSignature, setAllSignature] = useState<any>();
 
 	const [selectedMonthImport, setSelectedMonthImport] = useState<{
 		monthEN: string;
@@ -190,7 +195,7 @@ const PayStubTable = ({
 	const ViewSignature = () => {
 		if (manipulating?.signature?.picture) {
 			setManipulatingPath(manipulating.signature.picture.path);
-			setModalAction('viewsignature');
+			setModalAction('viewSignatureDocument');
 			setModalDocument(true);
 			return;
 		}
@@ -205,6 +210,15 @@ const PayStubTable = ({
 		setModalAction('viewDocumentFull');
 		setModalSelectPayStub(true);
 	};
+
+	const buildDocumentSignature = (item: any) => {
+		setModalAction('buildSignatureDocument');
+		setModalSelectPayStub(true);
+	}
+
+	const closeAfterSaveDocumentSignature = () => {
+		
+	}
 
 	// Rotacionar o icone de loading
 	useEffect(() => {
@@ -233,7 +247,7 @@ const PayStubTable = ({
 					selectedMonth.monthEN,
 					selectedMonth.year.toString(),
 				);
-				console.log('response', response);
+				console.log('response xd', response);
 				if (response && response.status == 200) {
 					console.log('response', response.collaborators);
 					setData(response.collaborators);
@@ -280,6 +294,8 @@ const PayStubTable = ({
 
 	return (
 		<section>
+			{manipulating && <ServiceSignedDocument type={'paystub'}  closeAfterSave={closeAfterSaveDocumentSignature} nameDocument={''} id={manipulating.id} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allSignature} />}
+
 			<Modal 
 				isStaticBackdrop={true} 
 				isOpen={modalImport} 
@@ -350,6 +366,8 @@ const PayStubTable = ({
 							const serviceData = item[key].item; // Acessa o conteúdo do objeto
 							const pictureData = item[key].pictureService;
 							const pictureFullData = item[key].pictureFull;
+							const signatureData = manipulating.signature.picture; 
+							
 							return (
 								<div key={index} className='d-flex flex-column gap-2 '>
 									<div>
@@ -375,6 +393,19 @@ const PayStubTable = ({
 														);
 													}
 
+												}else if(modalAction == 'viewSignatureDocument'){
+												}else if(modalAction == 'buildSignatureDocument'){
+													setAllDocument(pictureData);
+													setAllSignature(signatureData);
+													if(signatureData && pictureData){
+														setModalSignedDocument(true);
+													}else{
+														toast(
+															<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+																Assinatura não encontrada.
+															</Toasts>,
+														);
+													}
 												}else{
 													console.log('modalAction:', modalAction)
 												}
@@ -812,7 +843,7 @@ const PayStubTable = ({
 									isLink={true}
 									icon='LibraryAdd'
 									color='success'
-									onClick={() => {}}>
+									onClick={buildDocumentSignature}>
 									Documento Assinado
 								</Button>
 							</div>
