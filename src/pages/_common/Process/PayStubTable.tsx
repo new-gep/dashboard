@@ -43,12 +43,16 @@ const PayStubTable = ({
 	const { themeStatus, darkModeStatus } = useDarkMode();
 	const { userData } = useContext(AuthContext);
 	const [data, setData] = useState<any[]>([]); // Dados fictícios
+	const [dataIndex, setDataIndex] = useState<number>(0);
 	const [menu, setMenu] = useState<boolean>(false);
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 	// Manipulating
 	const [manipulating, setManipulating] = useState<null | any>(null);
+	const [manipulatingDocument, setManipulatingDocument] = useState<string>('');
 	const [manipulatingPath, setManipulatingPath] = useState<string>('');
 	const [manipulatingMenu, setManipulatingMenu] = useState<null | any>(null);
+	const [manipulatingIndex, setManipulatingIndex] = useState<number>(0);
+	const [manipulatingKey, setManipulatingKey] = useState<string>('');
 	const [upcomingEventsEditOffcanvas, setUpcomingEventsEditOffcanvas] = useState<boolean>(false);
 	// Modals
 	const [modalSelectPayStub, setModalSelectPayStub] = useState<boolean>(false);
@@ -294,7 +298,7 @@ const PayStubTable = ({
 
 	return (
 		<section>
-			{manipulating && <ServiceSignedDocument type={'paystub'}  closeAfterSave={closeAfterSaveDocumentSignature} nameDocument={''} id={manipulating.id} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allSignature} />}
+			{manipulating && <ServiceSignedDocument type={'PayStub'}  closeAfterSave={closeAfterSaveDocumentSignature} nameDocument={manipulatingDocument} data={data} setData={setData} dataIndex={dataIndex} manipulatingKey={manipulatingKey} manipulatingIndex={manipulatingIndex} id={manipulating.collaborator.id_work} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allSignature} />}
 
 			<Modal 
 				isStaticBackdrop={true} 
@@ -361,7 +365,6 @@ const PayStubTable = ({
 						manipulating.service &&
 						manipulating.service.length > 0 &&
 						manipulating.service.map((item: any, index: number) => {
-							console.log('item aqui', item);
 							const key = Object.keys(item)[0]; // Pega a chave dinâmica
 							const serviceData = item[key].item; // Acessa o conteúdo do objeto
 							const pictureData = item[key].pictureService;
@@ -379,7 +382,6 @@ const PayStubTable = ({
 												if(modalAction == 'viewDocument'){
 													setManipulatingPath(pictureData.path);
 													setModalSelectPayStub(false);
-													setModalAction('document');
 													setModalDocument(true);
 												}else if(modalAction == 'viewDocumentFull'){
 													if(pictureFullData && pictureFullData.path){
@@ -395,8 +397,12 @@ const PayStubTable = ({
 
 												}else if(modalAction == 'viewSignatureDocument'){
 												}else if(modalAction == 'buildSignatureDocument'){
+													
 													setAllDocument(pictureData);
 													setAllSignature(signatureData);
+													setManipulatingIndex(index);
+													setManipulatingKey(key);
+													setManipulatingDocument(serviceData.name);
 													if(signatureData && pictureData){
 														setModalSignedDocument(true);
 													}else{
@@ -450,19 +456,18 @@ const PayStubTable = ({
 
 				<ModalFooter className='d-flex justify-content-between'>
 					<div>
-						<Button isLink={true} color='light' icon={ modalAction == 'document' ? 'ArrowBack' : 'Close'} onClick={() => {
-							if(modalAction == 'document'){
+						<Button isLink={true} color='light' icon={ modalAction == 'viewDocument' || modalAction == 'viewDocumentFull' ? 'ArrowBack' : 'Close'} onClick={() => {
+							if(modalAction == 'viewDocument' || modalAction == 'viewDocumentFull'){
 								setModalDocument(false);
 								setModalSelectPayStub(true);
 							}else{
-								console.log('aqui')
 								setModalDocument(false);
 							}
 						}}>
-							{modalAction == 'document' ? 'Voltar' : 'Fechar'}
+							{modalAction == 'viewDocument' || modalAction == 'viewDocumentFull' ? 'Voltar' : 'Fechar'}
 						</Button>
 					</div>
-					{ modalAction !== 'viewDocument' &&
+					{ modalAction !== 'viewDocument' && modalAction !== 'viewDocumentFull' &&
 						<div className='d-flex gap-4'>
 							<Button isLight={true} color='danger' onClick={() => {}}>
 								Recusar
@@ -744,6 +749,7 @@ const PayStubTable = ({
 													icon={'PhotoLibrary'}
 													onClick={() => {
 														handleOpenOffcanvas(item);
+														setDataIndex(index);
 													}}>
 													Buscar
 												</Button>

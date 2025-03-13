@@ -54,54 +54,43 @@ const AppointmentList = () => {
 				</SubHeaderLeft>
                 
 				<SubHeaderRight>
-					<Popovers
-						desc={
-							<DatePicker
-								onChange={(item: any) => {
-									const selectedMonthName = dayjs(item).locale('pt-br').format('MMMM');
-									setDate(item);
-									setSelectedMonth({
-										monthEN: dayjs(item).locale('en').format('MMMM'),
-										month: selectedMonthName.charAt(0).toUpperCase() + selectedMonthName.slice(1),
-										year: dayjs(item).year()
-									});
-								}}
-								date={date}
-								color={process.env.REACT_APP_PRIMARY_COLOR}
-								locale={{
-									localize: {
-										ordinalNumber: () => {},
-										era: () => {},
-										quarter: () => {},
-										month: (n) => {
-											const monthName = dayjs().month(n).locale('pt-br').format('MMMM');
-											return monthName.charAt(0).toUpperCase() + monthName.slice(1);
-										},
-										day: () => {},
-										dayPeriod: () => {},
-									},
-									formatLong: {
-										date: () => {},
-										time: () => {},
-										dateTime: () => {},
-									},
-								}}
-								onShownDateChange={(item: Date) => {
-									const selectedMonthName = dayjs(item).locale('pt-br').format('MMMM');
-									setDate(item);
-									setSelectedMonth({
-										monthEN: dayjs(item).locale('en').format('MMMM'),
-										month: selectedMonthName.charAt(0).toUpperCase() + selectedMonthName.slice(1),
-										year: dayjs(item).year()
-									});
-								}}
-							/>
-						}
-						placement='bottom-end'
-						className='mw-100'
-						trigger='click'>
-						<Button className='text-capitalize' color='light'>{calendarDateLabel}</Button>
-					</Popovers>
+					<div className="month-navigator">
+						<Button
+							color="light"
+							isLink
+							onClick={() => {
+								const prevMonth = dayjs(date).subtract(1, 'month');
+								const selectedMonthName = prevMonth.locale('pt-br').format('MMMM');
+								setDate(prevMonth.toDate());
+								setSelectedMonth({
+									monthEN: prevMonth.locale('en').format('MMMM'),
+									month: selectedMonthName.charAt(0).toUpperCase() + selectedMonthName.slice(1),
+									year: prevMonth.year()
+								});
+							}}
+						>
+							Anterior
+						</Button>
+						<span className="mx-2">
+							{selectedMonth.month} {selectedMonth.year}
+						</span>
+						<Button
+							color="light"
+							isLink
+							onClick={() => {
+								const nextMonth = dayjs(date).add(1, 'month');
+								const selectedMonthName = nextMonth.locale('pt-br').format('MMMM');
+								setDate(nextMonth.toDate());
+								setSelectedMonth({
+									monthEN: nextMonth.locale('en').format('MMMM'),
+									month: selectedMonthName.charAt(0).toUpperCase() + selectedMonthName.slice(1),
+									year: nextMonth.year()
+								});
+							}}
+						>
+							Próximo
+						</Button>
+					</div>
 				</SubHeaderRight>
 			</SubHeader>
 			<Page container='fluid'>

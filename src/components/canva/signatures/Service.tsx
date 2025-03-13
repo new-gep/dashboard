@@ -11,10 +11,9 @@ import GetCompanyDocument from '../../../api/get/company/Document';
 import { Input } from '../../icon/material-icons';
 import Icon from '../../icon/Icon';
 import AuthContext from '../../../contexts/authContext';
+import Service_DocumentSignature from '../../../api/post/service/Service_DocumentSignature';
 
 interface Props {
-  step?:any;
-  where?:string | null;
   document: any;
   nameDocument:string | null;
   assignature: any;
@@ -22,10 +21,15 @@ interface Props {
   modal:boolean,
   setModal:any,
   id: number,
+  setData:any,
+  data:any,
+  dataIndex:number,
+  manipulatingIndex:number,
+  manipulatingKey:string,
   closeAfterSave?:any
 }
 
-export default function ServiceSignedDocument({modal, setModal ,document, assignature, nameDocument, type, id, closeAfterSave, where = null, step = null}: Props) {
+export default function ServiceSignedDocument({modal, setModal ,document, assignature, nameDocument, type, id, closeAfterSave, setData, data, dataIndex, manipulatingIndex, manipulatingKey }: Props) {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLCanvasElement>(null);
   const { userData } = useContext(AuthContext);
@@ -47,47 +51,45 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
   };
 
   async function saveImage(){
+    // const pictureData = data[dataIndex].service[manipulatingIndex][manipulatingKey].pictureFull =
+    // console.log('pictureData', pictureData)
     const canvasElement = canvasRef.current;
     if(canvasElement){
       setLoader(true)
       const dataURL = canvasElement.toDataURL('png',100);
-      console.log(dataURL)
-    //   let PropsUploadJob;
-    //   if(where){
-    //     PropsUploadJob = {
-    //       file:dataURL,
-    //       name:dynamic ? step == '1' ? 'dismissal_communication_dynamic' : 'dismissal_dynamic' : nameDocument ,
-    //       id  :id,
-    //       dynamic:dynamic ? nameDocument : null,
-    //     };
-    //   }else{
-    //     PropsUploadJob = {
-    //       file:dataURL,
-    //       name:dynamic ? 'dynamic': nameDocument ,
-    //       id  :id,
-    //       dynamic:dynamic ? nameDocument : null,
-    //     };
-    //   }
-    //   const response = await Job_DocumentSignature(PropsUploadJob);
-    //   if(response.status == 200){
-    //     await closeAfterSave();
-    //     setModal(false)
-    //     toast(
-    //       <Toasts
-    //         icon={ 'Check' }
-    //         iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-    //         title={ '🥳 Parabéns! '}
-    //       >
-    //         Sucesso ao gerar documento assinado.
-    //       </Toasts>,
-    //       {
-    //         closeButton: true ,
-    //         autoClose: 5000 //
-    //       }
-    //     )
-    //     setLoader(false);
-    //     return
-    //   };
+      let PropsUploadJob;
+
+      PropsUploadJob = {
+        file:dataURL,
+        name: nameDocument,
+        id  :id,
+        //@ts-ignore
+        type: type
+      };
+     
+      const response = await Service_DocumentSignature(PropsUploadJob);
+      if(response.status == 200){
+        const newData = [...data];
+        newData[dataIndex].service[manipulatingIndex][manipulatingKey].pictureFull = response;
+        setData(newData);
+        await closeAfterSave();
+        setModal(false)
+        toast(
+          <Toasts
+            icon={ 'Check' }
+            iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+            title={ '🥳 Parabéns! '}
+          >
+            Sucesso ao gerar documento assinado.
+          </Toasts>,
+          {
+            closeButton: true ,
+            autoClose: 5000 //
+          }
+        )
+        setLoader(false);
+        return
+      };
 
       toast(
         <Toasts
@@ -221,8 +223,6 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
     window.document.addEventListener('keydown', handleKeyDown);
     const fetchData = async () => {
       try {
-        console.log('document', document)
-        console.log('assignature', assignature)
         if (assignature && document && sectionRef.current && canvasRef.current) {
           const canvas = new fabric.Canvas(canvasRef.current);
           setCanvas(canvas)
