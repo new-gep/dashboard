@@ -45,7 +45,7 @@ import GetCompanyFindOne from '../../../api/get/company/FindOne';
 import PatchCompanyDefault from '../../../api/patch/company/Default';
 import DeleteCompanyFile from '../../../api/delete/company/File';
 import CompanyUser from './CompanyUser';
-
+import Modal, { ModalFooter, ModalBody, ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
 interface IPreviewItemProps {
 	title: string;
 	value: any | any[];
@@ -132,6 +132,8 @@ const CompanyPage = () => {
 	const [signaturePath, setSignaturePath] = useState<null | string>(null);
 	const [newLogoPathh, setNewLogoPath] = useState<any>(null);
 	const [newSignaturePath, setNewSignaturePath] = useState<null | any>(null);
+	const [contractPath, setContractPath] = useState<null | string>(null);
+	const [modal, setModal] = useState(false);
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -339,6 +341,7 @@ const CompanyPage = () => {
 		const fetchData = async () => {
 			if (userData) {
 				const response = await GetCompanyFindOne(userData.cnpj);
+				const responseContract = await GetCompanyDocument(userData.cnpj, 'contractActive');
 				if (response.status == 200) {
 					formik.setValues(response.company);
 					formik.setFieldValue('cnpj', response.company.CNPJ);
@@ -346,6 +349,7 @@ const CompanyPage = () => {
 					setCompanyDates(response.company);
 					setLogoPath(response.logo);
 					setSignaturePath(response.signature);
+					setContractPath(responseContract.path);
 				}
 			}
 		};
@@ -417,7 +421,7 @@ const CompanyPage = () => {
 											icon='Person'
 											color='info'
 											className='w-100 p-3'
-											isLight={TABS.PLAN !== activeTab}
+											isLight={TABS.USER !== activeTab}
 											onClick={() => setActiveTab(TABS.USER)}>
 											{TABS.USER}
 										</Button>
@@ -962,7 +966,46 @@ const CompanyPage = () => {
 							</Card>
 						)}
 						{TABS.PLAN === activeTab && (
+							
 							<Card stretch>
+								<Modal isOpen={modal} size={'lg'} setIsOpen={setModal}>
+									<ModalHeader setIsOpen={setModal}>
+										<ModalTitle id='modal-title'>
+											<h1>Visualizar Contrato</h1>
+											<p className='text-muted'>Reveja novamente o contrato assinado</p>
+										</ModalTitle>
+									</ModalHeader>
+									<ModalBody>
+										{
+										contractPath &&
+											<iframe
+												title='Conteúdo incorporado da página'
+												src={contractPath}
+												className='rounded-md left-5'
+												style={{ height: '500px', width: '100%', borderRadius: '10px' }}
+											/>
+										}
+									</ModalBody>
+									<ModalFooter>
+										<Button 
+											color='info' 
+											isLink 
+											type='reset'
+											icon='Download' 
+											onClick={() => {
+												const link = document.createElement('a');
+												//@ts-ignore
+												link.href = contractPath;
+												link.download = 'Contrato.pdf';
+												document.body.appendChild(link);
+												link.click();
+												document.body.removeChild(link);
+											}}>
+											Download Contrato
+										</Button>
+									</ModalFooter>
+								</Modal>
+
 								<CardHeader>
 									<CardLabel icon='ShoppingCart' iconColor='warning'>
 										<CardTitle>{TABS.PLAN}</CardTitle>
@@ -1038,6 +1081,16 @@ const CompanyPage = () => {
 											Atualizar Plano
 										</Button>
 									</CardFooterLeft>
+									<CardFooterRight>
+										<Button
+											color='success'
+											isLink
+											type='reset'
+											icon='LibraryBooks'
+											onClick={() => setModal(true)}>
+											Visualizar Contrato
+										</Button>
+									</CardFooterRight>
 								</CardFooter>
 							</Card>
 						)}
