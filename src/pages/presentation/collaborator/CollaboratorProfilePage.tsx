@@ -152,8 +152,9 @@ const CollaboratorProfilePage = () => {
 								color='danger'
 								isOutline={true}
 								size={'lg'}
+								isDisable={job && job.motion_demission}
 								onClick={startDemission}>
-								Desligar
+								{job && job.motion_demission ? 'Desligado' : 'Desligar'}
 							</Button>
 						</span>
 					</div>

@@ -724,9 +724,10 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				status : avaliation ? 'approved': 'reproved',
 				picture: view == 'signature' ? `Admission_Signature`: documentAvaliation,
 				id_user: userData.id,
-				id_work: manipulatingTable.id
+				id_work: manipulatingTable.id_work
 			}
 			const response:any = await PicturePath(params, manipulatingTable.cpf);
+			
 			if(response.status == 200){
 				switch (manipulatingTable.step) {
 					case 1:
