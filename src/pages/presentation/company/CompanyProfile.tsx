@@ -229,6 +229,15 @@ const CompanyPage = () => {
 			);
 			return;
 		}
+		toast(
+			<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
+				Assinatura atualizada com sucesso.
+			</Toasts>,
+			{
+				closeButton: true,
+				autoClose: 1000,
+			},
+		);
 	};
 
 	const uploadLogo = async (event: React.ChangeEvent<HTMLInputElement>) => {

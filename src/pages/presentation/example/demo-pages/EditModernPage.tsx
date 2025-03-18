@@ -70,6 +70,7 @@ const EditModernPage = () => {
 			setModalAvatar(false)
 			setIsLoading(false);
 			const response = await User(userData.id, formik.values)
+			console.log('response', response)
 			switch (response.status) {
 				case 200:
 					setPasswordChangeCTA(false)

@@ -298,7 +298,7 @@ const PointTable = ({
 
 	return (
 		<section>
-			{manipulating && <ServiceSignedDocument type={'Point'}  closeAfterSave={closeAfterSaveDocumentSignature} nameDocument={manipulatingDocument} data={data} setData={setData} dataIndex={dataIndex} manipulatingKey={manipulatingKey} manipulatingIndex={manipulatingIndex} id={manipulating.collaborator.id_work} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allSignature} />}
+			{manipulating && <ServiceSignedDocument type={'Point'}  closeAfterSave={closeAfterSaveDocumentSignature} nameDocument={manipulatingDocument} data={data} setData={setData} dataIndex={dataIndex} manipulatingKey={manipulatingKey} manipulatingIndex={manipulatingIndex} id={manipulating.job.id_work} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allSignature} />}
 
 			<Modal 
 				isStaticBackdrop={true} 

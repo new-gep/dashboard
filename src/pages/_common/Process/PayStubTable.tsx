@@ -216,6 +216,7 @@ const PayStubTable = ({
 	};
 
 	const buildDocumentSignature = (item: any) => {
+		console.log('manipulating', manipulating.collaborator.id_work)
 		setModalAction('buildSignatureDocument');
 		setModalSelectPayStub(true);
 	}
@@ -298,7 +299,7 @@ const PayStubTable = ({
 
 	return (
 		<section>
-			{manipulating && <ServiceSignedDocument type={'PayStub'}  closeAfterSave={closeAfterSaveDocumentSignature} nameDocument={manipulatingDocument} data={data} setData={setData} dataIndex={dataIndex} manipulatingKey={manipulatingKey} manipulatingIndex={manipulatingIndex} id={manipulating.collaborator.id_work} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allSignature} />}
+			{manipulating && <ServiceSignedDocument type={'PayStub'}  closeAfterSave={closeAfterSaveDocumentSignature} nameDocument={manipulatingDocument} data={data} setData={setData} dataIndex={dataIndex} manipulatingKey={manipulatingKey} manipulatingIndex={manipulatingIndex} id={manipulating.job.id} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allSignature} />}
 
 			<Modal 
 				isStaticBackdrop={true} 

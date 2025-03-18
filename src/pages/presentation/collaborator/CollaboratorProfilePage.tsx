@@ -74,7 +74,9 @@ const CollaboratorProfilePage = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (cpf) {
+				
 				const response = await Collaborator(cpf);
+				console.log('response', response)
 				if (response.status == 200) {
 					setCollaborator(response.collaborator);
 					setPicture(response.picture);

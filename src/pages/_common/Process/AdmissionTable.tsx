@@ -49,6 +49,7 @@ import Job_Dynamic from '../../../api/delete/job/job_dynamic';
 import SignedDocument from '../../../components/canva/SignedDocument';
 import Signatures from '../../../api/get/picture/Admission_Signatures';
 import GetCompanyDocument from '../../../api/get/company/Document';
+import PatchCollaboratorDefault from '../../../api/patch/collaborator/Default';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -549,16 +550,24 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		};
 
 		if(step == 3){
-			const response = await Signatures(manipulatingTable.cpf, manipulatingTable.id);
-			if(response.status == 200){
-				setStatusAllSignature(response.pictures)
-				//@ts-ignore
-				const filteredPictures = response.pictures.some(item => 
-					item.picture.toLowerCase() === `admission_signature` &&
-					item.status === 'approved'
-				);
-				setStatusSignature(filteredPictures);
-			}
+			const response = await Signatures(manipulatingTable.cpf, manipulatingTable.id);	
+				if(response.status == 200){
+					if(response.pictures.length > 0){
+						if(response.pictures[0].status == 'approved'){
+							setStatusSignature(true)
+							setStatusAllSignature(response.pictures)
+						}else{
+							setStatusSignature(false)
+							setStatusAllSignature(null)
+						}
+					}else{
+						console.log('aqui2')
+						setStatusAllSignature(null)
+					}
+					
+				}else{
+					setStatusAllSignature(null)
+				}
 		};
 	
 		if(responseDocument  && responseDocument.status == 200){
@@ -632,15 +641,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			case 3:
 				setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
 				setManipulatingTable(candidate)
-				response = await Signatures(candidate.cpf, candidate.id);
-				let allSignatureApproved:boolean = false
-				if(response.status == 200){
-					//@ts-ignore
-					allSignatureApproved = response.pictures.every(picture => picture.status === 'approved');
-					setStatusAllSignature(response.pictures)
-				}else{
-					setStatusAllSignature(null)
-				}
 				response = await Job_Check_Admissional(candidate.id)
 				if(response.status == 200){
 					setDatesDynamicManipulating(response.date)
@@ -670,7 +670,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						)
 					);
 					// console.log('obligationExists: ',obligation, 'documentSignatures: ',documentSignatures)	
-					console.log('obligationExists: ',obligationExists, 'dynamicExists: ',dynamicExists, 'allSignatureApproved: ',allSignatureApproved)
+
 					if (obligationExists && dynamicExists) {
 						updateStatusCandidate(candidate, true, true);
 					};
@@ -722,10 +722,11 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		try{
 			const params = {
 				status : avaliation ? 'approved': 'reproved',
-				picture: view == 'signature' ? `Admission_Signature`: documentAvaliation,
+				picture: view == 'signature' ? `Signature_Admission`: documentAvaliation,
 				id_user: userData.id,
-				id_work: manipulatingTable.id_work
+				id_work: manipulatingTable.id
 			}
+
 			const response:any = await PicturePath(params, manipulatingTable.cpf);
 			
 			if(response.status == 200){
@@ -1015,8 +1016,12 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		const params = {
 			CPF_collaborator:manipulating.cpf
 		}
+		const paramsPatch = {
+			id_work: manipulating.id
+		}
 		const update = await Job(params, manipulating.id)
-		if(update.status == 200 ){
+		const response = await PatchCollaboratorDefault(paramsPatch, manipulating.cpf)
+		if(update.status == 200 && response.status == 200){
 			const newCandidates = candidates.filter((item: { cpf: string | undefined; }) => item.cpf !== manipulating.cpf);
 			setCandidates(newCandidates)
 			setCandidatesStep(newCandidates)
@@ -1257,7 +1262,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					}
 				</ModalBody>
 				<ModalFooter>
-					{ ((typeDocument && pathDocumentMain && step != 3 ) || 
+					{ ((typeDocument && pathDocumentMain && step != 3 && step != 2 ) || 
 					  (view == 'signature' && step == 3 && typeDocumentSignature && pathDocumentSignature)) &&
 						<div className='d-flex gap-4'>
 							<Button

@@ -93,6 +93,7 @@ const AppointmentList = () => {
 					</div>
 				</SubHeaderRight>
 			</SubHeader>
+			
 			<Page container='fluid'>
 				<div className='row h-100'>
 					<div className='col-12'>

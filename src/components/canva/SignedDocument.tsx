@@ -31,10 +31,12 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
   const { userData } = useContext(AuthContext);
   const [canvas, setCanvas] = useState<any>(null);
   const [loader, setLoader] = useState(false)
+  const [deleting, setDeleting] = useState(false);
   const inputFile = useRef(null);
 
   async function loadImage(base64: any): Promise<any> {
     try {
+      console.log('aq: ')
       const imagemFabric = await fabric.FabricImage.fromURL(
         base64,
         { crossOrigin: 'anonymous' }
@@ -167,8 +169,7 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
       // Faça algo com o arquivo aqui (upload, pré-visualização, etc.)
       const reader = new FileReader();
       reader.onload = async (e) => {
-        //@ts-ignore
-        const base64 = e.explicitOriginalTarget.result;
+        const base64 = e.target?.result;
         const newSingature = await loadImage(base64)
         newSingature.set({
           borderColor: 'black',
@@ -197,6 +198,8 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
 
   const removeSelectedObject = () => {
     try{
+     // Evita execução múltipla
+      setDeleting(true);
       // Obtém o objeto atualmente selecionado no canvas
       const activeObject = canvas.getActiveObject();
       // Verifica se há um objeto selecionado
@@ -207,11 +210,12 @@ export default function SignedDocument({modal, setModal ,document, assignature, 
         canvas.renderAll();
       } else {
           // Exibe uma mensagem se nenhum objeto estiver selecionado
-          alert('Por favor, selecione um objeto para remover.');
+          return
         }
       }catch(e){
         console.log(e)
       }
+      
   };
 
 

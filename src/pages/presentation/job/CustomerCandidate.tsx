@@ -93,9 +93,8 @@ const Customer = () => {
 				id_user: userData.id
 			}
 			const response = await PicturePath(params,cpf);
+			console.log('response', response)
 			if(response.status == 200){
-				
-	
 				const index = AllPicture.findIndex(
 					(item: any) =>
 						//@ts-ignore
@@ -124,6 +123,34 @@ const Customer = () => {
 					}
 				)
 				// console.log(response)
+			}else if(response.status == 400){
+				toast(
+					<Toasts
+						icon={ 'Close' }
+						iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Erro!'}
+					>
+						Erro 404, tente mais tarde
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
+			}else{
+				toast(
+					<Toasts
+						icon={ 'Close' }
+						iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={ 'Erro!'}
+					>
+						Erro ao desconhecido no documento do candidato, tente mais tarde
+					</Toasts>,
+					{
+						closeButton: true ,
+						autoClose: 5000 //
+					}
+				)
 			}
 		}catch(e){
 			toast(
@@ -199,6 +226,7 @@ const Customer = () => {
 				break;
 			case 'address':
 				response = await CollaboratorFile(cpf, 'address');
+				console.log('response', response)
 				setDocumentAvaliation('address')
 				break;
 			case 'children':

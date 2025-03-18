@@ -68,6 +68,7 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
       };
      
       const response = await Service_DocumentSignature(PropsUploadJob);
+      console.log('response', response)
       if(response.status == 200){
         const newData = [...data];
         newData[dataIndex].service[manipulatingIndex][manipulatingKey].pictureFull = response;
