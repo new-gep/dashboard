@@ -132,7 +132,7 @@ const CommonMyWallet = () => {
 				<CardBody>
 					<div className='row g-3'>
 						<div className='col-12'>
-							{selectedCard && (
+							{selectedCard ? (
 								<ReactCreditCardsContainer
 									issuer={Payment.fns.cardType(selectedCard.number)}>
 									<ReactCreditCards
@@ -144,9 +144,15 @@ const CommonMyWallet = () => {
 										issuer={Payment.fns.cardType(selectedCard.number)}
 									/>
 								</ReactCreditCardsContainer>
+							) : (
+								<div className='col-12 h-full d-flex flex-column align-items-center justify-content-center '>
+									<h4>Nenhum cartão adicionado</h4>
+									<p className='text-muted'>Adicione um cartão para começar a utilizar a carteira</p>
+								</div>
 							)}
 						</div>
-						<div className='col-12'>
+						{ cardList.length > 0 && (
+							<div className='col-12'>
 							<div
 								className={classNames('rounded-3', {
 									'bg-l10-dark': !darkModeStatus,
@@ -177,13 +183,15 @@ const CommonMyWallet = () => {
 									))}
 								</div>
 							</div>
-						</div>
+							</div>
+						)}
 					</div>
 				</CardBody>
 			</Card>
 
 			
-			<Modal
+			{ cardList.length > 0 && (
+				<Modal
 				setIsOpen={setModalStatus}
 				isOpen={modalStatus}
 				size='xl'
@@ -336,7 +344,8 @@ const CommonMyWallet = () => {
 						</div>
 					</div>
 				</ModalBody>
-			</Modal>
+				</Modal>
+			)}
 		</>
 	);
 };

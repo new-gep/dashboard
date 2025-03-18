@@ -12,6 +12,7 @@ import Button from '../../../../../components/bootstrap/Button';
 import Avatar, { AvatarGroup } from '../../../../../components/Avatar';
 import USERS from '../../../../../common/data/userDummyData';
 import { demoPagesMenu } from '../../../../../menu';
+import { dashboardPagesMenu } from '../../../../../menu';
 import useDarkMode from '../../../../../hooks/useDarkMode';
 
 const CommonDashboardDesignTeam = () => {
@@ -19,7 +20,7 @@ const CommonDashboardDesignTeam = () => {
 
 	const navigate = useNavigate();
 	const handleOnClickToEmployeeListPage = useCallback(
-		() => navigate(`../${demoPagesMenu.appointment.subMenu.employeeList.path}`),
+		() => navigate(`../${dashboardPagesMenu.collaborator.path}`),	
 		[navigate],
 	);
 
@@ -45,7 +46,7 @@ const CommonDashboardDesignTeam = () => {
 				</CardActions>
 			</CardHeader>
 			<CardBody>
-				<AvatarGroup>
+				{/* <AvatarGroup>
 					<Avatar
 						srcSet={USERS.JANE.srcSet}
 						src={USERS.JANE.src}
@@ -70,7 +71,8 @@ const CommonDashboardDesignTeam = () => {
 						userName={`${USERS.RYAN.name} ${USERS.RYAN.surname}`}
 						color={USERS.RYAN.color}
 					/>
-				</AvatarGroup>
+				</AvatarGroup> */}
+				<></>
 			</CardBody>
 		</Card>
 	);

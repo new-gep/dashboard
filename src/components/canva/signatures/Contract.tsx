@@ -15,21 +15,15 @@ import Service_DocumentSignature from '../../../api/post/service/Service_Documen
 
 interface Props {
   document: any;
-  nameDocument:string | null;
-  assignature: any;
   type:string;
+  cpnj: string,
   modal:boolean,
   setModal:any,
-  id: number,
-  setData:any,
-  data:any,
-  dataIndex:number,
-  manipulatingIndex:number,
-  manipulatingKey:string,
+
   closeAfterSave?:any
 }
 
-export default function ServiceSignedDocument({modal, setModal ,document, assignature, nameDocument, type, id, closeAfterSave, setData, data, dataIndex, manipulatingIndex, manipulatingKey }: Props) {
+export default function ContractSignedDocument({document, type, modal, setModal , cpnj, closeAfterSave }: Props) {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLCanvasElement>(null);
   const { userData } = useContext(AuthContext);
@@ -54,58 +48,57 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
     // const pictureData = data[dataIndex].service[manipulatingIndex][manipulatingKey].pictureFull =
     // console.log('pictureData', pictureData)
     const canvasElement = canvasRef.current;
-    if(canvasElement){
-      setLoader(true)
-      const dataURL = canvasElement.toDataURL('png',100);
-      let PropsUploadJob;
 
-      PropsUploadJob = {
-        file:dataURL,
-        name: nameDocument,
-        id  :id,
-        //@ts-ignore
-        type: type
-      };
+    // if(canvasElement){
+    //   setLoader(true)
+    //   const dataURL = canvasElement.toDataURL('png',100);
+    //   let PropsUploadJob;
+
+    //   PropsUploadJob = {
+    //     file:dataURL,
+    //     //@ts-ignore
+    //     type: type
+    //   };
      
-      const response = await Service_DocumentSignature(PropsUploadJob);
-      if(response.status == 200){
-        const newData = [...data];
-        newData[dataIndex].service[manipulatingIndex][manipulatingKey].pictureFull = response;
-        setData(newData);
-        await closeAfterSave();
-        setModal(false)
-        toast(
-          <Toasts
-            icon={ 'Check' }
-            iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-            title={ '🥳 Parabéns! '}
-          >
-            Sucesso ao gerar documento assinado.
-          </Toasts>,
-          {
-            closeButton: true ,
-            autoClose: 5000 //
-          }
-        )
-        setLoader(false);
-        return
-      };
+    //   const response = await Service_DocumentSignature(PropsUploadJob);
+    //   if(response.status == 200){
+    //     const newData = [...data];
+    //     newData[dataIndex].service[manipulatingIndex][manipulatingKey].pictureFull = response;
+    //     setData(newData);
+    //     await closeAfterSave();
+    //     setModal(false)
+    //     toast(
+    //       <Toasts
+    //         icon={ 'Check' }
+    //         iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+    //         title={ '🥳 Parabéns! '}
+    //       >
+    //         Sucesso ao gerar documento assinado.
+    //       </Toasts>,
+    //       {
+    //         closeButton: true ,
+    //         autoClose: 5000 //
+    //       }
+    //     )
+    //     setLoader(false);
+    //     return
+    //   };
 
-      toast(
-        <Toasts
-          icon={ 'Close' }
-          iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-          title={ 'Erro! '}
-        >
-          Erro ao gerar documento assinado.
-        </Toasts>,
-        {
-          closeButton: true ,
-          autoClose: 5000 //
-        }
-      )
-      setLoader(false)
-    }
+    //   toast(
+    //     <Toasts
+    //       icon={ 'Close' }
+    //       iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+    //       title={ 'Erro! '}
+    //     >
+    //       Erro ao gerar documento assinado.
+    //     </Toasts>,
+    //     {
+    //       closeButton: true ,
+    //       autoClose: 5000 //
+    //     }
+    //   )
+    //   setLoader(false)
+    // }
   };
 
   const findSignature = async () => {
@@ -223,7 +216,7 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
     window.document.addEventListener('keydown', handleKeyDown);
     const fetchData = async () => {
       try {
-        if (assignature && document && sectionRef.current && canvasRef.current) {
+        if (document && sectionRef.current && canvasRef.current) {
           const canvas = new fabric.Canvas(canvasRef.current);
           setCanvas(canvas)
           const sectionWidth = sectionRef.current.offsetWidth;
@@ -255,21 +248,8 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
             selectable: false
           });
 
-          const canvaSignature = await loadImage(assignature.path);
-          canvaSignature.set({
-                borderColor: 'black',
-                cornerColor: 'black',
-                cornerStrokeColor: 'black',
-                cornerSize: 10, // Tamanho do manipulador para redimensionamento
-          });
-          canvaSignature.scaleToWidth(canvasWidth * 0.2);
-          // canvaSignature.set({
-          //   left: (canvasWidth - canvaDocument.width * docScaleFactor) / 2,
-          //   top: (canvasHeight - canvaDocument.height * docScaleFactor) / 2 + canvaDocument.height * docScaleFactor + 20, // Adicionando 20 pixels para dar um espaçamento
-          // });
-
+        
           canvas.add(canvaDocument);
-          canvas.add(canvaSignature);
           canvas.renderAll();
           
           return () => {
@@ -283,7 +263,7 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
       }
     }
     fetchData();
-  }, [document, assignature, modal, sectionRef.current, canvasRef.current]);
+  }, [document, modal, sectionRef.current, canvasRef.current]);
 
 
   return (

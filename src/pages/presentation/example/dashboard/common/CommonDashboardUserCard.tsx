@@ -1,23 +1,45 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import USERS from '../../../../../common/data/userDummyData';
 import { demoPagesMenu } from '../../../../../menu';
 import UserContact from '../../../../../components/UserContact';
+import MasterAdmin from '../../../../../api/get/user/MasterAdmin';
+import AuthContext from '../../../../../contexts/authContext';
+import Mask from '../../../../../function/Mask';
 
 const CommonDashboardUserCard = () => {
 	const navigate = useNavigate();
+	const { userData } = useContext(AuthContext);
+	const [masterAdmin, setMasterAdmin] = useState<any>(null);
+
+	useEffect(() => {
+		if (userData) {
+			MasterAdmin(userData.cnpj).then((res) => {
+				if (res.status === 200) {
+					setMasterAdmin(res.user);
+					console.log(res.data);
+				}
+			});
+		}
+	}, [userData]);
 
 	return (
-		<UserContact
-			name={`${USERS.SAM.name} ${USERS.SAM.surname}`}
-			position='Responsável'
-			mail={`${USERS.SAM.username}@site.com`}
-			phone='1234567'
-			// onChat={() => navigate(`../${demoPagesMenu.chat.subMenu.withListChat.path}`)}
-			src={USERS.SAM.src}
-			srcSet={USERS.SAM.srcSet}
-			color={USERS.SAM.color}
-		/>
+		<>
+			{
+				masterAdmin ?
+				<UserContact
+					name={`${Mask('firstName',masterAdmin.name)} ${Mask('secondName',masterAdmin.name)}`}
+					position='Responsável'
+					mail={`${masterAdmin.email}`}
+					phone={`55${masterAdmin.phone}`}
+					// onChat={() => navigate(`../${demoPagesMenu.chat.subMenu.withListChat.path}`)}
+					src={masterAdmin.avatar}
+				/>
+				:
+				<></>
+			}
+		
+		</>
 	);
 };
 

@@ -51,7 +51,7 @@ const DashboardPage = () => {
 
 	return (
 		<>
-			{/* <LockSystem /> */}
+			<LockSystem />
 			<PageWrapper title={demoPagesMenu.sales.subMenu.dashboard.text}>
 			{/* <SubHeader>
 				<SubHeaderLeft>
@@ -83,10 +83,10 @@ const DashboardPage = () => {
 					<div className='col-xl-4'>
 						<CommonDashboardUserCard />
 					</div>
-					<div className='col-xl-4'>
+					{/* <div className='col-xl-4'>
 						<CommonDashboardClientTeam />
-					</div>
-					<div className='col-xl-4'>
+					</div> */}
+					<div className='col-xl-8'>
 						<CommonDashboardDesignTeam />
 					</div>
 
