@@ -173,7 +173,7 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
       const reader = new FileReader();
       reader.onload = async (e) => {
         //@ts-ignore
-        const base64 = e.explicitOriginalTarget.result;
+        const base64 = e.currentTarget.result;
         const newSingature = await loadImage(base64)
         newSingature.set({
           borderColor: 'black',
@@ -212,7 +212,7 @@ export default function ServiceSignedDocument({modal, setModal ,document, assign
         canvas.renderAll();
       } else {
           // Exibe uma mensagem se nenhum objeto estiver selecionado
-          alert('Por favor, selecione um objeto para remover.');
+          // alert('Por favor, selecione um objeto para remover.');
         }
       }catch(e){
         console.log(e)

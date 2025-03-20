@@ -48,7 +48,7 @@ export default function LockSystem(){
             <ModalBody>
                 {step === 1 && <SelectPlan setStep={setStep} setPlan={setPlan} plan={plan}/>}
                 {step === 2 && <PaymentPlan plan={plan}/>}
-                {step === 3 && <ContractPlan plan={plan}/>}
+                {step === 3 && <ContractPlan setStep={setStep} plan={plan}/>}
                 {step === 4 && <Congratulation/>}
 
             </ModalBody>
