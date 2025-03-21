@@ -1491,6 +1491,37 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				newCollaborators = dates.demission.status = null;
 			}
 
+			switch(step){
+				case 1:
+					break;
+					case 2:
+						if(isStep){
+						}else{
+							const params = {
+								picture: 'Dismissal_Hand',
+								status : 'pending',
+								id_user: userData.id,
+								id_work: manipulatingTable.id
+							};
+							console.log('params', params)
+							await PicturePath(params, manipulatingTable.CPF_collaborator);
+						}
+					break;
+				case 3:
+					if(isStep){
+					}else{
+						const params = {
+							picture: 'Dismissal_Medical_Examination',
+							status : 'pending',
+							id_user: userData.id,
+							id_work: manipulatingTable.id
+						};
+						console.log('params', params)
+						await PicturePath(params, manipulatingTable.CPF_collaborator);
+					}
+					break;
+			}
+
 			const stepCollaborator = collaborators.filter(
 				(collaborator: any) => collaborator.demission.step === step,
 			);
