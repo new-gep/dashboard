@@ -695,11 +695,13 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
 					setStatusSignature(filteredPictures);
 				}else{
+					console.log('response.pictures',response)
 					//@ts-ignore
 					const filteredPictures = response.pictures.some(item =>
-						item.picture.toLowerCase() === `dismissal_signature` &&
+						item.picture.toLowerCase() === `signature_dismissal` &&
 						item.status === 'approved'
-					 );					  
+					 );			
+					console.log('filteredPictures',filteredPictures)
 					setStatusSignature(filteredPictures);
 				}
 			}
@@ -1185,11 +1187,13 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						step == 1 && manipulatingTable.demission?.solicitation == 'collaborator'?
 						'Dismissal_Hand' :
 						step == 2 ? 'Dismissal_Medical_Examination' :
-						`Dismissal_Signature`,
+						`Signature_Dismissal`,
 				id_user: userData.id,
 				id_work: manipulatingTable.id
 
 			};
+
+			console.log('params',params)
 
 			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
 			if (response.status == 200) {
