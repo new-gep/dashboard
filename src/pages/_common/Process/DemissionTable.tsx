@@ -624,7 +624,9 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				)
 				break;
 			case 'dismissal_communication_dynamic':
+				console.log('signature aqui',)
 				responseSignature = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '1', dynamic.replace(/\//g, ''));
+				console.log('responseSignature',responseSignature)
 				responseDocument  = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '0', dynamic.replace(/\//g, ''));
 			
 				const formattedFileNameNew = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\//g, '');
@@ -669,6 +671,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 		if(step == 1 && manipulatingTable && manipulatingTable.demission?.solicitation == 'company'){
 			const response = await DismissalSignatures(manipulatingTable.CPF_collaborator, manipulatingTable.id);
+			// console.log('response',response)
 			if(response.status == 200){
 				setStatusAllSignature(response.pictures)
 				if(document != 'dismissal_communication_dynamic'){
@@ -676,9 +679,11 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
 					setStatusSignature(filteredPictures);
 				}else{
+					console.log('else')
+					console.log('response.pictures',response.pictures)
 					//@ts-ignore
 					const filteredPictures = response.pictures.some(item =>
-						item.picture.toLowerCase() === `dismissal_signature_communication` &&
+						item.picture.toLowerCase() === `signature_communication` &&
 						item.status === 'approved'
 					 );					  
 					setStatusSignature(filteredPictures);
@@ -695,7 +700,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					const filteredPictures = response.pictures.some(item => item.picture.toLowerCase().includes(document) && item.status == 'approved' );
 					setStatusSignature(filteredPictures);
 				}else{
-					console.log('response.pictures',response)
 					//@ts-ignore
 					const filteredPictures = response.pictures.some(item =>
 						item.picture.toLowerCase() === `signature_dismissal` &&
@@ -722,6 +726,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			setPathDocumentSignatureFull(responseSignature.pathDocumentSignature ? responseSignature.pathDocumentSignature : null)
 
 		};
+
 		setLoadingSearchDocument(false)
 
 		// dismissal_hand
@@ -979,6 +984,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				setAvalidDocument(true)
 				setManipulatingTable(job);
 				response = await JobFile(job.id,'dismissal_medical','0' ,'0')
+				// console.log('response', response)
 				if(response.status == 200){
 					setDocumentAvaliation('medical_examination')
 					setPathDocumentMain(response.path)
@@ -1049,97 +1055,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				break;
 		}
 		return;
-		// let response;
-		// switch (candidate.step) {
-		// 	case 1:
-		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
-		// 		setManipulatingTable(candidate)
-		// 		response = await CollaboratorFile(candidate.cpf, 'medical_examination');
-		// 		if(response.status == 200){
-		// 			setDocumentAvaliation('medical_examination')
-		// 			setPathDocumentMain(response.path)
-		// 			setTypeDocument(response.type)
-		// 			setOpenDocument(true)
-		// 			setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-		// 			return
-		// 		}
-		// 		toast(
-		// 			<Toasts
-		// 				icon={ 'Close' }
-		// 				iconColor={ 'danger' }
-		// 				title={ 'Erro!'}
-		// 			>
-		// 				O candidato ainda não enviou o exame admissional.
-		// 			</Toasts>,
-		// 			{
-		// 				closeButton: true ,
-		// 				autoClose: 5000 //
-		// 			}
-		// 		)
-		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-		// 		break;
-		// 	case 2:
-		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
-		// 		setDocumentAvaliation(null)
-		// 		response = await Job_Check_Admissional(candidate.id)
-		// 		if(response.status == 200){
-		// 			setDatesDynamicManipulating(response.date)
-		// 			const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
-		// 			const allTrue = obligationValues.every(value => value === true);
-		// 			if (allTrue) {
-		// 				updateStatusCandidate(candidate, true);
-		// 			}
-		// 		}
-		// 		setManipulatingTable(candidate)
-		// 		setControllerBodyManipulating('kitAdmission');
-		// 		setTitleManipulating('Gerencie seu Kit Admissional');
-		// 		handleUpcomingEdit();
-		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-		// 		break;
-		// 	case 3:
-		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: true }));
-		// 		setManipulatingTable(candidate)
-		// 		response = await Signatures(candidate.cpf);
-		// 		let allSignatureApproved:boolean = false
-		// 		if(response.status == 200){
-		// 			//@ts-ignore
-		// 			allSignatureApproved = response.pictures.every(picture => picture.status === 'approved');
-		// 			setStatusAllSignature(response.pictures)
-		// 		}else{
-		// 			setStatusAllSignature(null)
-		// 		}
-		// 		response = await Job_Check_Admissional(candidate.id)
-		// 		if(response.status == 200){
-		// 			setDatesDynamicManipulating(response.date)
-		// 			const obligation = Object.keys(response.date.obligation);
-		// 			let dynamic = Object.values(response.date.dynamic.signature);
-		// 			dynamic = dynamic
-		// 			//@ts-ignore
-		// 			.map(item => item.replace(/^\/+|\/+$/g, '').trim())  // Remove barras no começo e final
-		// 			.filter(item => item !== "");;
-		// 			const documentSignatures = Object.values(response.date.documentSignature)
-		// 			const obligationExists = obligation.every(required =>
-		// 				documentSignatures.some(signature =>
-		// 					//@ts-ignore
-		// 					signature.toLowerCase().includes(required.toLowerCase())
-		// 				)
-		// 			);
-		// 			const dynamicExists = dynamic.every(required =>
-		// 				documentSignatures.some(signature =>
-		// 				  //@ts-ignore
-		// 				  signature.toLowerCase().includes(required.toLowerCase())
-		// 				)
-		// 			);
-		// 			if (obligationExists && dynamicExists && allSignatureApproved) {
-		// 				updateStatusCandidate(candidate, true);
-		// 			};
-		// 		};
-		// 		setControllerBodyManipulating('signature');
-		// 		setTitleManipulating('Gerencie as Assinaturas');
-		// 		handleUpcomingEdit();
-		// 		setLoadingStates(prevStates => ({ ...prevStates, [candidate.cpf]: false }));
-		// 		break;
-		// }
 	};
 
 	const navegationStep = async (navigation: boolean) => {
@@ -1183,7 +1098,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				status: avaliation ? 'approved' : 'reproved',
 				picture:
 					view == 'signature' && step == 1 && manipulatingTable.demission?.solicitation == 'company'
-						? `Dismissal_Signature_Communication` : 
+						? `Signature_Communication` : 
 						step == 1 && manipulatingTable.demission?.solicitation == 'collaborator'?
 						'Dismissal_Hand' :
 						step == 2 ? 'Dismissal_Medical_Examination' :
@@ -1192,8 +1107,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				id_work: manipulatingTable.id
 
 			};
-
-			console.log('params',params)
 
 			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
 			if (response.status == 200) {

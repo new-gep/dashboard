@@ -19,6 +19,7 @@ import { toast } from 'react-toastify';
 import FormGroup from '../../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../../components/bootstrap/forms/Input';
 import Checks, { ChecksGroup } from '../../../../components/bootstrap/forms/Checks';
+import DefaultPayment from '../../../../api/post/payment/Default';
 const validate = (values: {
 	name: string;
 	number: string;
@@ -196,6 +197,21 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 			}
 		}
 
+		const response = await DefaultPayment({
+			CNPJ_Company: userData.cnpj,
+			method: paymentMethod,
+			amount: total,
+			status: 'pending',
+			name: values.name,
+			email: userData.email,
+			phone: userData.phone,
+			additionalInfo: 'Pagamento de assinatura',
+			numberCard: values.number,
+			nameCard: values.name,
+			expiresAtCard: values.expiry,
+			cvvCard: values.cvc,
+		});
+		console.log('response', response);
 		// setWaiting(false);
 	};
 
