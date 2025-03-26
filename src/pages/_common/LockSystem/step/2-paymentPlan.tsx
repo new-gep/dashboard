@@ -87,6 +87,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 	const [saveCardChecked, setSaveCardChecked] = useState<boolean>(false);
 	const [generateQRCode, setGenerateQRCode] = useState<boolean>(false);
 	const [generateTicket, setGenerateTicket] = useState<boolean>(false);
+	const [qrCodeLink, setQrCodeLink] = useState<string>('');
 	const [discount, setDiscount] = useState<number>(plan.discount);
 	const [total, setTotal] = useState<number>(plan.price - discount);
 	const [coupon, setCoupon] = useState<string>('');
@@ -105,13 +106,18 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 		},
 		validate,
 		onSubmit: (values) => {
-			saveCard(values);
+			handleGeneratePaymentAndSaveCard(values);
 		},
 	});
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 		setCardDetails({ ...cardDetails, [name]: value });
+	};
+
+	const convertToYearMonth = (expiry: string) => {
+		const [month, year] = expiry.split("/"); // Pega o mês e o "ano"
+		return `20${year}-${month.padStart(2, "0")}`; // Formata para YYYY-MM
 	};
 
 	const handleInputFocus = ({ target }: { target: { name: Focused } }) => setFocused(target.name);
@@ -147,7 +153,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 		setSaveCardChecked(e.target.checked);
 	};
 
-	const saveCard = async (values: {
+	const handleGeneratePaymentAndSaveCard = async (values: {
 		name: string;
 		number: string;
 		cvc: number | string;
@@ -197,6 +203,8 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 			}
 		}
 
+		const formattedExpiry = convertToYearMonth(values.expiry);
+
 		const response = await DefaultPayment({
 			CNPJ_Company: userData.cnpj,
 			method: paymentMethod,
@@ -208,10 +216,48 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 			additionalInfo: 'Pagamento de assinatura',
 			numberCard: values.number,
 			nameCard: values.name,
-			expiresAtCard: values.expiry,
+			expiresAtCard: formattedExpiry,
 			cvvCard: values.cvc,
 		});
-		console.log('response', response);
+		console.log(response);
+		switch (response.status) {
+			case 200:
+				console.log(response.payment);
+				switch(response.payment){
+					case 'denied':
+						toast(
+							<Toasts
+								icon={'Close'}
+								iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+								title={'Erro'}>
+								Erro ao realizar pagamento, tente novamente.
+							</Toasts>,
+						);
+						return;
+				break;
+					case 'captured':
+						toast(
+							<Toasts
+								icon={'Check'}
+								iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+								title={'🥳 Parabéns! '}>
+								Pagamento realizado com sucesso.
+							</Toasts>,
+						);
+						return;
+				default:
+				toast(
+					<Toasts
+						icon={'Close'}
+						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={'Erro'}>
+						Erro ao realizar pagamento, tente novamente.
+					</Toasts>,
+				);
+			break;
+			}
+		}
+		// setWaiting(false);
 		// setWaiting(false);
 	};
 
@@ -220,10 +266,72 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 		setGenerateTicket(true);
 	};
 
-	const handleGenerateQRCode = () => {
-		console.log('Gerar QR Code');
+	const handleGenerateQRCode = async () => {
+		const response = await DefaultPayment({
+			CNPJ_Company: userData.cnpj,
+			method: paymentMethod,
+			amount: total,
+			status: 'pending',
+			name: userData.name,
+			email: userData.email,
+			phone: userData.phone,
+			additionalInfo: 'Pagamento de assinatura',
+		});
+		console.log(response);
+		setQrCodeLink(response.payment.image);
+		switch (response.status) {
+			case 200:
+				toast(
+					<Toasts
+						icon={'Check'}
+						iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={'🥳 Parabéns! '}>
+						QRCode gerado com sucesso.
+					</Toasts>,
+				);
+				break;
+			default:
+				toast(
+					<Toasts
+						icon={'Close'}
+						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title={'Erro'}>
+						Erro ao realizar pagamento, tente novamente.
+					</Toasts>,
+				);
+				break;
+		}
+
 		setGenerateQRCode(true);
+		startCountdown();
 	};
+
+	const startCountdown = () => {
+		const countdownTime = 15 * 60 * 1000; // 15 minutos em milissegundos
+		const endTime = Date.now() + countdownTime;
+
+		const interval = setInterval(() => {
+			const remainingTime = endTime - Date.now();
+			if (remainingTime <= 0) {
+				clearInterval(interval);
+				setGenerateQRCode(false);
+				toast(
+					<Toasts
+						icon={'Close'}
+						iconColor={'danger'}
+						title={'Tempo Esgotado'}>
+						O tempo para pagamento expirou. Por favor, gere um novo QR Code.
+					</Toasts>,
+				);
+			} else {
+				const minutes = Math.floor((remainingTime / 1000 / 60) % 60);
+				const seconds = Math.floor((remainingTime / 1000) % 60);
+				setCountdown(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+			}
+		}, 1000);
+	};
+
+	const [countdown, setCountdown] = useState<string>('15:00');
 
 	const handleApplyDiscount = () => {
 		if (coupon == '') {
@@ -687,12 +795,19 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									</div>
 									<div className='text-center'>
 										<div className='d-flex justify-content-center'>
-											<img
-												src={Pix}
-												alt='Pix'
-												className='img-fluid'
-												style={{ width: '150px', height: '150px' }}
-											/>
+											{qrCodeLink && (
+												<img
+													src={qrCodeLink}
+													alt='Pix'
+													className='img-fluid'
+													style={{ width: '150px', height: '150px' }}
+												/>
+											)}
+										</div>
+										<div className='mt-3'>
+											<span className='fw-bold text-danger'>
+												Tempo restante: {countdown}
+											</span>
 										</div>
 									</div>
 									<Button

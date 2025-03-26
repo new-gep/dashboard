@@ -14,7 +14,7 @@ import Congratulation from './step/Congratulation';
 export default function LockSystem(){
     const [modalStatus, setModalStatus] = useState(true);
     const [plan, setPlan] = useState<any>(null);
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState(3);
 
     useEffect(() => {
         
