@@ -317,12 +317,19 @@ const Customer = () => {
 		try{
 			if(jobId && Array.isArray(AllPicture)){
 				let pictures = AllPicture;
-				pictures = pictures.filter(pic => pic.picture !== 'CNH' && pic.picture !== 'Voter_Registration');
+				pictures = pictures.filter(pic => 
+					pic.picture !== 'CNH' && 
+					pic.picture !== 'Voter_Registration' && 
+					!pic.picture.toLowerCase().includes('medical') && 
+					!pic.picture.toLowerCase().includes('signature') && 
+					!pic.picture.toLowerCase().includes('dismissal')
+				);
 				const isValid = pictures.every(item => item.status === "approved")
+				console.log('pictures',pictures)
+				console.log('isValid',isValid)
 				if(!isValid){
 					return
 				}
-				console.log('aqui xx ')
 				const response = await Job_One(jobId)		
 				if(response.status == 200){
 					let candidates = response.job.candidates
@@ -331,7 +338,7 @@ const Customer = () => {
 						delete item.picture;
 						delete item.name;
 					});
-					console.log('cadidatos', candidates)
+					
 					const candidate = candidates.find((item:any) => item.cpf.toString() == cpf);
 					if (candidate) {
 						candidate.verify = true;

@@ -100,14 +100,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	});
 
 	useEffect(()=>{
-		if(datesSingIn.password === 'J46tUtN.U}w:X)*'){
-			setDatesSingIn((prevState: SingInProps) => ({
-				user:"",
-				name: '',
-				password:""
-			}))
-		}
-	},[datesSingIn])
+		setDatesSingIn((prevState: SingInProps) => ({
+			user: '',
+			name: '',
+			password: ''
+		}))
+	},[])
 
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
@@ -120,7 +118,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			dates.password = ''
 		};
 		const response = await User(datesSingIn)
-		console.log(response)
 		switch (response && response.status) {
 			case 200:
 				if(response.token){
@@ -612,7 +609,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												</FormGroup>
 											</div>
 											<div className='col-12'>
-												{!signInPassword ? (
+												{!signInPassword || datesSingIn.password === '' ? (
 													<Button
 														color='warning'
 														className='w-100 py-3'

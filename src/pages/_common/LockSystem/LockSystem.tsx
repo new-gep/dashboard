@@ -14,7 +14,7 @@ import Congratulation from './step/Congratulation';
 export default function LockSystem(){
     const [modalStatus, setModalStatus] = useState(true);
     const [plan, setPlan] = useState<any>(null);
-    const [step, setStep] = useState(3);
+    const [step, setStep] = useState(1);
 
     useEffect(() => {
         
@@ -47,7 +47,7 @@ export default function LockSystem(){
             
             <ModalBody>
                 {step === 1 && <SelectPlan setStep={setStep} setPlan={setPlan} plan={plan}/>}
-                {step === 2 && <PaymentPlan plan={plan}/>}
+                {step === 2 && <PaymentPlan plan={plan} setStep={setStep}/>}
                 {step === 3 && <ContractPlan setStep={setStep} plan={plan}/>}
                 {step === 4 && <Congratulation/>}
 

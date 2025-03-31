@@ -9,7 +9,6 @@ import Payment from 'payment';
 import 'react-credit-cards-2/es/styles-compiled.css';
 import Icon from '../../../../components/icon/Icon';
 import SubHeader, { SubheaderSeparator } from '../../../../layout/SubHeader/SubHeader';
-import Pix from './pix.png';
 import AllCardCompany from '../../../../api/get/card_company/AllCardCompany';
 import AuthContext from '../../../../contexts/authContext';
 import { useFormik } from 'formik';
@@ -20,6 +19,7 @@ import FormGroup from '../../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../../components/bootstrap/forms/Input';
 import Checks, { ChecksGroup } from '../../../../components/bootstrap/forms/Checks';
 import DefaultPayment from '../../../../api/post/payment/Default';
+import Spinner from '../../../../components/bootstrap/Spinner';
 const validate = (values: {
 	name: string;
 	number: string;
@@ -74,7 +74,7 @@ const validate = (values: {
 	return errors;
 };
 
-export default function PaymentPlan({ plan }: { plan: any }) {
+export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (step: number) => void }) {
 	const [paymentMethod, setPaymentMethod] = useState('creditCard');
 	const [cardDetails, setCardDetails] = useState({
 		number: '',
@@ -88,9 +88,11 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 	const [generateQRCode, setGenerateQRCode] = useState<boolean>(false);
 	const [generateTicket, setGenerateTicket] = useState<boolean>(false);
 	const [qrCodeLink, setQrCodeLink] = useState<string>('');
-	const [discount, setDiscount] = useState<number>(plan.discount);
-	const [total, setTotal] = useState<number>(plan.price - discount);
+	const [discount, setDiscount] = useState<any>(plan.discount);
+	const [total, setTotal] = useState<any>(plan.price - discount);
 	const [coupon, setCoupon] = useState<string>('');
+	const [watingPayment, setWatingPayment] = useState<boolean>(false);
+	const [watingGenerate, setWatingGenerate] = useState<boolean>(false);
 	const { userData } = useContext(AuthContext);
 	const [cardList, setCardList] = useState<
 		{ id: number; name: string; number: string; expiry: string; cvc: number | string }[]
@@ -159,7 +161,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 		cvc: number | string;
 		expiry: string;
 	}) => {
-		// setWaiting(true);
+		setWatingPayment(true);
 		if (saveCardChecked) {
 			values.number = values.number.replace(/\s/g, '');
 			values.cvc = values.cvc.toString();
@@ -202,7 +204,6 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 				);
 			}
 		}
-
 		const formattedExpiry = convertToYearMonth(values.expiry);
 
 		const response = await DefaultPayment({
@@ -233,7 +234,6 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 								Erro ao realizar pagamento, tente novamente.
 							</Toasts>,
 						);
-						return;
 				break;
 					case 'captured':
 						toast(
@@ -244,7 +244,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 								Pagamento realizado com sucesso.
 							</Toasts>,
 						);
-						return;
+						break;
 				default:
 				toast(
 					<Toasts
@@ -257,8 +257,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 			break;
 			}
 		}
-		// setWaiting(false);
-		// setWaiting(false);
+		setWatingPayment(false);
 	};
 
 	const handleGenerateTicket = () => {
@@ -267,6 +266,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 	};
 
 	const handleGenerateQRCode = async () => {
+		setWatingGenerate(true);
 		const response = await DefaultPayment({
 			CNPJ_Company: userData.cnpj,
 			method: paymentMethod,
@@ -277,10 +277,10 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 			phone: userData.phone,
 			additionalInfo: 'Pagamento de assinatura',
 		});
-		console.log(response);
-		setQrCodeLink(response.payment.image);
+		
 		switch (response.status) {
 			case 200:
+				setQrCodeLink(response.payment.image);
 				toast(
 					<Toasts
 						icon={'Check'}
@@ -303,6 +303,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 		}
 
 		setGenerateQRCode(true);
+		setWatingGenerate(false);
 		startCountdown();
 	};
 
@@ -585,25 +586,34 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									</FormGroup>
 								</div>
 
-								<div
-									className={`d-flex ${selectedCardId === null ? 'justify-content-between' : 'justify-content-end'} mt-3 px-3 `}>
-									{selectedCardId === null && (
-										<ChecksGroup className='d-flex justify-content-between mt-3 '>
-											<Checks
-												id='saveCard'
-												label='Salvar Cartão'
-												onChange={handleSaveCardChange}
-												checked={saveCardChecked}
-												isValid={formik.isValid}
-												isTouched={formik.touched.saveCard}
-												invalidFeedback={formik.errors.saveCard}
-											/>
-										</ChecksGroup>
-									)}
-									<Button type='submit' color='success'>
-										Pagar
-									</Button>
-								</div>
+								{ !watingPayment ? 
+									<div
+										className={`d-flex ${selectedCardId === null ? 'justify-content-between' : 'justify-content-end'} mt-3 px-3 `}>
+										{selectedCardId === null && (
+											<ChecksGroup className='d-flex justify-content-between mt-3 '>
+												<Checks
+													id='saveCard'
+													label='Salvar Cartão'
+													onChange={handleSaveCardChange}
+													checked={saveCardChecked}
+													isValid={formik.isValid}
+													isTouched={formik.touched.saveCard}
+													invalidFeedback={formik.errors.saveCard}
+												/>
+											</ChecksGroup>
+										)}
+										<Button type='submit' color='success'>
+											Pagar
+										</Button>
+									</div>
+									:
+									<div className='d-flex align-items-center justify-content-center mt-3 px-3 '>
+										<Spinner color='success' />
+										<Button isDisable isLink color='success'>
+											Processando Pagamento
+										</Button>
+									</div>
+								}
 							</form>
 						</div>
 						<div className='col-md-4 col-12 p-3 text-center px-5'>
@@ -784,9 +794,19 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 											</p>
 										</div>
 									</>
-									<Button onClick={handleGenerateQRCode} color='success'>
-										Gerar QR Code
-									</Button>
+									{
+										!watingGenerate ?
+										<Button onClick={handleGenerateQRCode} color='success'>
+											Gerar QR Code
+										</Button>
+										:
+										<div className='d-flex align-items-center justify-content-center mt-3 px-3 '>
+											<Spinner color='success' />
+											<Button isDisable isLink color='success'>
+												Gerando QR Code
+											</Button>
+										</div>
+									}
 								</>
 							) : (
 								<>
@@ -837,7 +857,7 @@ export default function PaymentPlan({ plan }: { plan: any }) {
 									<li>
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Desconto:</span>{' '}
-											<span className='text-danger'>R$ - {discount},00</span>
+											<span className='text-danger'>R$ - {discount },00</span>
 										</div>
 									</li>
 
