@@ -46,6 +46,10 @@ const CollaboratorList = () => {
     useEffect(() => {
 		const fetchData = async () => {
 			const response = await JobCollaboratorCompany(userData.cnpj)
+			if(!response || response.status !== 200){
+				setLoader(false)
+				return;
+			}
 			setCollaboratorCompany(response.collaborator)
 			setTimeout(() => {
 				setLoader(false)

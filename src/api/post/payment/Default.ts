@@ -18,7 +18,6 @@ interface CreatePaymentDto {
 
 
 export default async function DefaultPayment(CreatePaymentDto: CreatePaymentDto){
-    console.log('CreatePaymentDto', CreatePaymentDto);
     
     try{
         const response = await axios.post(`${process.env.REACT_APP_API}payment`, {

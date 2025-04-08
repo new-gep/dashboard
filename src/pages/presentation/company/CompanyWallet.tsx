@@ -26,6 +26,7 @@ import Toasts from '../../../components/bootstrap/Toasts';
 import AllCardCompany from '../../../api/get/card_company/AllCardCompany';
 import PatchCardCompanyDefault from '../../../api/patch/card_company/Default';
 import DeleteCardCompany from '../../../api/delete/card_company/default';
+import Mask from '../../../function/Mask';
 const validate = (values: {
 	name: string;
 	number: string;
@@ -400,7 +401,11 @@ const CompanyWallet = () => {
 									<Input
 										placeholder='Nome do Cartão'
 										autoComplete='ccName'
-										onChange={formik.handleChange}
+										className='capitalize'
+										onChange={(e: any) => {
+											const value = e.target.value.replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ\s]/g, '');
+											formik.setFieldValue('name', value.toUpperCase());
+										}}
 										value={formik.values.name}
 										onFocus={handleInputFocus}
 										onBlur={formik.handleBlur}

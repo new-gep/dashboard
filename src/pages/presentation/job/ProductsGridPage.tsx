@@ -184,15 +184,10 @@ const ProductsGridPage = () => {
 		}
 	};
 	  
-	function handleRemove(id: number) {
+	const handleRemove = (id: number) => {
 		const newData = data.filter((item) => item.id !== id);
 		setData(newData);
 	};
-
-	// function handleEdit(id: number) {
-	// 	const newData = data.filter((item) => item.id === id);
-	// 	setEditItem(newData[0]);
-	// };
 
 	const formik = useFormik({
 		initialValues: {
@@ -216,27 +211,6 @@ const ProductsGridPage = () => {
 			// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
 		},
 	});
-	  
-
-	// useEffect(() => {
-	// 	if (editItem) {
-	// 		formik.setValues({
-	// 			name: editItem.name,
-	// 			price: editItem.price,
-	// 			stock: editItem.stock,
-	// 			category: editItem.category,
-	// 		});
-	// 	}
-	// 	return () => {
-	// 		formik.setValues({
-	// 			name: '',
-	// 			price: 0,
-	// 			stock: 0,
-	// 			category: '',
-	// 		});
-	// 	};
-	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	// }, [editItem]);
 
 	useEffect(() => {
 		setImageFile(getRandomImage()); // Define uma imagem aleatória ao carregar o componente

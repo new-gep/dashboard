@@ -90,8 +90,12 @@ const CommonDashboardJob = () => {
 
 	useEffect(()=>{
 		const fetchData = async () => {
-			if(userData){
+			if(userData && userData.cnpj){
 				const response  = await Job_Open(userData.cnpj);
+				if(!response || response.status !== 200){
+					setJobs([])
+					return;
+				}
 				switch (response.status) {
 					case 200:
 						setJobs(response.job)

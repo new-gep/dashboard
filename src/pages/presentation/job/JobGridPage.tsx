@@ -395,8 +395,10 @@ const ProductsGridPage = () => {
 		setImageFile(getRandomImage());
 		if(userData.cnpj){
 			const fetchData = async () => {
-				const response = await Job_Open(userData.cnpj)
-				console.log('job:', response)
+				let response = await Job_Open(userData.cnpj)
+				if(!response || response.status !== 200){
+					return;
+				}	
 				switch (response.status) {
 					case 200:
 						setData(response.job)
@@ -508,7 +510,7 @@ const ProductsGridPage = () => {
 				noValidate
 				onSubmit={formik.handleSubmit}>
 				<OffCanvasHeader setOpen={setEditPanel}>
-					<OffCanvasTitle id='edit-panel'>
+					<OffCanvasTitle id='edit-panel' className='text-capitalize'>
 						{editItem?.function || 'Nova Vaga'}{' '}
 						{editItem?.function ? (
 							<Badge color='primary' isLight>

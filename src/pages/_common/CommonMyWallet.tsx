@@ -93,7 +93,8 @@ const CommonMyWallet = () => {
 	const [focused, setFocused] = useState<Focused>('number');
 	const handleInputFocus = ({ target }: { target: { name: Focused } }) => setFocused(target.name);
 	useEffect(() => {
-		if (userData) {
+		console.log('userData',userData)
+		if (userData && userData.cnpj) {
 			const fetchData = async () => {
 				const response = await AllCardCompany(userData.cnpj);
 				if (response.status === 200) {

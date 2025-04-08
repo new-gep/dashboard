@@ -15,9 +15,13 @@ const CommonDashboardUserCard = () => {
 	useEffect(() => {
 		if (userData) {
 			MasterAdmin(userData.cnpj).then((res) => {
-				if (res.status === 200) {
+				console.log('res',res);
+				if (!res || res.status !== 200) {
+					setMasterAdmin(null);
+					return;
+				}
+				if (res && res.status === 200) {
 					setMasterAdmin(res.user);
-					console.log(res.data);
 				}
 			});
 		}

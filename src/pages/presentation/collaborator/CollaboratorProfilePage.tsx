@@ -74,10 +74,8 @@ const CollaboratorProfilePage = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (cpf) {
-				
 				const response = await Collaborator(cpf);
-				console.log('response', response)
-				if (response.status == 200) {
+				if (response && response.status == 200) {
 					setCollaborator(response.collaborator);
 					setPicture(response.picture);
 					const responseJob = await Job_One(response.collaborator.id_work);
@@ -97,8 +95,6 @@ const CollaboratorProfilePage = () => {
 	const startDemission = () => {
 		setModalDemission(true);
 	};
-
-	const userTasks = dummyEventsData.filter((f) => f.assigned.username === 'CPF.username');
 
 	return (
 		<PageWrapper title={collaborator && Mask('firstName', collaborator.name)}>

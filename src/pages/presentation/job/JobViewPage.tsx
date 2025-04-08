@@ -396,8 +396,12 @@ const JobViewPage = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			// @ts-ignore
-			const response = await Job_One(id);
+			//@ts-ignore
+			let response = await Job_One(id);
+			if(!response || response.status !== 200){
+				console.log('aqui')
+				return;
+			}
 			switch (response.status) {
 				case 200:
 					setEditItem(response.job);

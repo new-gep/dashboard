@@ -50,6 +50,7 @@ import SignedDocument from '../../../components/canva/SignedDocument';
 import Signatures from '../../../api/get/picture/Admission_Signatures';
 import GetCompanyDocument from '../../../api/get/company/Document';
 import PatchCollaboratorDefault from '../../../api/patch/collaborator/Default';
+import PatchCollaboratorIdWork from '../../../api/patch/collaborator/IdWork';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -1016,11 +1017,9 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		const params = {
 			CPF_collaborator:manipulating.cpf
 		}
-		const paramsPatch = {
-			id_work: manipulating.id
-		}
+	
 		const update = await Job(params, manipulating.id)
-		const response = await PatchCollaboratorDefault(paramsPatch, manipulating.cpf)
+		const response = await PatchCollaboratorIdWork(manipulating.id, manipulating.cpf)
 		if(update.status == 200 && response.status == 200){
 			const newCandidates = candidates.filter((item: { cpf: string | undefined; }) => item.cpf !== manipulating.cpf);
 			setCandidates(newCandidates)
