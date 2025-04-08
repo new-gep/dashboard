@@ -42,7 +42,6 @@ const CollaboratorList = () => {
 		},
 	});
 
-	
     useEffect(() => {
 		const fetchData = async () => {
 			const response = await JobCollaboratorCompany(userData.cnpj)
@@ -274,8 +273,9 @@ const CollaboratorList = () => {
 						))} */}
 						{ Array.isArray(collaboratorCompany) && collaboratorCompany.length > 0 ?
 						collaboratorCompany.map((job) => {
-							// console.log(collaborator)
+							console.log('teste',job)
 							if(job.status != 200){
+								console.log('aquii',job)
 								return
 							}
 							return(

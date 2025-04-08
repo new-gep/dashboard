@@ -78,14 +78,16 @@ const CollaboratorProfilePage = () => {
 				if (response && response.status == 200) {
 					setCollaborator(response.collaborator);
 					setPicture(response.picture);
-					const responseJob = await Job_One(response.collaborator.id_work);
-					if (responseJob.status == 200) {
-						setJob(responseJob.job);
-						const response = await Job_All_Collaborator(responseJob.job.CPF_collaborator)
-						if(response.status == 200){
-							setAllJob(response.job)
-						}
-					}
+					console.log('teste',response.collaborator.id_work)
+					setJob(response.collaborator.id_work);
+					// const responseJob = await Job_One(response.collaborator.id_work);
+					// if (responseJob.status == 200) {
+					// 	setJob(responseJob.job);
+					// 	const response = await Job_All_Collaborator(responseJob.job.CPF_collaborator)
+					// 	if(response.status == 200){
+					// 		setAllJob(response.job)
+					// 	}
+					// }
 				}
 			};
 		};
