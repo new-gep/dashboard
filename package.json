@@ -1,11 +1,11 @@
 {
-	"name": "facit",
-	"version": "4.3.5",
+	"name": "gep",
+	"version": "1.0.0",
 	"private": true,
 	"scripts": {
 		"start": "react-scripts start",
 		"build": "react-scripts build",
-		"serve": "serve -s build",
+		"serve": "serve -s build ",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
 		"lint": "eslint .",
