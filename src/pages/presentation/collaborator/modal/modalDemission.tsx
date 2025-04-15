@@ -14,7 +14,7 @@ interface ModalDocumentProps {
 	job: any;
 	openModal: boolean;
 	closeModal: (value: boolean) => void;
-    listen: number;
+	listen: number;
 	setListen: (value: number) => void;
 }
 
@@ -23,10 +23,10 @@ export default function ModalDemission({
 	job,
 	openModal,
 	closeModal,
-    listen,
-    setListen
+	listen,
+	setListen,
 }: ModalDocumentProps) {
-    const { userData } = useContext(AuthContext);
+	const { userData } = useContext(AuthContext);
 	const [motion, setMotion] = useState<null | String>(null);
 
 	const startDemission = async () => {
@@ -44,41 +44,47 @@ export default function ModalDemission({
 				},
 			);
 			return;
+		}
+		const updateJob = {
+			motion_demission: motion.toString(),
+			demission: JSON.stringify({
+				step: 1,
+				status: null,
+				user: userData.id,
+				solicitation: 'company',
+				observation: '',
+			}),
+			user_edit: userData.id,
 		};
-        const updateJob = {
-            motion_demission: motion.toString(),
-            demission: JSON.stringify({step:1, status:null, user:userData.id, solicitation:'company', observation:''}),
-            user_edit: userData.id
-        };
-        const response = await Job(updateJob, job.id )
-		if(response.status == 200){
-            setListen(listen + 1)
-            toast(
+		const response = await Job(updateJob, job.id);
+		if (response.status == 200) {
+			setListen(listen + 1);
+			toast(
 				<Toasts
 					icon={'Check'}
 					iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
 					title={'Sucesso'}>
-					    Processo de demissão iniciada com sucesso
+					Processo de demissão iniciada com sucesso
 				</Toasts>,
 				{
 					closeButton: true,
 					autoClose: 5000, //
 				},
 			);
-            return
-        };
-        toast(
-            <Toasts
-                icon={'Close'}
-                iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-                title={'Erro!'}>
-                Erro interno, tente mais tarde!
-            </Toasts>,
-            {
-                closeButton: true,
-                autoClose: 5000, //
-            },
-        );
+			return;
+		}
+		toast(
+			<Toasts
+				icon={'Close'}
+				iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+				title={'Erro!'}>
+				Erro interno, tente mais tarde!
+			</Toasts>,
+			{
+				closeButton: true,
+				autoClose: 5000, //
+			},
+		);
 	};
 
 	return (
@@ -96,9 +102,9 @@ export default function ModalDemission({
 						}}>
 						<Options
 							list={[
-								{ value: 'motivo1', text: 'Motivo 1' },
-								{ value: 'motivo2', text: 'Motivo 2' },
-								{ value: 'motivo3', text: 'Motivo 3' },
+								{ value: 'Redução de Custos', text: 'Redução de Custos' },
+								{ value: 'Desempenho', text: 'Desempenho' },
+								{ value: 'Outros', text: 'Outros' },
 							]}
 						/>
 					</Select>

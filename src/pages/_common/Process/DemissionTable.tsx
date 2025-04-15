@@ -56,6 +56,7 @@ import Job_Demissional from '../../../api/get/job/Job_Demissional';
 import DismissalSignatures from '../../../api/get/picture/Dismissal_Signatures';
 import Collaborator from '../../../api/get/collaborator/Collaborator';
 import PatchCollaboratorDefault from '../../../api/patch/collaborator/Default';
+import PatchCollaboratorIdWork from '../../../api/patch/collaborator/IdWork';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -624,9 +625,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				)
 				break;
 			case 'dismissal_communication_dynamic':
-				console.log('signature aqui',)
 				responseSignature = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '1', dynamic.replace(/\//g, ''));
-				console.log('responseSignature',responseSignature)
 				responseDocument  = await JobFile(manipulatingTable.id, 'dismissal_communication_dynamic', '0', dynamic.replace(/\//g, ''));
 			
 				const formattedFileNameNew = dynamic.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\//g, '');
@@ -1104,11 +1103,12 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						step == 2 ? 'Dismissal_Medical_Examination' :
 						`Signature_Dismissal`,
 				id_user: userData.id,
-				id_work: manipulatingTable.id
-
+				id_work: manipulatingTable.id,
 			};
+			console.log(params)
 
-			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator);
+			const response: any = await PicturePath(params, manipulatingTable.CPF_collaborator.CPF);
+			console.log('response:', response)
 			if (response.status == 200) {
 				switch (manipulatingTable.demission.step) {
 					case 1:
@@ -1500,10 +1500,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			demission: JSON.stringify(manipulating.demission)
 		};
 		const update = await Job(params, manipulating.id);
-		const props = {
-			id_work:null,
-		}
-		const collaborator = await PatchCollaboratorDefault(props, manipulating.CPF_collaborator);
+		const collaborator = await PatchCollaboratorIdWork(null, manipulating.CPF_collaborator.CPF);
 		if(update.status == 200 && collaborator.status == 200){	
 			const stepCollaborator = collaborators.filter(
 				(collaborator: any) => collaborator.demission.step === step,
@@ -1587,7 +1584,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		const fetchData = async () => {
 			try {
 				const response = await Job_Demissional(userData.cnpj);
-				console.log('response aqui', response);
 				if (response.status == 200) {
 					const stepOneCollaborators = response.job.filter(
 						(job: { demission: { step: number } }) => {
@@ -1598,7 +1594,6 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						}
 					);
 					setCollaborators(response.job);
-					console.log('stepOneCollaborators', stepOneCollaborators);
 					setCollaboratorsStep(stepOneCollaborators);
 					return;
 				}
@@ -1873,7 +1868,8 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 									icon='ArrowForwardIos'
 									color='warning'
 									isLink={true}
-									onClick={() => navegationStep(true)}></Button>
+									onClick={() => navegationStep(true)}>
+								</Button>
 							)}
 						</div>
 					)}
@@ -1969,7 +1965,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 														<div className='flex-shrink-0'>
 															<img
 																className='rounded-circle'
-																src={item.collaborator.picture}
+																src={item.picture.path}
 																width={36}
 																height={36}
 																// srcSet={item.assigned.srcSet}
