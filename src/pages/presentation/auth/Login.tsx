@@ -14,8 +14,8 @@ import AuthContext from '../../../contexts/authContext';
 import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
 import Spinner from '../../../components/bootstrap/Spinner';
 import Alert, { AlertHeading } from '../../../components/bootstrap/Alert';
-import Logo from '../../../assets/logo/logo.png'
-import LogoDark from '../../../assets/logo/logo_yellow.png'
+import Logo from '../../../assets/logo/logo.png';
+import LogoDark from '../../../assets/logo/logo_yellow.png';
 import Icon from '../../../components/icon/Icon';
 import Cnpj from '../../../api/get/Cnpj';
 import Company from '../../../api/post/Company';
@@ -46,25 +46,25 @@ LoginHeader.defaultProps = {
 
 interface ILoginProps {
 	isSignUp?: boolean;
-};
+}
 
 interface SingUpProps {
-	cnpj : string,
-	municipal_registration:string,
-	state_registration:string,
-	email: string,
-    name : string,
-    phone: string,
-    user : string,
-    password: string;
-	hasType : boolean;
-};
+	cnpj: string;
+	municipal_registration: string;
+	state_registration: string;
+	email: string;
+	name: string;
+	phone: string;
+	user: string;
+	password: string;
+	hasType: boolean;
+}
 
 interface SingInProps {
-    user:  string,
-	password:string,
-	name:string
-};
+	user: string;
+	password: string;
+	name: string;
+}
 
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setToken } = useContext(AuthContext);
@@ -73,39 +73,39 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const [signInPassword, setSignInPassword] = useState<boolean>(false);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
-	const [isCardTypeAccountClient, setIsCardTypeAccountClient]   = useState<boolean>(false)
-	const [isCardTypeAccountCompany, setIsCardTypeAccountCompany] = useState<boolean>(false)
-	const [isCompany, setIsCompany] = useState<boolean>(false)
-	const [isClient , setIsClient ] = useState<boolean>(false)
+	const [isCardTypeAccountClient, setIsCardTypeAccountClient] = useState<boolean>(false);
+	const [isCardTypeAccountCompany, setIsCardTypeAccountCompany] = useState<boolean>(false);
+	const [isCompany, setIsCompany] = useState<boolean>(false);
+	const [isClient, setIsClient] = useState<boolean>(false);
 
-	const [isAccessInvalid , setIsAccessInvalid ] = useState<boolean>(false)
-	const [isRegisterInvalid , setIsRegisterInvalid ] = useState<boolean>(false)
-	const [textInvalid , setTextInvalid ] = useState<string | false>(false)
+	const [isAccessInvalid, setIsAccessInvalid] = useState<boolean>(false);
+	const [isRegisterInvalid, setIsRegisterInvalid] = useState<boolean>(false);
+	const [textInvalid, setTextInvalid] = useState<string | false>(false);
 
 	const [datesSingUp, setDatesSingUp] = useState<SingUpProps>({
-		cnpj : "",
-		name : "",
-		email: "",
-		phone: "",
-		user : "",
-		password: "",
-		state_registration:"",
-		municipal_registration:"",
-		hasType : false
+		cnpj: '',
+		name: '',
+		email: '',
+		phone: '',
+		user: '',
+		password: '',
+		state_registration: '',
+		municipal_registration: '',
+		hasType: false,
 	});
 	const [datesSingIn, setDatesSingIn] = useState<SingInProps>({
-		user:"",
-		name:"",
-		password:""
+		user: '',
+		name: '',
+		password: '',
 	});
 
-	useEffect(()=>{
+	useEffect(() => {
 		setDatesSingIn((prevState: SingInProps) => ({
 			user: '',
 			name: '',
-			password: ''
-		}))
-	},[])
+			password: '',
+		}));
+	}, []);
 
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
@@ -114,146 +114,145 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const handleSingIn = async () => {
 		const dates = datesSingIn;
-		if(!signInPassword){
-			dates.password = ''
-		};
-		const response = await User(datesSingIn)
+		if (!signInPassword) {
+			dates.password = '';
+		}
+		const response = await User(datesSingIn);
 		switch (response && response.status) {
 			case 200:
-				if(response.token){
+				if (response.token) {
 					setDatesSingIn(() => ({
-						user:"",
+						user: '',
 						name: '',
-						password:""
-					}))
+						password: '',
+					}));
 					setToken(response.token);
 					handleOnClick();
-					return
-				};
+					return;
+				}
 				setDatesSingIn((prevState: SingInProps) => ({
 					...prevState,
-					name: response.name
-				}))
-				setSignInPassword(true)
+					name: response.name,
+				}));
+				setSignInPassword(true);
 				break;
 			default:
 				setIsAccessInvalid(true);
-				setTimeout(() => {	
+				setTimeout(() => {
 					setIsAccessInvalid(false);
 				}, 5000);
 				break;
-		};
-		return
+		}
+		return;
 	};
 
-	const handleSingUp = async (e:any) => {
-		try{
+	const handleSingUp = async (e: any) => {
+		try {
 			e.preventDefault();
-			setIsLoading(true)
-			const checkUp =  AuthSingUp(datesSingUp);
-			if(!checkUp.isValid){
-				const errorMessages = Object.values(checkUp.errors).join('\n'); 
-				setTextInvalid(errorMessages); 
+			setIsLoading(true);
+			const checkUp = AuthSingUp(datesSingUp);
+			if (!checkUp.isValid) {
+				const errorMessages = Object.values(checkUp.errors).join('\n');
+				setTextInvalid(errorMessages);
 				setIsRegisterInvalid(true);
-				setTimeout(() => {	
+				setTimeout(() => {
 					setIsRegisterInvalid(false);
 				}, 5000);
-				return
-			};
-			const company = await Cnpj(datesSingUp.cnpj)
+				return;
+			}
+			const company = await Cnpj(datesSingUp.cnpj);
 			switch (company.status) {
 				case 400:
-					setTextInvalid('CNPJ não encontrado.'); 
+					setTextInvalid('CNPJ não encontrado.');
 					setIsRegisterInvalid(true);
-					setTimeout(() => {	
+					setTimeout(() => {
 						setIsRegisterInvalid(false);
 					}, 5000);
 					break;
-			
+
 				default:
 					break;
-			};
+			}
 			const paramsCreateAccount = {
 				CNPJ: datesSingUp.cnpj,
 				type_account: isCompany ? 'company' : 'client',
 				user: datesSingUp.user,
-				email : datesSingUp.email,
+				email: datesSingUp.email,
 				password: datesSingUp.password,
 				company_name: company.company.name,
-				state_registration:datesSingUp.state_registration,
-				municipal_registration:datesSingUp.municipal_registration,
-				responsible:datesSingUp.name,
-				phone:datesSingUp.phone,
-				zip_code:company.address.zip,
-				city:company.address.city,
-				street:company.address.street,
-				uf:company.address.state,
-				district:company.address.district,
-				number:company.address.number
+				state_registration: datesSingUp.state_registration,
+				municipal_registration: datesSingUp.municipal_registration,
+				responsible: datesSingUp.name,
+				phone: datesSingUp.phone,
+				zip_code: company.address.zip,
+				city: company.address.city,
+				street: company.address.street,
+				uf: company.address.state,
+				district: company.address.district,
+				number: company.address.number,
 			};
 			let response = await Company(paramsCreateAccount);
 			switch (response.status) {
 				case 201:
 					setToken(response.token);
 					handleOnClick();
-					return
+					return;
 				case 409:
-					setTextInvalid(response.message); 
+					setTextInvalid(response.message);
 					setIsRegisterInvalid(true);
-					setTimeout(() => {	
+					setTimeout(() => {
 						setIsRegisterInvalid(false);
 					}, 5000);
 					return;
 				case 500:
-					setTextInvalid(response.message); 
+					setTextInvalid(response.message);
 					setIsRegisterInvalid(true);
-					setTimeout(() => {	
+					setTimeout(() => {
 						setIsRegisterInvalid(false);
 					}, 5000);
 					return;
 				default:
-					setTextInvalid('Algo deu errado, tente novamente!'); 
+					setTextInvalid('Algo deu errado, tente novamente!');
 					setIsRegisterInvalid(true);
-					setTimeout(() => {	
+					setTimeout(() => {
 						setIsRegisterInvalid(false);
 					}, 5000);
 					return;
-			};
-		}catch(e){
-			setTextInvalid('Algo deu errado, tente novamente.'); 
+			}
+		} catch (e) {
+			setTextInvalid('Algo deu errado, tente novamente.');
 			setIsRegisterInvalid(true);
-			setTimeout(() => {	
+			setTimeout(() => {
 				setIsRegisterInvalid(false);
 			}, 5000);
-		}finally{
-			setIsLoading(false)
+		} finally {
+			setIsLoading(false);
 		}
-		
 	};
 
 	const handleMouseEnterAccountClient = () => {
-		setIsCardTypeAccountClient(!isCardTypeAccountClient)
+		setIsCardTypeAccountClient(!isCardTypeAccountClient);
 	};
 
 	const handleMouseEnterAccountCompany = () => {
-		setIsCardTypeAccountCompany(!isCardTypeAccountCompany)
+		setIsCardTypeAccountCompany(!isCardTypeAccountCompany);
 	};
 
-	const handleSelectAccount = (type:string) =>{
+	const handleSelectAccount = (type: string) => {
 		setDatesSingUp((prevState: SingUpProps) => ({
 			...prevState,
-			hasType: true
+			hasType: true,
 		}));
 		switch (type) {
 			case 'client':
-				setIsClient(true)
-				setIsCompany(false)
+				setIsClient(true);
+				setIsCompany(false);
 				break;
 			case 'company':
-				setIsCompany(true)
-				setIsClient(false)	
+				setIsCompany(true);
+				setIsClient(false);
 				break;
-		};
+		}
 	};
 
 	return (
@@ -262,48 +261,38 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			title={singUpStatus ? 'Sign Up' : 'Login'}
 			className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}>
 			<Page className='p-0'>
-				{ isAccessInvalid &&
-					<div className='col-md-5 col-lg-3 col-sm-8 position-fixed mt-5' style={{left:5, zIndex:10}}>
-						<Alert
-							icon='Dangerous'
-							color='danger'
-							isLight={true}
-							shadow={'md'}
-						>
-							<AlertHeading
-								tag={'h4'}
-							>
-								Acesso incorreto
-							</AlertHeading>
+				{isAccessInvalid && (
+					<div
+						className='col-md-5 col-lg-3 col-sm-8 position-fixed mt-5'
+						style={{ left: 5, zIndex: 10 }}>
+						<Alert icon='Dangerous' color='danger' isLight={true} shadow={'md'}>
+							<AlertHeading tag={'h4'}>Acesso incorreto</AlertHeading>
 							<p>Algo deu errado, tente novamente!</p>
 						</Alert>
 					</div>
-				}
-				{ isRegisterInvalid &&
-					<div className='col-md-5 col-lg-3 col-sm-8 position-fixed mt-5' style={{left:5, zIndex:10}}>
-						<Alert
-							icon='Warning'
-							color='warning'
-							isLight={true}
-							shadow={'md'}
-						>
-							<AlertHeading
-								tag={'h4'}
-							>
-								Registro incompleto
-							</AlertHeading>
+				)}
+				{isRegisterInvalid && (
+					<div
+						className='col-md-5 col-lg-3 col-sm-8 position-fixed mt-5'
+						style={{ left: 5, zIndex: 10 }}>
+						<Alert icon='Warning' color='warning' isLight={true} shadow={'md'}>
+							<AlertHeading tag={'h4'}>Registro incompleto</AlertHeading>
 							<p style={{ whiteSpace: 'pre-line' }}>{textInvalid}</p>
 						</Alert>
 					</div>
-				}
+				)}
 				<div className='row h-100 align-items-center justify-content-center mt-5'>
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
 							<CardBody>
 								<div className='row items-center justify-content-center'>
-									<img 
+									<img
 										src={darkModeStatus ? LogoDark : Logo}
-										style={{height:'50%', width:'50%', objectFit: 'contain'}}
+										style={{
+											height: '50%',
+											width: '50%',
+											objectFit: 'contain',
+										}}
 									/>
 								</div>
 								<div
@@ -355,67 +344,87 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</Alert> */}
 								<div className='row g-4'>
 									{singUpStatus ? (
-										<form className='row g-4' onSubmit={(e)=>handleSingUp(e)}>
+										<form className='row g-4' onSubmit={(e) => handleSingUp(e)}>
 											<div className='col-12'>
-												<FormGroup
-													isFloating
-													label='CNPJ'
-												>
-													<Input mask="99.999.999/9999-99" placeholder='' value={datesSingUp.cnpj} required 
+												<FormGroup isFloating label='CNPJ'>
+													<Input
+														mask='99.999.999/9999-99'
+														placeholder=''
+														value={datesSingUp.cnpj}
+														required
 														onChange={(e: any) => {
-															const rawCnpj = e.target.value.replace(/[^\d]/g, ''); // Remove tudo que não é número
-															setDatesSingUp((prevState: SingUpProps) => ({
-																...prevState,
-																cnpj: rawCnpj,
-															}));
+															const rawCnpj = e.target.value.replace(
+																/[^\d]/g,
+																'',
+															); // Remove tudo que não é número
+															setDatesSingUp(
+																(prevState: SingUpProps) => ({
+																	...prevState,
+																	cnpj: rawCnpj,
+																}),
+															);
 														}}
 													/>
 												</FormGroup>
 											</div>
 											<div className='col-12'>
-												<FormGroup
-													isFloating
-													label='Inscrição Estadual'
-												>
-													<Input placeholder='' value={datesSingUp.state_registration} required 
+												<FormGroup isFloating label='Inscrição Estadual'>
+													<Input
+														placeholder=''
+														value={datesSingUp.state_registration}
+														required
 														onChange={(e: any) => {
-															const rawState = e.target.value.replace(/[^\d]/g, ''); // Remove tudo que não é número
-															setDatesSingUp((prevState: SingUpProps) => ({
-																...prevState,
-																state_registration: rawState,
-															}));
+															const rawState = e.target.value.replace(
+																/[^\d]/g,
+																'',
+															); // Remove tudo que não é número
+															setDatesSingUp(
+																(prevState: SingUpProps) => ({
+																	...prevState,
+																	state_registration: rawState,
+																}),
+															);
 														}}
 													/>
 												</FormGroup>
 											</div>
 											<div className='col-12'>
-												<FormGroup
-													isFloating
-													label='Inscrição Municipal'
-													
-												>
-													<Input placeholder='' value={datesSingUp.municipal_registration} required 
+												<FormGroup isFloating label='Inscrição Municipal'>
+													<Input
+														placeholder=''
+														value={datesSingUp.municipal_registration}
+														required
 														onChange={(e: any) => {
-															const rawMunicipal = e.target.value.replace(/[^\d]/g, ''); // Remove tudo que não é número
-															setDatesSingUp((prevState: SingUpProps) => ({
-																...prevState,
-																municipal_registration: rawMunicipal,
-															}));
+															const rawMunicipal =
+																e.target.value.replace(
+																	/[^\d]/g,
+																	'',
+																); // Remove tudo que não é número
+															setDatesSingUp(
+																(prevState: SingUpProps) => ({
+																	...prevState,
+																	municipal_registration:
+																		rawMunicipal,
+																}),
+															);
 														}}
 													/>
 												</FormGroup>
 											</div>
 											<div className='col-12'>
-												<FormGroup
-													isFloating
-													label='Seu nome'>
-													<Input className='text-capitalize' value={datesSingUp.name} placeholder='' required 
-														onChange={
-															(e:any)=>
-																setDatesSingUp((prevState: SingUpProps) => ({
-																...prevState,
-																name: e.target.value,
-															}))
+												<FormGroup isFloating label='Seu nome'>
+													<Input
+														className='text-capitalize'
+														value={datesSingUp.name}
+														placeholder=''
+														required
+														onChange={(e: any) =>
+															setDatesSingUp(
+																(prevState: SingUpProps) => ({
+																	...prevState,
+																	name: e.target.value,
+																}),
+															)
 														}
 													/>
 												</FormGroup>
@@ -425,28 +434,39 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													id='signup-phone'
 													isFloating
 													label='Seu celular'>
-													<Input mask="(99) 9 9999-9999" autoComplete='family-name' value={datesSingUp.phone} required 
+													<Input
+														mask='(99) 9 9999-9999'
+														autoComplete='family-name'
+														value={datesSingUp.phone}
+														required
 														onChange={(e: any) => {
-															const rawPhone = e.target.value.replace(/[^\d]/g, ''); // Remove tudo que não é número
-															setDatesSingUp((prevState: SingUpProps) => ({
-																...prevState,
-																phone: rawPhone,
-															}));
+															const rawPhone = e.target.value.replace(
+																/[^\d]/g,
+																'',
+															); // Remove tudo que não é número
+															setDatesSingUp(
+																(prevState: SingUpProps) => ({
+																	...prevState,
+																	phone: rawPhone,
+																}),
+															);
 														}}
 													/>
 												</FormGroup>
 											</div>
 											<div className='col-12'>
-												<FormGroup
-													isFloating
-													label='Seu email'>
-													<Input value={datesSingUp.email} placeholder='' required 
-														onChange={
-															(e:any)=>
-																setDatesSingUp((prevState: SingUpProps) => ({
-																...prevState,
-																email: e.target.value,
-															}))
+												<FormGroup isFloating label='Seu email'>
+													<Input
+														value={datesSingUp.email}
+														placeholder=''
+														required
+														onChange={(e: any) =>
+															setDatesSingUp(
+																(prevState: SingUpProps) => ({
+																	...prevState,
+																	email: e.target.value,
+																}),
+															)
 														}
 													/>
 												</FormGroup>
@@ -462,12 +482,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														className='text-lowercase'
 														value={datesSingUp.user}
 														required
-														onChange={
-															(e:any)=>
-																setDatesSingUp((prevState: SingUpProps) => ({
-																...prevState,
-																user: e.target.value,
-															}))
+														onChange={(e: any) =>
+															setDatesSingUp(
+																(prevState: SingUpProps) => ({
+																	...prevState,
+																	user: e.target.value,
+																}),
+															)
 														}
 													/>
 												</FormGroup>
@@ -482,12 +503,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														type='password'
 														autoComplete='Senha'
 														required
-														onChange={
-															(e:any)=>
-																setDatesSingUp((prevState: SingUpProps) => ({
-																...prevState,
-																password: e.target.value,
-															}))
+														onChange={(e: any) =>
+															setDatesSingUp(
+																(prevState: SingUpProps) => ({
+																	...prevState,
+																	password: e.target.value,
+																}),
+															)
 														}
 													/>
 												</FormGroup>
@@ -497,52 +519,77 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Selecione o Tipo de Conta:
 												</h4>
 												<div className='row justify-content-around'>
-													<Button 
-														onMouseEnter={handleMouseEnterAccountCompany}
-														onMouseLeave={handleMouseEnterAccountCompany}
-														style={{height:'150px'}}
-														onClick={()=>handleSelectAccount('company')}
+													<Button
+														onMouseEnter={
+															handleMouseEnterAccountCompany
+														}
+														onMouseLeave={
+															handleMouseEnterAccountCompany
+														}
+														style={{ height: '150px' }}
+														onClick={() =>
+															handleSelectAccount('company')
+														}
 														className={classNames(
 															{
-																'bg-white': !isCardTypeAccountCompany,
-																'bg-dark'    : isCardTypeAccountCompany,
+																'bg-white':
+																	!isCardTypeAccountCompany,
+																'bg-dark': isCardTypeAccountCompany,
 															},
 															`rounded p-1 col-5 ${isCompany && 'border-2 border-dark'}`,
-														)}
-													>
-														{ !isCardTypeAccountCompany ?
-															<Icon icon='CustomFactory' size='7x' color={'dark'} />
-															:
+														)}>
+														{!isCardTypeAccountCompany ? (
+															<Icon
+																icon='CustomFactory'
+																size='7x'
+																color={'dark'}
+															/>
+														) : (
 															<div className='text-white'>
 																<p>
-																	Solução Ideal para Gestão de Múltiplas Empresas
+																	Solução Ideal para Gestão de
+																	Múltiplas Empresas
 																</p>
 															</div>
-														}
-														<h2 className={`text-dark ${isCardTypeAccountCompany && 'text-white'}`}>Company</h2>
+														)}
+														<h2
+															className={`text-dark ${isCardTypeAccountCompany && 'text-white'}`}>
+															Company
+														</h2>
 													</Button>
-													<Button 
+													<Button
 														onMouseEnter={handleMouseEnterAccountClient}
 														onMouseLeave={handleMouseEnterAccountClient}
-														style={{height:'150px'}}
-														onClick={()=>handleSelectAccount('client')}
+														style={{ height: '150px' }}
+														onClick={() =>
+															handleSelectAccount('client')
+														}
 														className={classNames(
 															`rounded p-1 col-5 ${isClient && 'border-2 border-dark '}`,
 															{
-															'bg-white': !isCardTypeAccountClient,
-															'bg-dark' : isCardTypeAccountClient,
-														})}
-													>
-														{ !isCardTypeAccountClient ?
-															<Icon icon='Maps Home Work' size='7x' color='dark' />
-															:
+																'bg-white':
+																	!isCardTypeAccountClient,
+																'bg-dark': isCardTypeAccountClient,
+															},
+														)}>
+														{!isCardTypeAccountClient ? (
+															<Icon
+																icon='Maps Home Work'
+																size='7x'
+																color='dark'
+															/>
+														) : (
 															<div className='text-white'>
 																<p>
-																	Solução Perfeita para Empresas Conectadas ou Independentes
+																	Solução Perfeita para Empresas
+																	Conectadas ou Independentes
 																</p>
 															</div>
-														}
-														<h2 className={`text-dark ${isCardTypeAccountClient && 'text-white'}`}>Client</h2>
+														)}
+														<h2
+															className={`text-dark ${isCardTypeAccountClient && 'text-white'}`}>
+															Client
+														</h2>
 													</Button>
 												</div>
 											</div>
@@ -550,8 +597,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												<Button
 													color='warning'
 													className='w-100 py-3'
-													type={ 'submit' }	
-													>
+													type={'submit'}>
 													{isLoading && (
 														<Spinner isSmall inButton isGrow />
 													)}
@@ -573,39 +619,40 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<Input
 														autoComplete='username'
 														value={datesSingIn.user}
-														onChange={
-															(e:any)=>
-																setDatesSingIn((prevState: SingInProps) => ({
-																...prevState,
-																user: e.target.value,
-															}))
+														onChange={(e: any) =>
+															setDatesSingIn(
+																(prevState: SingInProps) => ({
+																	...prevState,
+																	user: e.target.value,
+																}),
+															)
 														}
 													/>
 												</FormGroup>
 												{signInPassword && (
 													<div className='text-center h4 mb-3 fw-bold text-capitalize'>
-														Oi, {Mask('firstName',datesSingIn.name)}.
+														Oi, {Mask('firstName', datesSingIn.name)}.
 													</div>
 												)}
-												<FormGroup
-													id='loginPassword'
-													isFloating
-													label='Senha'
-													className={classNames({
-														'd-none': !signInPassword,
-													})}>
-													<Input
-														type='password'
-														value={datesSingIn.password}
-														onChange={
-															(e:any)=>
-																setDatesSingIn((prevState: SingInProps) => ({
-																...prevState,
-																password: e.target.value,
-															}))
-														}
-													/>
-												</FormGroup>
+												{signInPassword && (
+													<FormGroup
+														id='loginPassword'
+														isFloating
+														label='Senha'>
+														<Input
+															type='password'
+															value={datesSingIn.password}
+															onChange={(e: any) =>
+																setDatesSingIn(
+																	(prevState: SingInProps) => ({
+																		...prevState,
+																		password: e.target.value,
+																	}),
+																)
+															}
+														/>
+													</FormGroup>
+												)}
 											</div>
 											<div className='col-12'>
 												{!signInPassword || datesSingIn.password === '' ? (
