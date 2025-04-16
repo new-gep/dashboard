@@ -596,7 +596,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													})}>
 													<Input
 														type='password'
-														autoComplete='current-password'
 														value={datesSingIn.password}
 														onChange={
 															(e:any)=>
