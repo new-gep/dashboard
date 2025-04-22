@@ -10,13 +10,12 @@ import { AuthContextProvider } from './contexts/authContext';
 import './i18n';
 
 const children = (
-	
 	<Router>
 		<AuthContextProvider>
 			<ThemeContextProvider>
-					<React.StrictMode>
-						<App />
-					</React.StrictMode>
+				<React.StrictMode>
+					<App />
+				</React.StrictMode>
 			</ThemeContextProvider>
 		</AuthContextProvider>
 	</Router>

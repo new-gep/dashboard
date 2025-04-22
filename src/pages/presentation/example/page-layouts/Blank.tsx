@@ -12,8 +12,7 @@ const Blank = () => {
 				<div className='row d-flex align-items-center h-100'>
 					<div
 						className='col-12 d-flex justify-content-center'
-						style={{ fontSize: 'calc(3rem + 3vw)' }}
-					>
+						style={{ fontSize: 'calc(3rem + 3vw)' }}>
 						<p>Blank</p>
 					</div>
 					<div className='col-12 d-flex align-items-baseline justify-content-center'>

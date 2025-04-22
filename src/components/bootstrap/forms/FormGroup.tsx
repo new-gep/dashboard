@@ -46,16 +46,17 @@ const FormGroup: FC<IFormGroupProps> = ({
 		</Label>
 	);
 
-	const CHILDREN = id && !Array.isArray(children)
-		? cloneElement(children, {
-			id,
-			size: size || children?.props.size,
-			placeholder: isFloating ? label : children.props.placeholder,
-			'aria-describedby': formText ? `${id}-text` : null,
-			mask: children?.props.mask || undefined, // Passa a máscara se estiver usando InputMask
-			alwaysShowMask: children?.props.alwaysShowMask || false, // Caso esteja configurado no InputMask
-		})
-		: children;
+	const CHILDREN =
+		id && !Array.isArray(children)
+			? cloneElement(children, {
+					id,
+					size: size || children?.props.size,
+					placeholder: isFloating ? label : children.props.placeholder,
+					'aria-describedby': formText ? `${id}-text` : null,
+					mask: children?.props.mask || undefined, // Passa a máscara se estiver usando InputMask
+					alwaysShowMask: children?.props.alwaysShowMask || false, // Caso esteja configurado no InputMask
+				})
+			: children;
 
 	const FORM_TEXT = formText && <FormText id={`${id}-text`}>{formText}</FormText>;
 

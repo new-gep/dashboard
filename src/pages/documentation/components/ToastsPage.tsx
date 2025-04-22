@@ -589,7 +589,7 @@ import { toast } from 'react-toastify';`;
 														time='Just now'>
 														Hello, world! This is a toast message.
 													</Toasts>,
-													{ autoClose: 5000 },
+													{ autoClose: 1000 },
 												)
 											}>
 											autoDismiss value is null (5000)

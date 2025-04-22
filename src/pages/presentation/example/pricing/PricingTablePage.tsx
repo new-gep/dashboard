@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import PageWrapper from '../../../../layout/PageWrapper/PageWrapper';
-import SubHeader, { SubHeaderLeft, SubheaderSeparator } from '../../../../layout/SubHeader/SubHeader';
+import SubHeader, {
+	SubHeaderLeft,
+	SubheaderSeparator,
+} from '../../../../layout/SubHeader/SubHeader';
 import Page from '../../../../layout/Page/Page';
 import { demoPagesMenu } from '../../../../menu';
 import Card, { CardBody, CardHeader } from '../../../../components/bootstrap/Card';

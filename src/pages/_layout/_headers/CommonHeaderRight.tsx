@@ -1,7 +1,6 @@
-import React, { FC, ReactNode, useContext, useLayoutEffect, useState } from 'react';
+import React, { FC, ReactNode, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import classNames from 'classnames';
 import { useTour } from '@reactour/tour';
 import Button, { IButtonProps } from '../../../components/bootstrap/Button';
 import { HeaderRight } from '../../../layout/Header/Header';
@@ -11,18 +10,11 @@ import OffCanvas, {
 	OffCanvasTitle,
 } from '../../../components/bootstrap/OffCanvas';
 import Alert from '../../../components/bootstrap/Alert';
-import Dropdown, {
-	DropdownItem,
-	DropdownMenu,
-	DropdownToggle,
-} from '../../../components/bootstrap/Dropdown';
+
 import Icon from '../../../components/icon/Icon';
 import ThemeContext from '../../../contexts/themeContext';
-import LANG, { getLangWithKey, ILang } from '../../../lang';
-import showNotification from '../../../components/extras/showNotification';
 import useDarkMode from '../../../hooks/useDarkMode';
 import Popovers from '../../../components/bootstrap/Popovers';
-import Spinner from '../../../components/bootstrap/Spinner';
 
 interface ICommonHeaderRightProps {
 	beforeChildren?: ReactNode;

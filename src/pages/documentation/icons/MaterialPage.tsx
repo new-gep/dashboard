@@ -25,7 +25,7 @@ const MaterialPage = () => {
 		onSubmit: () => {},
 	});
 	const FILTERED_ICONS = MaterialIcons.filter((name) =>
-		name.toLowerCase().includes(formik.values.filterIcon.toLowerCase())
+		name.toLowerCase().includes(formik.values.filterIcon.toLowerCase()),
 	);
 	return (
 		<PageWrapper title={componentPagesMenu.icons.subMenu.material.text}>

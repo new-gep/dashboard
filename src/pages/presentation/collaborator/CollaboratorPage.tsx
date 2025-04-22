@@ -7,7 +7,6 @@ import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
 import USERS from '../../../common/data/userDummyData';
-import Badge from '../../../components/bootstrap/Badge';
 import Button from '../../../components/bootstrap/Button';
 import Dropdown, { DropdownMenu, DropdownToggle } from '../../../components/bootstrap/Dropdown';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
@@ -15,18 +14,17 @@ import Label from '../../../components/bootstrap/forms/Label';
 import Input from '../../../components/bootstrap/forms/Input';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
 import SERVICES from '../../../common/data/serviceDummyData';
-import { demoPagesMenu, secondaryPath } from '../../../menu';
+import { demoPagesMenu } from '../../../menu';
 import useTourStep from '../../../hooks/useTourStep';
 import JobCollaboratorCompany from '../../../api/get/job/Job_Collaborator_Company';
 import AuthContext from '../../../contexts/authContext';
 import Mask from '../../../function/Mask';
 
-
 const CollaboratorList = () => {
-    useTourStep(18);
-    const { userData } = useContext(AuthContext);
+	useTourStep(18);
+	const { userData } = useContext(AuthContext);
 	const [filterMenu, setFilterMenu] = useState(false);
-    const [loader, setLoader] = useState<boolean>(true);
+	const [loader, setLoader] = useState<boolean>(true);
 	const [collaboratorCompany, setCollaboratorCompany] = useState<any>(null);
 
 	const formik = useFormik({
@@ -42,24 +40,22 @@ const CollaboratorList = () => {
 		},
 	});
 
-    useEffect(() => {
+	useEffect(() => {
 		const fetchData = async () => {
-			const response = await JobCollaboratorCompany(userData.cnpj)
-			if(!response || response.status !== 200){
-				setLoader(false)
+			const response = await JobCollaboratorCompany(userData.cnpj);
+			if (!response || response.status !== 200) {
+				setLoader(false);
 				return;
 			}
-			setCollaboratorCompany(response.collaborator)
+			setCollaboratorCompany(response.collaborator);
 			setTimeout(() => {
-				setLoader(false)
+				setLoader(false);
 			}, 2000);
-	
 		};
-		if(userData){
-            fetchData()
-        };
-    }, [userData]);
-
+		if (userData) {
+			fetchData();
+		}
+	}, [userData]);
 
 	return (
 		<PageWrapper title={demoPagesMenu.appointment.subMenu.employeeList.text}>
@@ -170,11 +166,11 @@ const CollaboratorList = () => {
 				</SubHeaderRight>
 			</SubHeader>
 
-			{ loader?
+			{loader ? (
 				<div className='p-5'>
 					<h1>🔍 Buscando Colaboradores</h1>
 				</div>
-				:
+			) : (
 				<Page container='fluid'>
 					<div className='row row-cols-xxl-3 row-cols-lg-3 row-cols-md-2'>
 						{/* {searchUsers.map((user) => (
@@ -271,81 +267,96 @@ const CollaboratorList = () => {
 								</Card>
 							</div>
 						))} */}
-						{ Array.isArray(collaboratorCompany) && collaboratorCompany.length > 0 ?
-						collaboratorCompany.map((job) => {
-							console.log('teste',job)
-							if(job.status != 200){
-								console.log('aquii',job)
-								return
-							}
-							return(
-								<div key={job.collaborator.id} className='col'>
-									<Card key={job.collaborator.id}>
-										<CardBody key={job.collaborator.id}>
-											<div className='row g-3'>
-												<div className='col d-flex'>
-													<div className='flex-shrink-0'>
-														<div className='position-relative'>
-															<div
-																className='ratio ratio-1x1'
-																style={{ width: 100 }}>
+						{Array.isArray(collaboratorCompany) && collaboratorCompany.length > 0 ? (
+							collaboratorCompany.map((job) => {
+								console.log('teste', job);
+								if (job.status != 200) {
+									console.log('aquii', job);
+									return;
+								}
+								return (
+									<div key={job.collaborator.id} className='col'>
+										<Card key={job.collaborator.id}>
+											<CardBody key={job.collaborator.id}>
+												<div className='row g-3'>
+													<div className='col d-flex'>
+														<div className='flex-shrink-0'>
+															<div className='position-relative'>
 																<div
-																	className={classNames(
-																		// `bg-l25-${user.color}`,
-																		'rounded-2',
-																		'd-flex align-items-center justify-content-center',
-																		'overflow-hidden',
-																		'shadow',
-																	)}>
-																	<img
-																		src={job.picture}
-																		alt={job.collaborator.name}
-																		width={100}
-																	/>
+																	className='ratio ratio-1x1'
+																	style={{ width: 100 }}>
+																	<div
+																		className={classNames(
+																			// `bg-l25-${user.color}`,
+																			'rounded-2',
+																			'd-flex align-items-center justify-content-center',
+																			'overflow-hidden',
+																			'shadow',
+																		)}>
+																		<img
+																			src={job.picture}
+																			alt={
+																				job.collaborator
+																					.name
+																			}
+																			width={100}
+																		/>
+																	</div>
 																</div>
-															</div>
-															{/* { (
+																{/* { (
 																<span className='position-absolute top-100 start-85 translate-middle badge border border-2 border-light rounded-circle bg-success p-2'>
 																	<span className='visually-hidden'>
 																		Online user
 																	</span>
 																</span>
 															)} */}
-														</div>
-													</div>
-													<div className='flex-grow-1 ms-3 d-flex justify-content-between'>
-														<div className='w-100'>
-															<div className='row'>
-																<div className='col'>
-																	<div className='d-flex flex-column gap-3 align-items-start'>
-																		<div className='fw-bold fs-5 me-2'>
-																			{/* {`${user.name} ${user.surname}`} */}
-																			{ Mask( 'firstName' , job.collaborator.name)} {Mask( 'secondName' , job.collaborator.name) }
-																		</div>
-																		
-																		<small className={`border ${job.isDeleted ? 'border-danger text-danger' :'border-success text-success'} border-2 fw-bold px-2 py-1 rounded-1`}>
-																			{job.isDeleted ? 'Inativo' : 'Ativo'}
-																		</small>
-																	</div>
-
-																	<div className='text-muted'>
-																		{/* @{job.function} */}
-																	</div>
-																</div>
-																<div className='col-auto'>
-																	<Button
-																		icon='Info'
-																		color='dark'
-																		isLight
-																		hoverShadow='sm'
-																		tag='a'
-																		to={`../collaborator/profile/${job.collaborator.CPF}`}
-																		// data-tour={user.name}
-																		aria-label='More info'
-																	/>
-																</div>
 															</div>
-															{/* {!!user?.services && (
+														</div>
+														<div className='flex-grow-1 ms-3 d-flex justify-content-between'>
+															<div className='w-100'>
+																<div className='row'>
+																	<div className='col'>
+																		<div className='d-flex flex-column gap-3 align-items-start'>
+																			<div className='fw-bold fs-5 me-2'>
+																				{/* {`${user.name} ${user.surname}`} */}
+																				{Mask(
+																					'firstName',
+																					job.collaborator
+																						.name,
+																				)}{' '}
+																				{Mask(
+																					'secondName',
+																					job.collaborator
+																						.name,
+																				)}
+																			</div>
+
+																			<small
+																				className={`border ${job.isDeleted ? 'border-danger text-danger' : 'border-success text-success'} border-2 fw-bold px-2 py-1 rounded-1`}>
+																				{job.isDeleted
+																					? 'Inativo'
+																					: 'Ativo'}
+																			</small>
+																		</div>
+
+																		<div className='text-muted'>
+																			{/* @{job.function} */}
+																		</div>
+																	</div>
+																	<div className='col-auto'>
+																		<Button
+																			icon='Info'
+																			color='dark'
+																			isLight
+																			hoverShadow='sm'
+																			tag='a'
+																			to={`../collaborator/profile/${job.collaborator.CPF}`}
+																			// data-tour={user.name}
+																			aria-label='More info'
+																		/>
+																	</div>
+																</div>
+																{/* {!!user?.services && (
 																<div className='row g-2 mt-3'>
 																	{user?.services.map((service) => (
 																		<div
@@ -366,23 +377,23 @@ const CollaboratorList = () => {
 																	))}
 																</div>
 															)} */}
+															</div>
 														</div>
 													</div>
 												</div>
-											</div>
-										</CardBody>
-									</Card>
-								</div>
-							)
-						})
-						:
-						<div className='p-5 w-full'>
-							<h1>Nenhum colaborador encontrado</h1>
-						</div>
-						}
+											</CardBody>
+										</Card>
+									</div>
+								);
+							})
+						) : (
+							<div className='p-5 w-full'>
+								<h1>Nenhum colaborador encontrado</h1>
+							</div>
+						)}
 					</div>
 				</Page>
-			}
+			)}
 		</PageWrapper>
 	);
 };

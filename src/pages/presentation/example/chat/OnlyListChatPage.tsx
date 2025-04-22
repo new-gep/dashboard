@@ -19,7 +19,10 @@ import Card, {
 } from '../../../../components/bootstrap/Card';
 import Chat, { ChatGroup, ChatHeader, ChatListItem } from '../../../../components/Chat';
 import USERS, { IUserProps } from '../../../../common/data/userDummyData';
-import OffCanvas, { OffCanvasBody, OffCanvasHeader } from '../../../../components/bootstrap/OffCanvas';
+import OffCanvas, {
+	OffCanvasBody,
+	OffCanvasHeader,
+} from '../../../../components/bootstrap/OffCanvas';
 import InputGroup from '../../../../components/bootstrap/forms/InputGroup';
 import Textarea from '../../../../components/bootstrap/forms/Textarea';
 import { demoPagesMenu } from '../../../../menu';

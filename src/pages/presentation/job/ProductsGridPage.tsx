@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import SubHeader, {
@@ -8,7 +9,6 @@ import SubHeader, {
 	SubheaderSeparator,
 } from '../../../layout/SubHeader/SubHeader';
 import Button from '../../../components/bootstrap/Button';
-import CommonGridJobItem from '../../_common/CommonGridJobItem';
 import tableData from '../../../common/data/dummyProductData';
 import OffCanvas, {
 	OffCanvasBody,
@@ -33,37 +33,35 @@ import Option from '../../../components/bootstrap/Option';
 import Textarea from '../../../components/bootstrap/forms/Textarea';
 import AuthContext from '../../../contexts/authContext';
 import Job from '../../../api/post/Job';
-import Mask from '../../../function/Mask';
 import Toasts from '../../../components/bootstrap/Toasts';
-import { toast } from 'react-toastify';
 // Defina as chaves possíveis do objeto AbstractPicture
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 
 interface IValues {
-	image:string;
+	image: string;
 	function: string;
-	salary  : any;
-	time    : any;
-	journey : string;
-	contract: string
+	salary: any;
+	time: any;
+	journey: string;
+	contract: string;
 	benefits: string;
-	details : string;
-	obligations : string;
-};
+	details: string;
+	obligations: string;
+}
 
 interface Ijob {
-	user_create ?: any;
-	image:string;
+	user_create?: any;
+	image: string;
 	function: string;
-	salary  : any;
-	time    : any;
-	journey : string;
-	contract: string
+	salary: any;
+	time: any;
+	journey: string;
+	contract: string;
 	benefits: string;
-	details : string;
-	obligations : string;
+	details: string;
+	obligations: string;
 	CNPJ_company?: string;
-};
+}
 
 const validate = (values: IValues) => {
 	const errors: any = {};
@@ -76,15 +74,12 @@ const validate = (values: IValues) => {
 		errors.salary = 'Salário é obrigatório';
 	}
 	if (!values.time || values.time <= 0) {
-
 		errors.time = 'Horas semanais são obrigatórias';
 	} else if (values.time.length < 1) {
-
-        errors.time = 'Horário mínimo é 1 digito';
+		errors.time = 'Horário mínimo é 1 digito';
 	} else if (values.time.length > 3) {
-
-        errors.time = 'Horário máximo é 3 digitos';
-    }
+		errors.time = 'Horário máximo é 3 digitos';
+	}
 	if (!values.journey) {
 		errors.journey = 'Jornada é obrigatória';
 	}
@@ -97,11 +92,10 @@ const validate = (values: IValues) => {
 	return errors;
 };
 
-
 const ProductsGridPage = () => {
 	const { userData } = useContext(AuthContext);
 	const [data, setData] = useState(tableData);
-	const [editItem,  setEditItem] = useState<IValues | null>(null);
+	const [editItem, setEditItem] = useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = useState<boolean>(false);
 	const [imageFile, setImageFile] = useState<any>(null);
 	const [nameImage, setNameImage] = useState<string>('');
@@ -110,21 +104,21 @@ const ProductsGridPage = () => {
 		setImageFile(null);
 		const file = e.target.files ? e.target.files[0] : null;
 		if (file) {
-		  const imageUrl = URL.createObjectURL(file); // Cria uma URL temporária
-		  setImageFile(imageUrl); // Atualiza o estado com a URL da imagem
+			const imageUrl = URL.createObjectURL(file); // Cria uma URL temporária
+			setImageFile(imageUrl); // Atualiza o estado com a URL da imagem
 		}
 	};
 
 	const getRandomImage = () => {
 		const keys = Object.keys(AbstractPicture) as Array<keyof typeof AbstractPicture>; // Defina o tipo correto das chaves
 		const randomKey = keys[Math.floor(Math.random() * keys.length)]; // Escolhe uma chave aleatória
-		console.log(randomKey)
-		setNameImage(randomKey)
+		console.log(randomKey);
+		setNameImage(randomKey);
 		return AbstractPicture[randomKey]; // Retorna a imagem correspondente à chave aleatória
 	};
 
-	const createJob = async (job:Ijob) => {
-		job.user_create  = userData.id;
+	const createJob = async (job: Ijob) => {
+		job.user_create = userData.id;
 		job.CNPJ_company = userData.cnpj;
 		// job.time = JSON.stringify({
 		// 	time: job.time,
@@ -135,55 +129,49 @@ const ProductsGridPage = () => {
 			case 201:
 				toast(
 					<Toasts
-						icon={ 'Work' }
-						iconColor={ 'success' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Successo'}
-						
-						>
-						Vaga criada com sucesso! 
+						icon='Work'
+						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Successo'>
+						Vaga criada com sucesso!
 					</Toasts>,
 					{
-						closeButton: true ,
-						autoClose: 3000 // Examples: 1000, 3000, ...
-					}
-				)
+						closeButton: true,
+						autoClose: 1000, // Examples: 1000, 3000, ...
+					},
+				);
 				setEditPanel(false);
 				break;
 			case 500:
 				toast(
 					<Toasts
-						icon={ 'Work' }
-						iconColor={ 'warning' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Erro'}
-						
-						>
-						Algo deu errado, tente novamente! 
+						icon='Work'
+						iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Erro'>
+						Algo deu errado, tente novamente!
 					</Toasts>,
 					{
-						closeButton: true ,
-						autoClose: 3000 // Examples: 1000, 3000, ...
-					}
-				)
+						closeButton: true,
+						autoClose: 1000, // Examples: 1000, 3000, ...
+					},
+				);
 				break;
 			default:
 				toast(
 					<Toasts
-						icon={ 'Work' }
-						iconColor={ 'danger' } // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={ 'Erro Desconhecido'}
-						
-						>
-						Algo deu errado, tente novamente! 
+						icon='Work'
+						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Erro Desconhecido'>
+						Algo deu errado, tente novamente!
 					</Toasts>,
 					{
-						closeButton: true ,
-						autoClose: 3000 // Examples: 1000, 3000, ...
-					}
-				)
+						closeButton: true,
+						autoClose: 1000, // Examples: 1000, 3000, ...
+					},
+				);
 				break;
 		}
 	};
-	  
+
 	const handleRemove = (id: number) => {
 		const newData = data.filter((item) => item.id !== id);
 		setData(newData);
@@ -192,17 +180,17 @@ const ProductsGridPage = () => {
 	const formik = useFormik({
 		initialValues: {
 			function: '',
-			salary  : '',
-			time    : '',
-			journey : '',
+			salary: '',
+			time: '',
+			journey: '',
 			contract: '',
 			benefits: '',
-			details : '',
-			obligations : '',
-			image: ''
+			details: '',
+			obligations: '',
+			image: '',
 		},
 		validate,
-		onSubmit: (values, { resetForm }) => {  
+		onSubmit: (values, { resetForm }) => {
 			values.image = nameImage;
 			const job = values;
 			createJob(job);
@@ -214,7 +202,7 @@ const ProductsGridPage = () => {
 
 	useEffect(() => {
 		setImageFile(getRandomImage()); // Define uma imagem aleatória ao carregar o componente
-	  }, []);
+	}, []);
 
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.vaga.text}>
@@ -293,7 +281,9 @@ const ProductsGridPage = () => {
 					<Card>
 						<CardHeader>
 							<CardLabel icon='Photo' iconColor='info'>
-								<CardTitle>Imagem da Vaga <p className='fs-6 fw-semibold'>(aleatório)</p> </CardTitle>
+								<CardTitle>
+									Imagem da Vaga <p className='fs-6 fw-semibold'>(aleatório)</p>{' '}
+								</CardTitle>
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
@@ -367,7 +357,7 @@ const ProductsGridPage = () => {
 								</div>
 								<div className='col-12'>
 									<FormGroup id='salary' label='Salario' isFloating>
-										<Input									
+										<Input
 											onChange={formik.handleChange}
 											value={formik.values.salary}
 											onBlur={formik.handleBlur}
@@ -384,7 +374,6 @@ const ProductsGridPage = () => {
 											max={3}
 											min={1}
 											placeholder='Horas semanais'
-											
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
 											value={formik.values.time}
@@ -394,51 +383,51 @@ const ProductsGridPage = () => {
 											validFeedback='Ótimo!'
 										/>
 									</FormGroup>
-
 								</div>
 								<div className='col-12'>
 									<FormGroup id='journey'>
 										<Select
 											className='form-select fw-medium'
-											required={true} 
-											ariaLabel={''}
-											placeholder={'Jornada'}	
+											required
+											ariaLabel=''
+											placeholder='Jornada'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
 											value={formik.values.journey}
 											isValid={formik.isValid}
 											isTouched={formik.touched.journey}
 											invalidFeedback={formik.errors.journey}
-											validFeedback='Ótimo!'								
-										>
-											<option value={'5x2'}>5x2</option>
-											<option value={'6x1'}>6x1</option>
+											validFeedback='Ótimo!'>
+											<option value='5x2'>5x2</option>
+											<option value='6x1'>6x1</option>
 										</Select>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
 									<FormGroup id='contract'>
-										<Select 
+										<Select
 											className='form-select fw-medium'
-											required={true} 
-											ariaLabel={'Contratação'}
-											placeholder={'Contratação'}	
+											required
+											ariaLabel='Contratação'
+											placeholder='Contratação'
 											onChange={formik.handleChange}
 											onBlur={formik.handleBlur}
 											value={formik.values.contract}
 											isValid={formik.isValid}
 											isTouched={formik.touched.contract}
 											invalidFeedback={formik.errors.contract}
-											validFeedback='Ótimo!'	
-										>
-											<Option value={ 'clt' }>CLT</Option>
-											<Option value={ 'pj' }>PJ </Option>
-											<Option value={ 'contract' }>Contrato</Option>
+											validFeedback='Ótimo!'>
+											<Option value='clt'>CLT</Option>
+											<Option value='pj'>PJ </Option>
+											<Option value='contract'>Contrato</Option>
 										</Select>
 									</FormGroup>
-								</div>								
+								</div>
 								<div className='col-12'>
-									<FormGroup id='obligations' label='Obrigações (opcional)' isFloating>
+									<FormGroup
+										id='obligations'
+										label='Obrigações (opcional)'
+										isFloating>
 										<Textarea
 											onChange={formik.handleChange}
 											value={formik.values.obligations}
@@ -447,13 +436,14 @@ const ProductsGridPage = () => {
 											isTouched={formik.touched.obligations}
 											invalidFeedback={formik.errors.obligations}
 											validFeedback='Ótimo!'
-										>
-
-										</Textarea>
+										/>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
-									<FormGroup id='benefits' label='Benefícios (opcional)' isFloating>
+									<FormGroup
+										id='benefits'
+										label='Benefícios (opcional)'
+										isFloating>
 										<Textarea
 											onChange={formik.handleChange}
 											value={formik.values.benefits}
@@ -462,9 +452,7 @@ const ProductsGridPage = () => {
 											isTouched={formik.touched.benefits}
 											invalidFeedback={formik.errors.benefits}
 											validFeedback='Ótimo!'
-										>
-
-										</Textarea>
+										/>
 									</FormGroup>
 								</div>
 								<div className='col-12'>
@@ -477,9 +465,7 @@ const ProductsGridPage = () => {
 											isTouched={formik.touched.details}
 											invalidFeedback={formik.errors.details}
 											validFeedback='Ótimo!'
-										>
-
-										</Textarea>
+										/>
 									</FormGroup>
 								</div>
 							</div>

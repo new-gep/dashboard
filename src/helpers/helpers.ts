@@ -65,13 +65,12 @@ export const randomColor = () => {
 export const priceFormat = (price: number | string) => {
 	// Converte a entrada para um número
 	const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
-  
+
 	return numericPrice.toLocaleString('pt-BR', {
-	  minimumFractionDigits: 0, // Remove as casas decimais
-	  maximumFractionDigits: 0,
+		minimumFractionDigits: 0, // Remove as casas decimais
+		maximumFractionDigits: 0,
 	});
-  };
-  
+};
 
 export const average = (array: any[]) => array.reduce((a, b) => a + b) / array.length;
 

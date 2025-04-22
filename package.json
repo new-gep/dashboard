@@ -1,10 +1,11 @@
 {
-	"name": "facit",
-	"version": "4.3.5",
+	"name": "gep",
+	"version": "0.0.1",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"start": "react-scripts start",
-		"build": "react-scripts build",
+		"build": "cross-env DISABLE_ESLINT_PLUGIN=true react-scripts build",
 		"serve": "serve -s build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
@@ -19,23 +20,6 @@
 	"jest": {
 		"transformIgnorePatterns": [
 			"<rootDir>/node_modules/(?!pascalcase|prismjs|@omtanke/react-use-event-outside/.*)"
-		]
-	},
-	"eslintConfig": {
-		"extends": [
-			"react-app",
-			"react-app/jest",
-			"plugin:storybook/recommended"
-		],
-		"overrides": [
-			{
-				"files": [
-					"**/*.stories.*"
-				],
-				"rules": {
-					"import/no-anonymous-default-export": "off"
-				}
-			}
 		]
 	},
 	"browserslist": {
@@ -87,7 +71,8 @@
 		"react": "^18.3.1",
 		"react-apexcharts": "^1.4.1",
 		"react-big-calendar": "^1.13.1",
-		"react-credit-cards-2": "0.10.0",
+		"react-credit-cards": "^0.8.3",
+		"react-credit-cards-2": "^0.9.0",
 		"react-date-range": "^2.0.1",
 		"react-dom": "^18.3.1",
 		"react-ga4": "^2.1.0",
@@ -114,7 +99,7 @@
 	},
 	"devDependencies": {
 		"@eslint/eslintrc": "^3.1.0",
-		"@eslint/js": "^9.7.0",
+		"@eslint/js": "^9.25.1",
 		"@storybook/addon-a11y": "^8.2.4",
 		"@storybook/addon-actions": "^8.2.4",
 		"@storybook/addon-controls": "^8.2.4",
@@ -139,23 +124,30 @@
 		"@types/react-scrollspy": "^3.3.9",
 		"@types/react-syntax-highlighter": "^15.5.13",
 		"@types/react-transition-group": "^4.4.10",
+		"@typescript-eslint/eslint-plugin": "^8.31.0",
+		"@typescript-eslint/parser": "^8.31.0",
 		"animate.css": "^4.1.1",
 		"bootstrap": "^5.3.3",
-		"eslint": "8.57.0",
+		"cross-env": "^7.0.3",
+		"eslint": "^8.57.1",
 		"eslint-config-airbnb": "^19.0.4",
+		"eslint-config-airbnb-base": "^15.0.0",
 		"eslint-config-airbnb-typescript": "^18.0.0",
 		"eslint-config-prettier": "^9.1.0",
+		"eslint-config-react-app": "^7.0.1",
 		"eslint-config-standard-with-typescript": "^43.0.1",
+		"eslint-formatter-table": "^7.32.1",
 		"eslint-plugin-eslint-comments": "^3.2.0",
 		"eslint-plugin-flowtype": "^8.0.3",
-		"eslint-plugin-import": "^2.29.1",
-		"eslint-plugin-jsx-a11y": "^6.9.0",
+		"eslint-plugin-import": "^2.31.0",
+		"eslint-plugin-jsx-a11y": "^6.10.2",
 		"eslint-plugin-n": "^17.9.0",
-		"eslint-plugin-prettier": "^5.2.1",
+		"eslint-plugin-prettier": "^5.2.6",
 		"eslint-plugin-promise": "^6.4.0",
-		"eslint-plugin-react": "^7.34.4",
+		"eslint-plugin-react": "^7.37.5",
 		"eslint-plugin-react-hooks": "^4.6.2",
 		"eslint-plugin-storybook": "^0.8.0",
+		"eslint-plugin-unused-imports": "^4.1.4",
 		"globals": "^15.8.0",
 		"prettier": "^3.3.3",
 		"react-scripts": "5.0.1",
@@ -192,5 +184,12 @@
 		"nth-check": ">=2.1.1",
 		"postcss": ">=8.4.31",
 		"trim": "^1.0.1"
+	},
+	"compilerOptions": {
+		"noEmitOnError": false,
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"noImplicitAny": false
 	}
 }

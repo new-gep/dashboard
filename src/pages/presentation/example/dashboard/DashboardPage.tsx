@@ -1,32 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useTour } from '@reactour/tour';
 import useDarkMode from '../../../../hooks/useDarkMode';
 import { demoPagesMenu } from '../../../../menu';
 import PageWrapper from '../../../../layout/PageWrapper/PageWrapper';
-import SubHeader, {
-	SubHeaderLeft,
-	SubHeaderRight,
-	SubheaderSeparator,
-} from '../../../../layout/SubHeader/SubHeader';
+
 import Page from '../../../../layout/Page/Page';
 import { TABS, TTabs } from './common/helper';
-import Button, { ButtonGroup } from '../../../../components/bootstrap/Button';
-
-import CommonAvatarTeam from '../../../../common/other/CommonAvatarTeam';
 
 import CommonDashboardAlert from './common/CommonDashboardAlert';
 import CommonDashboardUserCard from './common/CommonDashboardUserCard';
-import CommonDashboardClientTeam from './common/CommonDashboardClientTeam';
 import CommonDashboardDesignTeam from './common/CommonDashboardDesignTeam';
-import CommonDashboardIncome from './common/CommonDashboardIncome';
-import CommonDashboardRecentActivities from './common/CommonDashboardRecentActivities';
-import CommonDashboardUserIssue from './common/CommonDashboardUserIssue';
-import CommonDashboardSalesByStore from './common/CommonDashboardSalesByStore';
-import CommonDashboardWaitingAnswer from './common/CommonDashboardWaitingAnswer';
 import CommonMyWallet from '../../../_common/CommonMyWallet';
 import CommonDashboardJob from './common/CommonDashboardJob';
 import ThemeContext from '../../../../contexts/themeContext';
-import LockSystem from '../../../_common/LockSystem/LockSystem';
 
 const DashboardPage = () => {
 	const { mobileDesign } = useContext(ThemeContext);
@@ -53,7 +39,7 @@ const DashboardPage = () => {
 		<>
 			{/* <LockSystem /> */}
 			<PageWrapper title={demoPagesMenu.sales.subMenu.dashboard.text}>
-			{/* <SubHeader>
+				{/* <SubHeader>
 				<SubHeaderLeft>
 					<span className='h4 mb-0 fw-bold'>Overview</span>
 					<SubheaderSeparator />
@@ -74,23 +60,23 @@ const DashboardPage = () => {
 					</CommonAvatarTeam>
 				</SubHeaderRight>
 			</SubHeader> */}
-			<Page container='fluid'>
-				<div className='row'>
-					<div className='col-12'>
-						<CommonDashboardAlert />
-					</div>
+				<Page container='fluid'>
+					<div className='row'>
+						<div className='col-12'>
+							<CommonDashboardAlert />
+						</div>
 
-					<div className='col-xl-4'>
-						<CommonDashboardUserCard />
-					</div>
-					{/* <div className='col-xl-4'>
+						<div className='col-xl-4'>
+							<CommonDashboardUserCard />
+						</div>
+						{/* <div className='col-xl-4'>
 						<CommonDashboardClientTeam />
 					</div> */}
-					<div className='col-xl-8'>
-						<CommonDashboardDesignTeam />
-					</div>
+						<div className='col-xl-8'>
+							<CommonDashboardDesignTeam />
+						</div>
 
-					{/* <div className='col-xxl-6'>
+						{/* <div className='col-xxl-6'>
 						<CommonDashboardIncome activeTab={activeTab} />
 					</div>
 					<div className='col-xxl-3'>
@@ -108,17 +94,17 @@ const DashboardPage = () => {
 						<CommonDashboardWaitingAnswer />
 					</div> */}
 
-					<div className='col-xxl-4 col-xl-6'>
-						<CommonMyWallet />
+						<div className='col-xxl-4 col-xl-6'>
+							<CommonMyWallet />
+						</div>
+						<div className='col-xxl-8'>
+							<CommonDashboardJob />
+						</div>
 					</div>
-					<div className='col-xxl-8'>
-						<CommonDashboardJob />
-					</div>
-				</div>
-			</Page>
+				</Page>
 			</PageWrapper>
 		</>
-	);	
+	);
 };
 
 export default DashboardPage;

@@ -2,6 +2,7 @@ import React, { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Card, {
 	CardBody,
 	CardFooter,
@@ -20,14 +21,8 @@ import Label from '../../../components/bootstrap/forms/Label';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
-import SubHeader, {
-	SubHeaderLeft,
-	SubHeaderRight,
-	SubheaderSeparator,
-} from '../../../layout/SubHeader/SubHeader';
+import SubHeader, { SubHeaderLeft } from '../../../layout/SubHeader/SubHeader';
 import Avatar from '../../../components/Avatar';
-import User1Webp from '../../../assets/img/wanna/wanna2.webp';
-import User1Img from '../../../assets/img/wanna/wanna2.png';
 import CompanyLogoDefault from '../../../assets/img/companyLogoDefault.png';
 import CompanyWallet from './CompanyWallet';
 // import editPasswordValidate from './helper/editPasswordValidate';
@@ -37,15 +32,19 @@ import { demoPagesMenu } from '../../../menu';
 import useDarkMode from '../../../hooks/useDarkMode';
 import GetCompanyDocument from '../../../api/get/company/Document';
 import AuthContext from '../../../contexts/authContext';
-import { toast } from 'react-toastify';
 import Toasts from '../../../components/bootstrap/Toasts';
 import PostCompanyDocument from '../../../api/post/company/Document';
-import Spinner from '../../../components/bootstrap/Spinner';
 import GetCompanyFindOne from '../../../api/get/company/FindOne';
 import PatchCompanyDefault from '../../../api/patch/company/Default';
 import DeleteCompanyFile from '../../../api/delete/company/File';
 import CompanyUser from './CompanyUser';
-import Modal, { ModalFooter, ModalBody, ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
+import Modal, {
+	ModalFooter,
+	ModalBody,
+	ModalHeader,
+	ModalTitle,
+} from '../../../components/bootstrap/Modal';
+
 interface IPreviewItemProps {
 	title: string;
 	value: any | any[];
@@ -142,7 +141,7 @@ const CompanyPage = () => {
 		SIGNATURE: 'Assinatura',
 		MY_WALLET: 'Carteira',
 		PLAN: 'Plano',
-		USER: 'Usuários'
+		USER: 'Usuários',
 	};
 
 	const [activeTab, setActiveTab] = useState(TABS.ACCOUNT_DETAIL);
@@ -168,7 +167,7 @@ const CompanyPage = () => {
 			uf: '',
 			zip: '',
 		},
-		validationSchema: validationSchema,
+		validationSchema,
 		onSubmit: () => {
 			showNotification(
 				<span className='d-flex align-items-center'>
@@ -187,22 +186,21 @@ const CompanyPage = () => {
 	};
 
 	const uploadSignature = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const files = event.target.files;
+		const { files } = event.target;
 		if (files && files.length > 0) {
 			const file = files[0];
 			if (file.type.startsWith('image/')) {
 				setNewSignaturePath(file);
 				const imageUrl = URL.createObjectURL(file);
 				setSignaturePath(imageUrl);
-				return;
 			} else {
 				toast(
-					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+					<Toasts icon='Close' iconColor='danger' title='Erro'>
 						Selecione <b>apenas</b> arquivo de imagem.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 3000,
+						autoClose: 1000,
 					},
 				);
 			}
@@ -216,21 +214,21 @@ const CompanyPage = () => {
 			cnpj: userData.cnpj,
 		};
 
-		let response = await PostCompanyDocument(PropsUpload);
+		const response = await PostCompanyDocument(PropsUpload);
 		if (response.status !== 200) {
 			toast(
-				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+				<Toasts icon='Close' iconColor='danger' title='Erro'>
 					Algo deu errado, tente mais tarde.
 				</Toasts>,
 				{
 					closeButton: true,
-					autoClose: 3000,
+					autoClose: 1000,
 				},
 			);
 			return;
 		}
 		toast(
-			<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
+			<Toasts icon='Check' iconColor='success' title='Sucesso'>
 				Assinatura atualizada com sucesso.
 			</Toasts>,
 			{
@@ -241,7 +239,7 @@ const CompanyPage = () => {
 	};
 
 	const uploadLogo = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const files = event.target.files;
+		const { files } = event.target;
 		if (files && files.length > 0) {
 			const file = files[0];
 			// Define o arquivo no estado
@@ -253,18 +251,17 @@ const CompanyPage = () => {
 				// Define o URL da imagem no estado
 				setLogoPath(imageUrl);
 				return;
-			} else {
-				// Exibe um toast em caso de erro
-				toast(
-					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
-						Selecione <b>apenas</b> arquivo de imagem.
-					</Toasts>,
-					{
-						closeButton: true,
-						autoClose: 3000,
-					},
-				);
 			}
+			// Exibe um toast em caso de erro
+			toast(
+				<Toasts icon='Close' iconColor='danger' title='Erro'>
+					Selecione <b>apenas</b> arquivo de imagem.
+				</Toasts>,
+				{
+					closeButton: true,
+					autoClose: 1000,
+				},
+			);
 
 			// Opcional: Resetar o input file após processamento
 			event.target.value = ''; // Permite resetar o campo caso necessário
@@ -275,12 +272,12 @@ const CompanyPage = () => {
 		const response = await DeleteCompanyFile(`company/${userData.cnpj}/Logo`);
 		if (response.status == 200) {
 			toast(
-				<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
+				<Toasts icon='Check' iconColor='success' title='Sucesso'>
 					Logo deletada com sucesso
 				</Toasts>,
 				{
 					closeButton: true,
-					autoClose: 3000,
+					autoClose: 1000,
 				},
 			);
 			setLogoPath(null);
@@ -288,12 +285,12 @@ const CompanyPage = () => {
 			return;
 		}
 		toast(
-			<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+			<Toasts icon='Close' iconColor='danger' title='Erro'>
 				Erro ao tentar deletar sua logo, tente mais tarde
 			</Toasts>,
 			{
 				closeButton: true,
-				autoClose: 3000,
+				autoClose: 1000,
 			},
 		);
 	};
@@ -310,7 +307,7 @@ const CompanyPage = () => {
 				};
 				const response = await PostCompanyDocument(PropsUpload);
 				if (response.status !== 200) {
-					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+					<Toasts icon='Close' iconColor='danger' title='Erro'>
 						Algo deu errado, não foi possível atualizar a <b>Logo</b>.
 					</Toasts>;
 					return;
@@ -319,28 +316,27 @@ const CompanyPage = () => {
 			const response = await PatchCompanyDefault(formik.values, userData.cnpj);
 			if (response.status == 200) {
 				toast(
-					<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso'}>
+					<Toasts icon='Check' iconColor='success' title='Sucesso'>
 						{response.message}
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 3000,
+						autoClose: 1000,
 					},
 				);
-				return;
 			} else {
 				toast(
-					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+					<Toasts icon='Close' iconColor='danger' title='Erro'>
 						{response.message}
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 3000,
+						autoClose: 1000,
 					},
 				);
 			}
 		} catch (e) {
-			<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+			<Toasts icon='Close' iconColor='danger' title='Erro'>
 				Algo deu errado, tente mais tarde.
 			</Toasts>;
 		}
@@ -525,7 +521,7 @@ const CompanyPage = () => {
 													<FormGroup id='cnpj' label='CNPJ' isFloating>
 														<Input
 															placeholder='CNPJ'
-															disabled={true}
+															disabled
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
 															value={formik.values.cnpj}
@@ -542,7 +538,7 @@ const CompanyPage = () => {
 														label='Inscrição Estadual'
 														isFloating>
 														<Input
-															disabled={true}
+															disabled
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
 															value={formik.values.state_registration}
@@ -582,7 +578,7 @@ const CompanyPage = () => {
 														label='Inscrição Municipal'
 														isFloating>
 														<Input
-															disabled={true}
+															disabled
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
 															value={
@@ -804,14 +800,10 @@ const CompanyPage = () => {
 												<ChecksGroup>
 													<Checks
 														type='switch'
-														id={`isVisible`}
+														id='isVisible'
 														name='isVisible'
-														label={'Anônimo'}
-														checked={
-															formik.values.isVisible == '1'
-																? true
-																: false
-														}
+														label='Anônimo'
+														checked={formik.values.isVisible == '1'}
 														value={formik.values.isVisible}
 														onChange={(
 															event: React.ChangeEvent<HTMLInputElement>,
@@ -975,35 +967,39 @@ const CompanyPage = () => {
 							</Card>
 						)}
 						{TABS.PLAN === activeTab && (
-							
 							<Card stretch>
-								<Modal isOpen={modal} size={'lg'} setIsOpen={setModal}>
+								<Modal isOpen={modal} size='lg' setIsOpen={setModal}>
 									<ModalHeader setIsOpen={setModal}>
 										<ModalTitle id='modal-title'>
 											<h1>Visualizar Contrato</h1>
-											<p className='text-muted'>Reveja novamente o contrato assinado</p>
+											<p className='text-muted'>
+												Reveja novamente o contrato assinado
+											</p>
 										</ModalTitle>
 									</ModalHeader>
 									<ModalBody>
-										{
-										contractPath &&
+										{contractPath && (
 											<iframe
 												title='Conteúdo incorporado da página'
 												src={contractPath}
 												className='rounded-md left-5'
-												style={{ height: '500px', width: '100%', borderRadius: '10px' }}
+												style={{
+													height: '500px',
+													width: '100%',
+													borderRadius: '10px',
+												}}
 											/>
-										}
+										)}
 									</ModalBody>
 									<ModalFooter>
-										<Button 
-											color='info' 
-											isLink 
+										<Button
+											color='info'
+											isLink
 											type='reset'
-											icon='Download' 
+											icon='Download'
 											onClick={() => {
 												const link = document.createElement('a');
-												//@ts-ignore
+												// @ts-ignore
 												link.href = contractPath;
 												link.download = 'Contrato.pdf';
 												document.body.appendChild(link);
@@ -1021,7 +1017,9 @@ const CompanyPage = () => {
 									</CardLabel>
 								</CardHeader>
 
-								<CardBody className='pb-0 d-flex justify-content-center' isScrollable>
+								<CardBody
+									className='pb-0 d-flex justify-content-center'
+									isScrollable>
 									<div className='col-md-4'>
 										<Card>
 											<CardBody className=''>

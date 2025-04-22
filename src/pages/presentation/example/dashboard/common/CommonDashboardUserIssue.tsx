@@ -11,7 +11,11 @@ import Card, {
 	CardTitle,
 } from '../../../../../components/bootstrap/Card';
 import Button from '../../../../../components/bootstrap/Button';
-import Modal, { ModalBody, ModalHeader, ModalTitle } from '../../../../../components/bootstrap/Modal';
+import Modal, {
+	ModalBody,
+	ModalHeader,
+	ModalTitle,
+} from '../../../../../components/bootstrap/Modal';
 import FormGroup from '../../../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../../../components/bootstrap/forms/Input';
 import Todo, { ITodoListItem } from '../../../../../components/extras/Todo';

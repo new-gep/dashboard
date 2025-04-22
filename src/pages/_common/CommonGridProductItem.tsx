@@ -22,7 +22,7 @@ import showNotification from '../../components/extras/showNotification';
 import Icon from '../../components/icon/Icon';
 import { demoPagesMenu } from '../../menu';
 import useDarkMode from '../../hooks/useDarkMode';
-import { AbstractPicture } from '../../constants/abstract';
+
 interface ICommonGridProductItemProps {
 	id: string | number;
 	name: string;

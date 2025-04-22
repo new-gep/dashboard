@@ -14,9 +14,8 @@ import useNavigationItemHandle from '../../hooks/useNavigationItemHandle';
 import AuthContext from '../../contexts/authContext';
 import ThemeContext from '../../contexts/themeContext';
 import Mask from '../../function/Mask';
-import UserOne from '../../assets/img/10067026.webp'
-import UserTwo from '../../assets/img/3187499.webp'
-import { AvatarPicture } from '../../constants/avatar';  
+import { AvatarPicture } from '../../constants/avatar';
+
 const User = () => {
 	const { width } = useWindowSize();
 	const { setAsideStatus } = useContext(ThemeContext);
@@ -27,11 +26,6 @@ const User = () => {
 	const [collapseStatus, setCollapseStatus] = useState<boolean>(false);
 	const { t } = useTranslation(['translation', 'menu']);
 
-	useEffect(()=>{
-		//@ts-ignore
-		console.log(AvatarPicture[userData.avatar])
-	},[])
-
 	return (
 		<>
 			<div
@@ -41,9 +35,11 @@ const User = () => {
 				<div className='user-avatar'>
 					<img
 						// srcSet={userData?.srcSet}
-						src={ userData.avatar ?
-							//@ts-ignore
-							AvatarPicture[userData.avatar]  : AvatarPicture.default
+						src={
+							userData.avatar
+								? // @ts-ignore
+									AvatarPicture[userData.avatar]
+								: AvatarPicture.default
 						}
 						alt='Avatar'
 						width={128}
@@ -52,7 +48,7 @@ const User = () => {
 				</div>
 				<div className='user-info'>
 					<div className='user-name d-flex align-items-center text-capitalize'>
-						{ userData.name && `${Mask('firstName',userData.name)}`}
+						{userData.name && `${Mask('firstName', userData.name)}`}
 						<Icon icon='Verified' className='ms-1' color='info' />
 					</div>
 					{/* <div className='user-sub-title'>{userData?.position}</div> */}
@@ -67,7 +63,7 @@ const User = () => {
 						// 		`../${demoPagesMenu.appointment.subMenu.employeeID.path}/${userData?.id}`,
 						// 	)
 						// }
-						>
+					>
 						Perfil
 					</Button>
 				</DropdownItem>
@@ -140,8 +136,7 @@ const User = () => {
 									setAsideStatus(false);
 								}
 								navigate(`../${demoPagesMenu.login.path}`);
-							}}
-							>
+							}}>
 							<span className='navigation-link navigation-link-pill'>
 								<span className='navigation-link-info'>
 									<Icon icon='Logout' className='navigation-icon' />

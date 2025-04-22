@@ -21,7 +21,6 @@ import ChartsHeader from '../pages/_layout/_headers/ChartsHeader';
 import ContentHeader from '../pages/_layout/_headers/ContentHeader';
 import UtilitiesHeader from '../pages/_layout/_headers/UtilitiesHeader';
 import IconHeader from '../pages/_layout/_headers/IconHeader';
-import DefaultHeader from '../pages/_layout/_headers/DefaultHeader';
 import DocumentationHeader from '../pages/_layout/_headers/DocumentationHeader';
 
 const headers: RouteProps[] = [
@@ -134,6 +133,10 @@ const headers: RouteProps[] = [
 		path: `${demoPagesMenu.sales.subMenu.customerID.path}/:cpf/:jobId`,
 		element: <ProductListHeader />,
 	},
+	// {
+	// 	path: `${mainMenu.recruit.subMenu.processSelection.path}`,
+	// 	element: <Talent />,
+	// },
 	{
 		path: `${pageLayoutTypesPagesMenu.asideTypes.path}/*`,
 		element: <PageLayoutHeader />,
@@ -169,6 +172,10 @@ const headers: RouteProps[] = [
 	{
 		path: `${componentPagesMenu.icons.path}/*`,
 		element: <IconHeader />,
+	},
+	{
+		path: `${gettingStartedPagesMenu.gettingStarted.path}/*`,
+		element: <DocumentationHeader />,
 	},
 	{
 		path: `${gettingStartedPagesMenu.gettingStarted.path}/*`,

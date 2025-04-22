@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { toast } from 'react-toastify';
 import ModalDocument from '../modal/modalDocument';
 import Button from '../../../../components/bootstrap/Button';
-import { toast } from 'react-toastify';
 import Toasts from '../../../../components/bootstrap/Toasts';
 import Job_Check_Admissional from '../../../../api/get/job/Job_Check_Admissional';
 import Spinner from '../../../../components/bootstrap/Spinner';
@@ -10,64 +10,58 @@ import JobFile from '../../../../api/get/job/Job_File';
 
 export default function DossieAdmission(datesJob: any) {
 	const [modal, setModal] = useState<boolean>(false);
-    const [jobId, setJobId] = useState<any>(null);
+	const [jobId, setJobId] = useState<any>(null);
 	const [job, setJob] = useState<any>(null);
 	const [typeDocument, setTypeDocument] = useState<any>(false);
 	const [pathDocumentMain, setPathDocumentMain] = useState<any>('');
 	const [pathDocumentSecondary, setPathDocumentSecondary] = useState<any>('');
-    const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+	const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
 
-	const searchDocument = async (type:string, document: string) => {
+	const searchDocument = async (type: string, document: string) => {
 		setLoading((prev) => ({ ...prev, [document]: true }));
 		let response;
-		
-        if(type == 'obligation'){
-			console.log(jobId, document, '1')
+
+		if (type == 'obligation') {
+			console.log(jobId, document, '1');
 			response = await JobFile(jobId, document, '1');
-			if(response.status == 404){
+			if (response.status == 404) {
 				toast(
-					<Toasts
-						icon={'WarningAmber'}
-						iconColor={'warning'}
-						title={'Opa!'}>
+					<Toasts icon='WarningAmber' iconColor='warning' title='Opa!'>
 						Documento não encontrado.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 3000, //
+						autoClose: 1000, //
 					},
 				);
 				setLoading((prev) => ({ ...prev, [document]: false }));
-				return
+				return;
 			}
-        }else{
+		} else {
 			// console.log(jobId, 'dynamic', '1', document)
-            response = await JobFile(jobId, 'dynamic', '1', document);
-			if(response.status == 404){
+			response = await JobFile(jobId, 'dynamic', '1', document);
+			if (response.status == 404) {
 				toast(
-					<Toasts
-						icon={'WarningAmber'}
-						iconColor={'warning'}
-						title={'Opa!'}>
+					<Toasts icon='WarningAmber' iconColor='warning' title='Opa!'>
 						Documento não encontrado.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 3000, //
+						autoClose: 1000, //
 					},
 				);
 				setLoading((prev) => ({ ...prev, [document]: false }));
-				return
+				return;
 			}
-        }
-		if(document == 'medical'){
-			setTypeDocument(response.type)
-			setPathDocumentMain(response.path)
+		}
+		if (document == 'medical') {
+			setTypeDocument(response.type);
+			setPathDocumentMain(response.path);
 			setModal(true);
 			setLoading((prev) => ({ ...prev, [document]: false }));
-			return
+			return;
 		}
-		console.log(response)
+		console.log(response);
 		setTypeDocument(response.typeDocumentSignature);
 		switch (response.typeDocumentSignature) {
 			case 'pdf':
@@ -101,20 +95,21 @@ export default function DossieAdmission(datesJob: any) {
 					case 'voucher':
 						return 'Solitação de Vale Transporte';
 					case 'medical':
-						return 'Exame Admissional'
+						return 'Exame Admissional';
 				}
 				break;
 			case 'dynamic':
-                return document.replace(/([a-z])([A-Z])/g, "$1 $2")
-                .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2")
-                .trim(); 
+				return document
+					.replace(/([a-z])([A-Z])/g, '$1 $2')
+					.replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
+					.trim();
 		}
 	};
 
 	useEffect(() => {
 		const fetchData = async () => {
 			if (datesJob && datesJob.job.id) {
-                setJobId(datesJob.job.id)
+				setJobId(datesJob.job.id);
 				const response = await Job_Check_Admissional(datesJob.job.id);
 				setJob(response);
 			}
@@ -150,15 +145,16 @@ export default function DossieAdmission(datesJob: any) {
 									<div className='col-12' key={key}>
 										<Button
 											className='col-12 p-3 d-flex justify-content-center align-items-center'
-											isLight={true}
+											isLight
 											color='primary'
 											onClick={() => searchDocument('obligation', key)}
-											isDisable={loading[key]}
-										>
+											isDisable={loading[key]}>
 											{loading[key] ? (
 												<Spinner color='primary' />
 											) : (
-												<span className='fw-bold'>{documentName('obligation', key)}</span>
+												<span className='fw-bold'>
+													{documentName('obligation', key)}
+												</span>
 											)}
 										</Button>
 									</div>
@@ -180,16 +176,16 @@ export default function DossieAdmission(datesJob: any) {
 											<div className='col-12' key={key}>
 												<Button
 													className='col-12 p-3'
-													isLight={true}
+													isLight
 													color='primary'
 													onClick={() => searchDocument('dynamic', value)}
 													isDisable={loading[value]}>
 													{loading[value] ? (
-														<>
-															<Spinner color='primary' />
-														</>
+														<Spinner color='primary' />
 													) : (
-														<span className='fw-bold'>{documentName('dynamic', value)}</span>
+														<span className='fw-bold'>
+															{documentName('dynamic', value)}
+														</span>
 													)}
 												</Button>
 											</div>
@@ -198,8 +194,7 @@ export default function DossieAdmission(datesJob: any) {
 								}
 								return null;
 							},
-						)
-					}
+						)}
 				</>
 			)}
 		</section>

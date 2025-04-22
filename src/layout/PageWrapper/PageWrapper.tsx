@@ -34,7 +34,7 @@ const PageWrapper = forwardRef<HTMLDivElement, IPageWrapperProps>(
 		const { token, isAuthenticated } = useContext(AuthContext);
 
 		const navigate = useNavigate();
-		
+
 		useEffect(() => {
 			// Verifica se a página é protegida e se o usuário não está autenticado (token inválido)
 			if (isProtected && !isAuthenticated) {
@@ -43,7 +43,7 @@ const PageWrapper = forwardRef<HTMLDivElement, IPageWrapperProps>(
 		}, [isProtected, isAuthenticated, navigate]);
 
 		return (
-			<div ref={ref}  className={classNames('page-wrapper', 'container-fluid', className)}>
+			<div ref={ref} className={classNames('page-wrapper', 'container-fluid', className)}>
 				{children}
 			</div>
 		);

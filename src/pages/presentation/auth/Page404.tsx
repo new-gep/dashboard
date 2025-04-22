@@ -25,7 +25,7 @@ const Page404 = () => {
 							src={Humans}
 							alt='Humans'
 							className='mr-5'
-							style={{ height: '50vh', marginLeft:'9%' }}
+							style={{ height: '50vh', marginLeft: '9%' }}
 						/>
 					</div>
 					<div className='col-12 d-flex flex-column justify-content-center align-items-center mb-2'>

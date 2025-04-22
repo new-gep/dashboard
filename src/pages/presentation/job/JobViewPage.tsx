@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
-import { ApexOptions } from 'apexcharts';
+import { toast } from 'react-toastify';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import SubHeader, {
@@ -11,9 +11,7 @@ import SubHeader, {
 } from '../../../layout/SubHeader/SubHeader';
 import Button from '../../../components/bootstrap/Button';
 import { demoPagesMenu } from '../../../menu';
-import tableData from '../../../common/data/dummyProductData';
 import Avatar from '../../../components/Avatar';
-import USERS from '../../../common/data/userDummyData';
 import Card, {
 	CardBody,
 	CardFooter,
@@ -26,7 +24,6 @@ import Card, {
 } from '../../../components/bootstrap/Card';
 import Icon from '../../../components/icon/Icon';
 import { priceFormat } from '../../../helpers/helpers';
-import Chart from '../../../components/extras/Chart';
 import Accordion, { AccordionItem } from '../../../components/bootstrap/Accordion';
 import PlaceholderImage from '../../../components/extras/PlaceholderImage';
 import Input from '../../../components/bootstrap/forms/Input';
@@ -42,7 +39,6 @@ import Textarea from '../../../components/bootstrap/forms/Textarea';
 import Select from '../../../components/bootstrap/forms/Select';
 import Option from '../../../components/bootstrap/Option';
 import Toasts from '../../../components/bootstrap/Toasts';
-import { toast } from 'react-toastify';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
 import AuthContext from '../../../contexts/authContext';
 import Checks from '../../../components/bootstrap/forms/Checks';
@@ -137,14 +133,14 @@ const JobViewPage = () => {
 					setDeleteModal(false);
 					toast(
 						<Toasts
-							icon={'Work'}
-							iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={'Successo'}>
+							icon='Work'
+							iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title='Successo'>
 							Vaga deletada com sucesso!
 						</Toasts>,
 						{
 							closeButton: true,
-							autoClose: 3000, // Examples: 1000, 3000, ...
+							autoClose: 1000, // Examples: 1000, 3000, ...
 						},
 					);
 					redirect();
@@ -154,14 +150,14 @@ const JobViewPage = () => {
 					setRebuild(rebuild + 1);
 					toast(
 						<Toasts
-							icon={'Work'}
-							iconColor={'warning'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={'Erro'}>
+							icon='Work'
+							iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title='Erro'>
 							Não foi possivel deletar a vaga, algo deu errado!
 						</Toasts>,
 						{
 							closeButton: true,
-							autoClose: 3000, // Examples: 1000, 3000, ...
+							autoClose: 1000, // Examples: 1000, 3000, ...
 						},
 					);
 					break;
@@ -170,14 +166,14 @@ const JobViewPage = () => {
 					setRebuild(rebuild + 1);
 					toast(
 						<Toasts
-							icon={'Work'}
-							iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={'Erro'}>
+							icon='Work'
+							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title='Erro'>
 							Erro interno, tente mais tarde!
 						</Toasts>,
 						{
 							closeButton: true,
-							autoClose: 3000, // Examples: 1000, 3000, ...
+							autoClose: 1000, // Examples: 1000, 3000, ...
 						},
 					);
 					break;
@@ -201,56 +197,56 @@ const JobViewPage = () => {
 					setActiveTab(TABS.DETAILS);
 					toast(
 						<Toasts
-							icon={'Work'}
-							iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={'Successo'}>
+							icon='Work'
+							iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title='Successo'>
 							Vaga editada com sucesso!
 						</Toasts>,
 						{
 							closeButton: true,
-							autoClose: 3000, // Examples: 1000, 3000, ...
+							autoClose: 1000, // Examples: 1000, 3000, ...
 						},
 					);
 					break;
 				case 404:
 					toast(
 						<Toasts
-							icon={'Work'}
-							iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={'Erro'}>
+							icon='Work'
+							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title='Erro'>
 							Algo deu errado, tente novamente!
 						</Toasts>,
 						{
 							closeButton: true,
-							autoClose: 3000, // Examples: 1000, 3000, ...
+							autoClose: 1000, // Examples: 1000, 3000, ...
 						},
 					);
 					break;
 				case 500:
 					toast(
 						<Toasts
-							icon={'Work'}
-							iconColor={'warning'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={'Erro'}>
+							icon='Work'
+							iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title='Erro'>
 							Erro interno, tente novamente!
 						</Toasts>,
 						{
 							closeButton: true,
-							autoClose: 3000, // Examples: 1000, 3000, ...
+							autoClose: 1000, // Examples: 1000, 3000, ...
 						},
 					);
 					break;
 				default:
 					toast(
 						<Toasts
-							icon={'Work'}
-							iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title={'Erro Desconhecido'}>
+							icon='Work'
+							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+							title='Erro Desconhecido'>
 							Algo deu errado, tente novamente!
 						</Toasts>,
 						{
 							closeButton: true,
-							autoClose: 3000, // Examples: 1000, 3000, ...
+							autoClose: 1000, // Examples: 1000, 3000, ...
 						},
 					);
 					break;
@@ -279,7 +275,7 @@ const JobViewPage = () => {
 				step: 1,
 			};
 			setCandidates(updatedCandidates);
-			//@ts-ignore
+			// @ts-ignore
 			const updatedCandidatesWithoutPicture = updatedCandidates.map((candidate) => {
 				const { name, picture, ...rest } = candidate; // Desestruturação para excluir `picture`
 				return rest;
@@ -306,7 +302,7 @@ const JobViewPage = () => {
 				status: false, // Definindo o status como reprovado
 			};
 			setCandidates(updatedCandidates);
-			//@ts-ignore
+			// @ts-ignore
 			const updatedCandidatesWithoutPicture = updatedCandidates.map((candidate) => {
 				const { name, picture, ...rest } = candidate; // Desestruturação para excluir `picture`
 				return rest;
@@ -334,7 +330,7 @@ const JobViewPage = () => {
 				step: 0,
 			};
 			setCandidates(updatedCandidates);
-			//@ts-ignore
+			// @ts-ignore
 			const updatedCandidatesWithoutPicture = updatedCandidates.map((candidate) => {
 				const { name, picture, ...rest } = candidate; // Desestruturação para excluir `picture`
 				return rest;
@@ -396,10 +392,9 @@ const JobViewPage = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			//@ts-ignore
-			let response = await Job_One(id);
-			if(!response || response.status !== 200){
-				console.log('aqui')
+			// @ts-ignore
+			const response = await Job_One(id);
+			if (!response || response.status !== 200) {
 				return;
 			}
 			switch (response.status) {
@@ -424,8 +419,12 @@ const JobViewPage = () => {
 					</Button>
 					<SubheaderSeparator />
 					<Avatar
-						//@ts-ignore
-						src={userCreate && userCreate.avatar ? AvatarPicture[userCreate.avatar] : AvatarPicture.default}
+						src={
+							userCreate && userCreate.avatar
+							// @ts-ignore
+								? AvatarPicture[userCreate.avatar]
+								: AvatarPicture.default
+						}
 						size={32}
 						color={userCreate && userCreate.color}
 						title={userCreate && userCreate.id}
@@ -454,7 +453,7 @@ const JobViewPage = () => {
 					<span className='text-danger fw-medium'> {editItem && editItem.function} </span>{' '}
 					?
 				</ModalBody>
-				<ModalFooter className={``}>
+				<ModalFooter className=''>
 					<Button
 						color='info'
 						isOutline
@@ -469,352 +468,373 @@ const JobViewPage = () => {
 			</Modal>
 
 			<Page>
-				{editItem ? 
-				<>
-					<div className='display-4 fw-bold py-3 text-capitalize'>
-						{editItem && editItem.function}
-					</div>
-					<div className='row h-100'>
-						<div className='col-lg-4'>
-							<Card stretch>
-								<CardBody isScrollable>
-									<div className='row g-3'>
-										<div className='absolute'>
-											{editItem?.PCD == '1' && (
-												<div className='d-flex gap-2 '>
-													<Icon icon='AccessibleForward' size={'2x'} />
-													<p className='mt-2'>Vaga Afirmativa</p>
-												</div>
-											)}
-										</div>
-										<div className='col-12'>
-											{editItem && (
-												<img
-													src={AbstractPicture[editItem.image]}
-													alt=''
-													width='100%'
-													className='p-5'
-												/>
-											)}
-										</div>
-										<div className='col-12'>
-											<Button
-												icon='Summarize'
-												color='info'
-												className='w-100 p-3'
-												isLight={activeTab !== TABS.DETAILS}
-												onClick={() => setActiveTab(TABS.DETAILS)}>
-												{TABS.DETAILS}
-											</Button>
-										</div>
-										<div className='col-12'>
-											<Button
-												icon='People'
-												color='info'
-												className='w-100 p-3'
-												isLight={activeTab !== TABS.CANDIDATE}
-												onClick={() => setActiveTab(TABS.CANDIDATE)}>
-												{TABS.CANDIDATE}
-											</Button>
-										</div>
-										<div className='col-12'>
-											<Button
-												icon='Edit'
-												color='success'
-												className='w-100 p-3'
-												isLight={activeTab !== TABS.EDIT}
-												onClick={() => setActiveTab(TABS.EDIT)}>
-												{TABS.EDIT}
-											</Button>
-										</div>
-									</div>
-								</CardBody>
-								<CardFooter>
-									<CardFooterLeft className='w-100'>
-										<Button
-											onClick={handleRemove}
-											icon='Delete'
-											color='danger'
-											isLight
-											className='w-100 p-3'>
-											Deletar
-										</Button>
-									</CardFooterLeft>
-								</CardFooter>
-							</Card>
+				{editItem ? (
+					<>
+						<div className='display-4 fw-bold py-3 text-capitalize'>
+							{editItem && editItem.function}
 						</div>
-						<div className='col-lg-8'>
-							<Card
-								stretch
-								className='overflow-hidden'
-								tag='form'
-								noValidate
-								onSubmit={formik.handleSubmit}>
-								{activeTab === TABS.DETAILS && (
-									<>
-										<CardHeader>
-											<CardLabel icon='Summarize' iconColor='info'>
-												<CardTitle tag='div' className='h5'>
-													Informações
-												</CardTitle>
-												<CardSubTitle tag='div' className='h6'>
-													Detalhes da Vaga
-												</CardSubTitle>
-											</CardLabel>
-										</CardHeader>
-										<CardBody isScrollable>
-											<div className='row'>
-												<div className='col-lg-6'>
-													<Card
-														stretch
-														shadow='sm'
-														className={`bg-l${
-															darkModeStatus ? 'o25' : '25'
-														}-primary rounded-2`}>
-														<CardHeader className='bg-transparent'>
-															<CardLabel>
-																<CardTitle>Salario</CardTitle>
-															</CardLabel>
-														</CardHeader>
-														<CardBody>
-															<div className='d-flex align-items-center pb-3'>
-																<div className='flex-shrink-0'>
-																	<Icon
-																		icon='Savings'
-																		size='4x'
-																		color='primary'
-																	/>
-																</div>
-																<div className='flex-grow-1 ms-3'>
-																	<div className='fw-bold fs-3 mb-0'>
-																		R${' '}
-																		{editItem &&
-																			priceFormat(
-																				editItem.salary,
-																			)}
-																	</div>
-																</div>
-															</div>
-														</CardBody>
-													</Card>
-												</div>
-												<div className='col-lg-6'>
-													<Card
-														stretch
-														shadow='sm'
-														className={`bg-l${
-															darkModeStatus ? 'o25' : '25'
-														}-secondary bg-l${
-															darkModeStatus ? 'o50' : '10'
-														}-secondary:hover transition-base rounded-2`}>
-														<CardHeader className='bg-transparent'>
-															<CardLabel>
-																<CardTitle tag='h4' className='h5'>
-																	Contrato
-																</CardTitle>
-															</CardLabel>
-														</CardHeader>
-														<CardBody>
-															<div className='d-flex align-items-center pb-3'>
-																<div className='flex-shrink-0'>
-																	<Icon
-																		icon='Construction'
-																		size='4x'
-																		color='secondary'
-																	/>
-																</div>
-																<div className='flex-grow-1 ms-3'>
-																	<div
-																		className={`fw-bold fs-3 mb-0 text-uppercase ${editItem && editItem.contract == 'contract' ? 'text-capitalize' : 'text-uppercase'}`}>
-																		{editItem &&
-																		editItem.contract == 'contract'
-																			? 'Contrato'
-																			: editItem?.contract}
-																	</div>
-																</div>
-															</div>
-														</CardBody>
-													</Card>
-												</div>
-												<div className='col-lg-6'>
-													<Card
-														stretch
-														shadow='sm'
-														className={`bg-l${
-															darkModeStatus ? 'o25' : '25'
-														}-success rounded-2`}>
-														<CardHeader className='bg-transparent'>
-															<CardLabel>
-																<CardTitle>Carga Horária</CardTitle>
-															</CardLabel>
-														</CardHeader>
-														<CardBody>
-															<div className='d-flex align-items-center pb-3'>
-																<div className='flex-shrink-0'>
-																	<Icon
-																		icon='Schedule'
-																		size='4x'
-																		color='success'
-																	/>
-																</div>
-																<div className='flex-grow-1 ms-3'>
-																	<div className='fw-bold fs-3 mb-0'>
-																		{editItem &&
-																			editItem.time &&
-																			editItem.time.time}
-																		h semanais
-																	</div>
-																</div>
-															</div>
-														</CardBody>
-													</Card>
-												</div>
-												<div className='col-lg-6'>
-													<Card
-														stretch
-														shadow='sm'
-														className={`bg-l${
-															darkModeStatus ? 'o25' : '25'
-														}-info rounded-2`}>
-														<CardHeader className='bg-transparent'>
-															<CardLabel>
-																<CardTitle>
-																	Jornada de Trabalho
-																</CardTitle>
-															</CardLabel>
-														</CardHeader>
-														<CardBody>
-															<div className='d-flex align-items-center pb-3'>
-																<div className='flex-shrink-0'>
-																	<Icon
-																		icon='DirectionsRun'
-																		size='4x'
-																		color='info'
-																	/>
-																</div>
-																<div className='flex-grow-1 ms-3'>
-																	<div className='fw-bold fs-3 mb-0'>
-																		{editItem &&
-																			editItem.time &&
-																			editItem.time.journey}
-																	</div>
-																</div>
-															</div>
-														</CardBody>
-													</Card>
-												</div>
-												<div className='col-12 shadow-3d-container'>
-													<Accordion id='faq' shadow='sm'>
-														<AccordionItem id='faq1' title='Obrigações'>
-															{editItem && editItem.obligations ? (
-																editItem.obligations
-															) : (
-																<p className='text-muted fw-semibold'>
-																	Nada para mostrar aqui{' '}
-																	<Icon
-																		icon='SentimentNeutral '
-																		size='2x'
-																	/>{' '}
-																</p>
-															)}
-														</AccordionItem>
-														<AccordionItem id='faq2' title='Benefícios'>
-															{editItem && editItem.benefits ? (
-																editItem.benefits
-															) : (
-																<p className='text-muted fw-semibold'>
-																	Nada para mostrar aqui{' '}
-																	<Icon
-																		icon='SentimentDissatisfied '
-																		size='2x'
-																	/>{' '}
-																</p>
-															)}
-														</AccordionItem>
-														<AccordionItem id='faq3' title='Detalhes'>
-															{editItem && editItem.details ? (
-																editItem.details
-															) : (
-																<p className='text-muted fw-semibold'>
-																	Nada para mostrar aqui{' '}
-																	<Icon
-																		icon='SentimentVeryDissatisfied '
-																		size='2x'
-																	/>{' '}
-																</p>
-															)}
-														</AccordionItem>
-													</Accordion>
-												</div>
+						<div className='row h-100'>
+							<div className='col-lg-4'>
+								<Card stretch>
+									<CardBody isScrollable>
+										<div className='row g-3'>
+											<div className='absolute'>
+												{editItem?.PCD == '1' && (
+													<div className='d-flex gap-2 '>
+														<Icon icon='AccessibleForward' size='2x' />
+														<p className='mt-2'>Vaga Afirmativa</p>
+													</div>
+												)}
 											</div>
-										</CardBody>
-									</>
-								)}
-								{activeTab === TABS.CANDIDATE && (
-									<>
-										<CardHeader>
-											<CardLabel icon='People' iconColor='info'>
-												<CardTitle tag='div' className='h5'>
-													Candidatos
-												</CardTitle>
-												<CardSubTitle tag='div' className='h6'>
-													Colaboradores Inscritos
-												</CardSubTitle>
-											</CardLabel>
-										</CardHeader>
-										<CardBody isScrollable>
-											<div className='row g-4'>
-												{Array.isArray(candidates) && candidates.length > 0 ? (
-													candidates.map((candidate: any, index: number) => (
-														<div
-															key={candidate.cpf}
-															className='col-12 d-md-flex align-items-center'>
-															<div className='flex-shrink-0 d-flex justify-content-center'>
-																<img
-																	src={`${candidate.picture}`}
-																	alt='Foto do candidato'
-																	width={64}
-																	height={64}
-																	className='rounded-circle'
-																/>
-															</div>
-															<div className='flex-grow-1 ms-3 d-flex justify-content-center justify-content-md-between align-items-center m-2 '>
-																<figure className='mb-0'>
-																	<blockquote className='gap-2 align-items-center  blockquote mb-0 d-flex justify-content-center justify-content-md-start'>
+											<div className='col-12'>
+												{editItem && (
+													<img
+														src={AbstractPicture[editItem.image]}
+														alt=''
+														width='100%'
+														className='p-5'
+													/>
+												)}
+											</div>
+											<div className='col-12'>
+												<Button
+													icon='Summarize'
+													color='info'
+													className='w-100 p-3'
+													isLight={activeTab !== TABS.DETAILS}
+													onClick={() => setActiveTab(TABS.DETAILS)}>
+													{TABS.DETAILS}
+												</Button>
+											</div>
+											<div className='col-12'>
+												<Button
+													icon='People'
+													color='info'
+													className='w-100 p-3'
+													isLight={activeTab !== TABS.CANDIDATE}
+													onClick={() => setActiveTab(TABS.CANDIDATE)}>
+													{TABS.CANDIDATE}
+												</Button>
+											</div>
+											<div className='col-12'>
+												<Button
+													icon='Edit'
+													color='success'
+													className='w-100 p-3'
+													isLight={activeTab !== TABS.EDIT}
+													onClick={() => setActiveTab(TABS.EDIT)}>
+													{TABS.EDIT}
+												</Button>
+											</div>
+										</div>
+									</CardBody>
+									<CardFooter>
+										<CardFooterLeft className='w-100'>
+											<Button
+												onClick={handleRemove}
+												icon='Delete'
+												color='danger'
+												isLight
+												className='w-100 p-3'>
+												Deletar
+											</Button>
+										</CardFooterLeft>
+									</CardFooter>
+								</Card>
+							</div>
+							<div className='col-lg-8'>
+								<Card
+									stretch
+									className='overflow-hidden'
+									tag='form'
+									noValidate
+									onSubmit={formik.handleSubmit}>
+									{activeTab === TABS.DETAILS && (
+										<>
+											<CardHeader>
+												<CardLabel icon='Summarize' iconColor='info'>
+													<CardTitle tag='div' className='h5'>
+														Informações
+													</CardTitle>
+													<CardSubTitle tag='div' className='h6'>
+														Detalhes da Vaga
+													</CardSubTitle>
+												</CardLabel>
+											</CardHeader>
+											<CardBody isScrollable>
+												<div className='row'>
+													<div className='col-lg-6'>
+														<Card
+															stretch
+															shadow='sm'
+															className={`bg-l${
+																darkModeStatus ? 'o25' : '25'
+															}-primary rounded-2`}>
+															<CardHeader className='bg-transparent'>
+																<CardLabel>
+																	<CardTitle>Salario</CardTitle>
+																</CardLabel>
+															</CardHeader>
+															<CardBody>
+																<div className='d-flex align-items-center pb-3'>
+																	<div className='flex-shrink-0'>
 																		<Icon
-																			icon={
-																				candidate.verify ||
-																				candidate.step != '0'
-																					? 'GppGood'
-																					: 'GppMaybe'
-																			}
-																			color={
-																				candidate.verify ||
-																				candidate.step != '0'
-																					? 'success'
-																					: 'warning'
-																			}
-																			title={
-																				candidate.verify ||
-																				candidate.step != '0'
-																					? 'documentos aprovado'
-																					: 'documentos em espera'
-																			}
+																			icon='Savings'
+																			size='4x'
+																			color='primary'
 																		/>
-																		<p>{candidate.name}</p>
-																	</blockquote>
-																	<div className='d-flex align-items-center gap-2 justify-content-center justify-content-md-start'>
-																		<p
-																			className={`mb-0 ${candidate.status || candidate.step != '0' ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
-																			{candidate.status ||
-																			candidate.step != '0'
-																				? 'aprovado para próxima fase'
-																				: candidate.status ==
-																					null
-																					? 'em espera'
-																					: 'reprovado'}
-																		</p>
-																		{/* <Icon 
+																	</div>
+																	<div className='flex-grow-1 ms-3'>
+																		<div className='fw-bold fs-3 mb-0'>
+																			R${' '}
+																			{editItem &&
+																				priceFormat(
+																					editItem.salary,
+																				)}
+																		</div>
+																	</div>
+																</div>
+															</CardBody>
+														</Card>
+													</div>
+													<div className='col-lg-6'>
+														<Card
+															stretch
+															shadow='sm'
+															className={`bg-l${
+																darkModeStatus ? 'o25' : '25'
+															}-secondary bg-l${
+																darkModeStatus ? 'o50' : '10'
+															}-secondary:hover transition-base rounded-2`}>
+															<CardHeader className='bg-transparent'>
+																<CardLabel>
+																	<CardTitle
+																		tag='h4'
+																		className='h5'>
+																		Contrato
+																	</CardTitle>
+																</CardLabel>
+															</CardHeader>
+															<CardBody>
+																<div className='d-flex align-items-center pb-3'>
+																	<div className='flex-shrink-0'>
+																		<Icon
+																			icon='Construction'
+																			size='4x'
+																			color='secondary'
+																		/>
+																	</div>
+																	<div className='flex-grow-1 ms-3'>
+																		<div
+																			className={`fw-bold fs-3 mb-0 text-uppercase ${editItem && editItem.contract == 'contract' ? 'text-capitalize' : 'text-uppercase'}`}>
+																			{editItem &&
+																			editItem.contract ==
+																				'contract'
+																				? 'Contrato'
+																				: editItem?.contract}
+																		</div>
+																	</div>
+																</div>
+															</CardBody>
+														</Card>
+													</div>
+													<div className='col-lg-6'>
+														<Card
+															stretch
+															shadow='sm'
+															className={`bg-l${
+																darkModeStatus ? 'o25' : '25'
+															}-success rounded-2`}>
+															<CardHeader className='bg-transparent'>
+																<CardLabel>
+																	<CardTitle>
+																		Carga Horária
+																	</CardTitle>
+																</CardLabel>
+															</CardHeader>
+															<CardBody>
+																<div className='d-flex align-items-center pb-3'>
+																	<div className='flex-shrink-0'>
+																		<Icon
+																			icon='Schedule'
+																			size='4x'
+																			color='success'
+																		/>
+																	</div>
+																	<div className='flex-grow-1 ms-3'>
+																		<div className='fw-bold fs-3 mb-0'>
+																			{editItem &&
+																				editItem.time &&
+																				editItem.time.time}
+																			h semanais
+																		</div>
+																	</div>
+																</div>
+															</CardBody>
+														</Card>
+													</div>
+													<div className='col-lg-6'>
+														<Card
+															stretch
+															shadow='sm'
+															className={`bg-l${
+																darkModeStatus ? 'o25' : '25'
+															}-info rounded-2`}>
+															<CardHeader className='bg-transparent'>
+																<CardLabel>
+																	<CardTitle>
+																		Jornada de Trabalho
+																	</CardTitle>
+																</CardLabel>
+															</CardHeader>
+															<CardBody>
+																<div className='d-flex align-items-center pb-3'>
+																	<div className='flex-shrink-0'>
+																		<Icon
+																			icon='DirectionsRun'
+																			size='4x'
+																			color='info'
+																		/>
+																	</div>
+																	<div className='flex-grow-1 ms-3'>
+																		<div className='fw-bold fs-3 mb-0'>
+																			{editItem &&
+																				editItem.time &&
+																				editItem.time
+																					.journey}
+																		</div>
+																	</div>
+																</div>
+															</CardBody>
+														</Card>
+													</div>
+													<div className='col-12 shadow-3d-container'>
+														<Accordion id='faq' shadow='sm'>
+															<AccordionItem
+																id='faq1'
+																title='Obrigações'>
+																{editItem &&
+																editItem.obligations ? (
+																	editItem.obligations
+																) : (
+																	<p className='text-muted fw-semibold'>
+																		Nada para mostrar aqui{' '}
+																		<Icon
+																			icon='SentimentNeutral '
+																			size='2x'
+																		/>{' '}
+																	</p>
+																)}
+															</AccordionItem>
+															<AccordionItem
+																id='faq2'
+																title='Benefícios'>
+																{editItem && editItem.benefits ? (
+																	editItem.benefits
+																) : (
+																	<p className='text-muted fw-semibold'>
+																		Nada para mostrar aqui{' '}
+																		<Icon
+																			icon='SentimentDissatisfied '
+																			size='2x'
+																		/>{' '}
+																	</p>
+																)}
+															</AccordionItem>
+															<AccordionItem
+																id='faq3'
+																title='Detalhes'>
+																{editItem && editItem.details ? (
+																	editItem.details
+																) : (
+																	<p className='text-muted fw-semibold'>
+																		Nada para mostrar aqui{' '}
+																		<Icon
+																			icon='SentimentVeryDissatisfied '
+																			size='2x'
+																		/>{' '}
+																	</p>
+																)}
+															</AccordionItem>
+														</Accordion>
+													</div>
+												</div>
+											</CardBody>
+										</>
+									)}
+									{activeTab === TABS.CANDIDATE && (
+										<>
+											<CardHeader>
+												<CardLabel icon='People' iconColor='info'>
+													<CardTitle tag='div' className='h5'>
+														Candidatos
+													</CardTitle>
+													<CardSubTitle tag='div' className='h6'>
+														Colaboradores Inscritos
+													</CardSubTitle>
+												</CardLabel>
+											</CardHeader>
+											<CardBody isScrollable>
+												<div className='row g-4'>
+													{Array.isArray(candidates) &&
+													candidates.length > 0 ? (
+														candidates.map(
+															(candidate: any, index: number) => (
+																<div
+																	key={candidate.cpf}
+																	className='col-12 d-md-flex align-items-center'>
+																	<div className='flex-shrink-0 d-flex justify-content-center'>
+																		<img
+																			src={`${candidate.picture}`}
+																			alt='Foto do candidato'
+																			width={64}
+																			height={64}
+																			className='rounded-circle'
+																		/>
+																	</div>
+																	<div className='flex-grow-1 ms-3 d-flex justify-content-center justify-content-md-between align-items-center m-2 '>
+																		<figure className='mb-0'>
+																			<blockquote className='gap-2 align-items-center  blockquote mb-0 d-flex justify-content-center justify-content-md-start'>
+																				<Icon
+																					icon={
+																						candidate.verify ||
+																						candidate.step !=
+																							'0'
+																							? 'GppGood'
+																							: 'GppMaybe'
+																					}
+																					color={
+																						candidate.verify ||
+																						candidate.step !=
+																							'0'
+																							? 'success'
+																							: 'warning'
+																					}
+																					title={
+																						candidate.verify ||
+																						candidate.step !=
+																							'0'
+																							? 'documentos aprovado'
+																							: 'documentos em espera'
+																					}
+																				/>
+																				<p>
+																					{candidate.name}
+																				</p>
+																			</blockquote>
+																			<div className='d-flex align-items-center gap-2 justify-content-center justify-content-md-start'>
+																				<p
+																					className={`mb-0 ${candidate.status || candidate.step != '0' ? 'text-success' : candidate.status == null ? 'text-warning' : 'text-danger'}`}>
+																					{candidate.status ||
+																					candidate.step !=
+																						'0'
+																						? 'aprovado para próxima fase'
+																						: candidate.status ==
+																							  null
+																							? 'em espera'
+																							: 'reprovado'}
+																				</p>
+																				{/* <Icon 
 																					icon={
 																						candidate.verify ? 'GppGood' : 'GppMaybe'
 																					}
@@ -823,127 +843,136 @@ const JobViewPage = () => {
 																					}
 																					title={candidate.verify ? 'documentos aprovado' : 'documentos em espera'}
 																				/> */}
+																			</div>
+																		</figure>
 																	</div>
-																</figure>
-															</div>
-															<div className='d-flex flex-row gap-4'>
-																<Button
-																	icon='Check'
-																	color='success'
-																	isLight={true}
-																	isDisable={
-																		candidate.status == false ||
+																	<div className='d-flex flex-row gap-4'>
+																		<Button
+																			icon='Check'
+																			color='success'
+																			isLight
+																			isDisable={
+																				candidate.status ==
+																					false ||
+																				candidate.status ||
+																				candidate.step !=
+																					'0'
+																			}
+																			onClick={() =>
+																				aprovedCandidate(
+																					candidate,
+																					index,
+																				)
+																			}>
+																			aprovar
+																		</Button>
+																		<Button
+																			icon='Visibility'
+																			color='info'
+																			isLight
+																			isDisable={
+																				candidate.status ==
+																					false ||
+																				candidate.status ||
+																				candidate.step !=
+																					'0'
+																			}
+																			onClick={() =>
+																				navigateToCustomer(
+																					candidate.cpf,
+																				)
+																			}>
+																			visualizar
+																		</Button>
+																		{candidate.status ==
+																			false ||
 																		candidate.status ||
-																		candidate.step != '0'
-																	}
-																	onClick={() =>
-																		aprovedCandidate(
-																			candidate,
-																			index,
-																		)
-																	}>
-																	aprovar
-																</Button>
-																<Button
-																	icon='Visibility'
-																	color='info'
-																	isLight={true}
-																	isDisable={
-																		candidate.status == false ||
-																		candidate.status ||
-																		candidate.step != '0'
-																	}
-																	onClick={() =>
-																		navigateToCustomer(
-																			candidate.cpf,
-																		)
-																	}>
-																	visualizar
-																</Button>
-																{candidate.status == false ||
-																candidate.status ||
-																candidate.step != '0' ? (
-																	<Button
-																		icon='Autorenew'
-																		color='light'
-																		isLight={true}
-																		onClick={() =>
-																			restoreCandidate(
-																				candidate,
-																				index,
-																			)
-																		}>
-																		restaurar
-																	</Button>
+																		candidate.step != '0' ? (
+																			<Button
+																				icon='Autorenew'
+																				color='light'
+																				isLight
+																				onClick={() =>
+																					restoreCandidate(
+																						candidate,
+																						index,
+																					)
+																				}>
+																				restaurar
+																			</Button>
+																		) : (
+																			<Button
+																				icon='Close'
+																				color='danger'
+																				isLight
+																				onClick={() =>
+																					reprovedCandidate(
+																						candidate,
+																						index,
+																					)
+																				}>
+																				reprovar
+																			</Button>
+																		)}
+																	</div>
+																</div>
+															),
+														)
+													) : (
+														<div>
+															<p className='fw-bold fs-3'>
+																Nenhum candidato cadastrado no
+																momento
+															</p>
+														</div>
+													)}
+												</div>
+											</CardBody>
+										</>
+									)}
+									{activeTab === TABS.EDIT && (
+										<>
+											<CardHeader>
+												<CardLabel icon='Edit' iconColor='success'>
+													<CardTitle tag='div' className='h5'>
+														Editar
+													</CardTitle>
+													<CardSubTitle tag='div' className='h6'>
+														Informações da Vaga
+													</CardSubTitle>
+												</CardLabel>
+											</CardHeader>
+											<CardBody isScrollable>
+												<Card>
+													<CardHeader>
+														<CardLabel icon='Photo' iconColor='info'>
+															<CardTitle>Imagem da Vaga</CardTitle>
+														</CardLabel>
+													</CardHeader>
+													<CardBody>
+														<div className='row'>
+															<div className='col-lg-12'>
+																{editItem?.image ? (
+																	<img
+																		src={
+																			AbstractPicture[
+																				editItem.image
+																			]
+																		}
+																		alt=''
+																		width='25%'
+																		height='25%'
+																		className='mx-auto d-block img-fluid mb-3'
+																	/>
 																) : (
-																	<Button
-																		icon='Close'
-																		color='danger'
-																		isLight={true}
-																		onClick={() =>
-																			reprovedCandidate(
-																				candidate,
-																				index,
-																			)
-																		}>
-																		reprovar
-																	</Button>
+																	<PlaceholderImage
+																		width={128}
+																		height={128}
+																		className='mx-auto d-block img-fluid mb-3 rounded'
+																	/>
 																)}
 															</div>
-														</div>
-													))
-												) : (
-													<div>
-														<p className='fw-bold fs-3'>
-															Nenhum candidato cadastrado no momento
-														</p>
-													</div>
-												)}
-											</div>
-										</CardBody>
-									</>
-								)}
-								{activeTab === TABS.EDIT && (
-									<>
-										<CardHeader>
-											<CardLabel icon='Edit' iconColor='success'>
-												<CardTitle tag='div' className='h5'>
-													Editar
-												</CardTitle>
-												<CardSubTitle tag='div' className='h6'>
-													Informações da Vaga
-												</CardSubTitle>
-											</CardLabel>
-										</CardHeader>
-										<CardBody isScrollable>
-											<Card>
-												<CardHeader>
-													<CardLabel icon='Photo' iconColor='info'>
-														<CardTitle>Imagem da Vaga</CardTitle>
-													</CardLabel>
-												</CardHeader>
-												<CardBody>
-													<div className='row'>
-														<div className='col-lg-12'>
-															{editItem?.image ? (
-																<img
-																	src={
-																		AbstractPicture[editItem.image]
-																	}
-																	alt=''
-																	width={'25%'}
-																	height={'25%'}
-																	className='mx-auto d-block img-fluid mb-3'
-																/>
-															) : (
-																<PlaceholderImage
-																	width={128}
-																	height={128}
-																	className='mx-auto d-block img-fluid mb-3 rounded'
-																/>
-															)}
-														</div>
-														{/* <div className='col-lg-8'>
+															{/* <div className='col-lg-8'>
 															<div className='row g-4'>
 																<div className='col-12'>
 																	<Input
@@ -968,234 +997,296 @@ const JobViewPage = () => {
 																</div>
 															</div>
 														</div> */}
-													</div>
-												</CardBody>
-											</Card>
+														</div>
+													</CardBody>
+												</Card>
 
-											<Card>
-												<CardHeader>
-													<CardLabel icon='Description' iconColor='success'>
-														<CardTitle>Detalhes da Vaga</CardTitle>
-													</CardLabel>
-												</CardHeader>
-												<CardBody>
-													<div className='row g-4'>
-														<div className='col-12'>
-															<FormGroup id='pcd' isFloating>
-																<Checks
-																	type='switch'
-																	label='PCD'
-																	onChange={(
-																		e: React.ChangeEvent<HTMLInputElement>,
-																	) => {
-																		formik.setFieldValue(
-																			'PCD',
-																			e.target.checked
-																				? '1'
-																				: '0',
-																		);
-																	}}
-																	value={formik.values.PCD}
-																	checked={formik.values.PCD === '1'}
-																	isInline={true}
-																/>
-															</FormGroup>
+												<Card>
+													<CardHeader>
+														<CardLabel
+															icon='Description'
+															iconColor='success'>
+															<CardTitle>Detalhes da Vaga</CardTitle>
+														</CardLabel>
+													</CardHeader>
+													<CardBody>
+														<div className='row g-4'>
+															<div className='col-12'>
+																<FormGroup id='pcd' isFloating>
+																	<Checks
+																		type='switch'
+																		label='PCD'
+																		onChange={(
+																			e: React.ChangeEvent<HTMLInputElement>,
+																		) => {
+																			formik.setFieldValue(
+																				'PCD',
+																				e.target.checked
+																					? '1'
+																					: '0',
+																			);
+																		}}
+																		value={formik.values.PCD}
+																		checked={
+																			formik.values.PCD ===
+																			'1'
+																		}
+																		isInline
+																	/>
+																</FormGroup>
+															</div>
+															<div className='col-12'>
+																<FormGroup
+																	id='function'
+																	label='Função'
+																	isFloating>
+																	<Input
+																		className='text-capitalize'
+																		placeholder='Função'
+																		onChange={
+																			formik.handleChange
+																		}
+																		onBlur={formik.handleBlur}
+																		value={
+																			formik.values.function
+																		}
+																		isValid={formik.isValid}
+																		isTouched={
+																			formik.touched.function
+																		}
+																		invalidFeedback={
+																			formik.errors.function
+																		}
+																		validFeedback='Ótimo!'
+																	/>
+																</FormGroup>
+															</div>
+															<div className='col-12'>
+																<FormGroup
+																	id='salary'
+																	label='Salario'
+																	isFloating>
+																	<Input
+																		onChange={
+																			formik.handleChange
+																		}
+																		value={formik.values.salary}
+																		onBlur={formik.handleBlur}
+																		isValid={formik.isValid}
+																		isTouched={
+																			!!formik.touched.salary
+																		}
+																		invalidFeedback={
+																			typeof formik.errors
+																				.salary === 'string'
+																				? formik.errors
+																						.salary
+																				: undefined
+																		}
+																		validFeedback='Ótimo!'
+																	/>
+																</FormGroup>
+															</div>
+															<div className='col-12'>
+																<FormGroup
+																	id='time'
+																	label='Horas semanais'
+																	isFloating>
+																	<Input
+																		max={3}
+																		min={1}
+																		placeholder='Horas semanais'
+																		onChange={
+																			formik.handleChange
+																		}
+																		onBlur={formik.handleBlur}
+																		value={formik.values.time}
+																		isValid={formik.isValid}
+																		isTouched={
+																			!!formik.touched.time
+																		}
+																		invalidFeedback={
+																			typeof formik.errors
+																				.time === 'string'
+																				? formik.errors.time
+																				: undefined
+																		}
+																		validFeedback='Ótimo!'
+																	/>
+																</FormGroup>
+															</div>
+															<div className='col-12'>
+																<FormGroup id='journey'>
+																	<Select
+																		className='form-select fw-medium'
+																		required
+																		ariaLabel=''
+																		placeholder='Jornada'
+																		onChange={
+																			formik.handleChange
+																		}
+																		onBlur={formik.handleBlur}
+																		value={
+																			formik.values.journey
+																		}
+																		isValid={formik.isValid}
+																		isTouched={
+																			!!formik.touched.journey
+																		}
+																		invalidFeedback={
+																			typeof formik.errors
+																				.journey ===
+																			'string'
+																				? formik.errors
+																						.journey
+																				: undefined
+																		}
+																		validFeedback='Ótimo!'>
+																		<Option value='5x2'>
+																			5x2
+																		</Option>
+																		<Option value='6x1'>
+																			6x1
+																		</Option>
+																	</Select>
+																</FormGroup>
+															</div>
+															<div className='col-12'>
+																<FormGroup id='contract'>
+																	<Select
+																		className='form-select fw-medium'
+																		required
+																		ariaLabel='Contratação'
+																		placeholder='Contratação'
+																		onChange={
+																			formik.handleChange
+																		}
+																		onBlur={formik.handleBlur}
+																		value={
+																			formik.values.contract
+																		}
+																		isValid={formik.isValid}
+																		isTouched={
+																			formik.touched.contract
+																		}
+																		invalidFeedback={
+																			formik.errors.contract
+																		}
+																		validFeedback='Ótimo!'>
+																		<Option value='clt'>
+																			CLT
+																		</Option>
+																		
+																		<Option value='pj'>
+																			PJ
+																		</Option>
+																		<Option value='contract'>
+																			Contrato
+																		</Option>
+																	</Select>
+																</FormGroup>
+															</div>
+															<div className='col-12'>
+																<FormGroup
+																	id='obligations'
+																	label='Obrigações (opcional)'
+																	isFloating>
+																	<Textarea
+																		onChange={
+																			formik.handleChange
+																		}
+																		value={
+																			formik.values
+																				.obligations
+																		}
+																		onBlur={formik.handleBlur}
+																		isValid={formik.isValid}
+																		isTouched={
+																			formik.touched
+																				.obligations
+																		}
+																		invalidFeedback={
+																			formik.errors
+																				.obligations
+																		}
+																		validFeedback='Ótimo!'
+																	/>
+																</FormGroup>
+															</div>
+															<div className='col-12'>
+																<FormGroup
+																	id='benefits'
+																	label='Benefícios (opcional)'
+																	isFloating>
+																	<Textarea
+																		onChange={
+																			formik.handleChange
+																		}
+																		value={
+																			formik.values.benefits
+																		}
+																		onBlur={formik.handleBlur}
+																		isValid={formik.isValid}
+																		isTouched={
+																			formik.touched.benefits
+																		}
+																		invalidFeedback={
+																			formik.errors.benefits
+																		}
+																		validFeedback='Ótimo!'
+																	/>
+																</FormGroup>
+															</div>
+															<div className='col-12'>
+																<FormGroup
+																	id='details'
+																	label='Detalhes (opcional)'
+																	isFloating>
+																	<Textarea
+																		onChange={
+																			formik.handleChange
+																		}
+																		value={
+																			formik.values.details
+																		}
+																		onBlur={formik.handleBlur}
+																		isValid={formik.isValid}
+																		isTouched={
+																			formik.touched.details
+																		}
+																		invalidFeedback={
+																			formik.errors.details
+																		}
+																		validFeedback='Ótimo!'
+																	/>
+																</FormGroup>
+															</div>
 														</div>
-														<div className='col-12'>
-															<FormGroup
-																id='function'
-																label='Função'
-																isFloating>
-																<Input
-																	className='text-capitalize'
-																	placeholder='Função'
-																	onChange={formik.handleChange}
-																	onBlur={formik.handleBlur}
-																	value={formik.values.function}
-																	isValid={formik.isValid}
-																	isTouched={formik.touched.function}
-																	invalidFeedback={
-																		formik.errors.function
-																	}
-																	validFeedback='Ótimo!'
-																/>
-															</FormGroup>
-														</div>
-														<div className='col-12'>
-															<FormGroup
-																id='salary'
-																label='Salario'
-																isFloating>
-																<Input
-																	onChange={formik.handleChange}
-																	value={formik.values.salary}
-																	onBlur={formik.handleBlur}
-																	isValid={formik.isValid}
-																	isTouched={!!formik.touched.salary}
-																	invalidFeedback={
-																		typeof formik.errors.salary ===
-																		'string'
-																			? formik.errors.salary
-																			: undefined
-																	}
-																	validFeedback='Ótimo!'
-																/>
-															</FormGroup>
-														</div>
-														<div className='col-12'>
-															<FormGroup
-																id='time'
-																label='Horas semanais'
-																isFloating>
-																<Input
-																	max={3}
-																	min={1}
-																	placeholder='Horas semanais'
-																	onChange={formik.handleChange}
-																	onBlur={formik.handleBlur}
-																	value={formik.values.time}
-																	isValid={formik.isValid}
-																	isTouched={!!formik.touched.time}
-																	invalidFeedback={
-																		typeof formik.errors.time ===
-																		'string'
-																			? formik.errors.time
-																			: undefined
-																	}
-																	validFeedback='Ótimo!'
-																/>
-															</FormGroup>
-														</div>
-														<div className='col-12'>
-															<FormGroup id='journey'>
-																<Select
-																	className='form-select fw-medium'
-																	required={true}
-																	ariaLabel={''}
-																	placeholder={'Jornada'}
-																	onChange={formik.handleChange}
-																	onBlur={formik.handleBlur}
-																	value={formik.values.journey}
-																	isValid={formik.isValid}
-																	isTouched={!!formik.touched.journey}
-																	invalidFeedback={
-																		typeof formik.errors.journey ===
-																		'string'
-																			? formik.errors.journey
-																			: undefined
-																	}
-																	validFeedback='Ótimo!'>
-																	<Option value={'5x2'}>5x2</Option>
-																	<Option value={'6x1'}>6x1</Option>
-																</Select>
-															</FormGroup>
-														</div>
-														<div className='col-12'>
-															<FormGroup id='contract'>
-																<Select
-																	className='form-select fw-medium'
-																	required={true}
-																	ariaLabel={'Contratação'}
-																	placeholder={'Contratação'}
-																	onChange={formik.handleChange}
-																	onBlur={formik.handleBlur}
-																	value={formik.values.contract}
-																	isValid={formik.isValid}
-																	isTouched={formik.touched.contract}
-																	invalidFeedback={
-																		formik.errors.contract
-																	}
-																	validFeedback='Ótimo!'>
-																	<Option value={'clt'}>CLT</Option>
-																	<Option value={'pj'}>PJ </Option>
-																	<Option value={'contract'}>
-																		Contrato
-																	</Option>
-																</Select>
-															</FormGroup>
-														</div>
-														<div className='col-12'>
-															<FormGroup
-																id='obligations'
-																label='Obrigações (opcional)'
-																isFloating>
-																<Textarea
-																	onChange={formik.handleChange}
-																	value={formik.values.obligations}
-																	onBlur={formik.handleBlur}
-																	isValid={formik.isValid}
-																	isTouched={
-																		formik.touched.obligations
-																	}
-																	invalidFeedback={
-																		formik.errors.obligations
-																	}
-																	validFeedback='Ótimo!'></Textarea>
-															</FormGroup>
-														</div>
-														<div className='col-12'>
-															<FormGroup
-																id='benefits'
-																label='Benefícios (opcional)'
-																isFloating>
-																<Textarea
-																	onChange={formik.handleChange}
-																	value={formik.values.benefits}
-																	onBlur={formik.handleBlur}
-																	isValid={formik.isValid}
-																	isTouched={formik.touched.benefits}
-																	invalidFeedback={
-																		formik.errors.benefits
-																	}
-																	validFeedback='Ótimo!'></Textarea>
-															</FormGroup>
-														</div>
-														<div className='col-12'>
-															<FormGroup
-																id='details'
-																label='Detalhes (opcional)'
-																isFloating>
-																<Textarea
-																	onChange={formik.handleChange}
-																	value={formik.values.details}
-																	onBlur={formik.handleBlur}
-																	isValid={formik.isValid}
-																	isTouched={formik.touched.details}
-																	invalidFeedback={
-																		formik.errors.details
-																	}
-																	validFeedback='Ótimo!'></Textarea>
-															</FormGroup>
-														</div>
-													</div>
-												</CardBody>
-											</Card>
-										</CardBody>
-										<CardFooter>
-											<CardFooterRight>
-												<Button
-													color='info'
-													icon='Save'
-													type='submit'
-													isDisable={!formik.isValid && !!formik.submitCount}>
-													Editar
-												</Button>
-											</CardFooterRight>
-										</CardFooter>
-									</>
-								)}
-							</Card>
+													</CardBody>
+												</Card>
+											</CardBody>
+											<CardFooter>
+												<CardFooterRight>
+													<Button
+														color='info'
+														icon='Save'
+														type='submit'
+														isDisable={
+															!formik.isValid && !!formik.submitCount
+														}>
+														Editar
+													</Button>
+												</CardFooterRight>
+											</CardFooter>
+										</>
+									)}
+								</Card>
+							</div>
 						</div>
-					</div>
-				</>
-				:
-				<>
-					<div className='display-4 fw-bold py-3 text-capitalize'>
-						carregando...
-					</div>
-				</>
-				}
-
+					</>
+				) : (
+					<div className='display-4 fw-bold py-3 text-capitalize'>carregando...</div>
+				)}
 			</Page>
 		</PageWrapper>
 	);

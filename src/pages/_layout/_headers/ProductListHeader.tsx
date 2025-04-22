@@ -7,7 +7,6 @@ import GetCompanyFindOne from '../../../api/get/company/FindOne';
 import CompanyLogoDefault from '../../../assets/img/companyLogoDefault.png';
 
 const ProductListHeader = () => {
-
 	const { userData } = useContext(AuthContext);
 	const [logoPath, setLogoPath] = useState<null | string>(null);
 	const [companyDates, setCompanyDates] = useState<null | any>(null);
@@ -23,20 +22,21 @@ const ProductListHeader = () => {
 			}
 		};
 		fetchData();
-	}, [userData]);	return (
+	}, [userData]);
+	return (
 		<Header>
 			<HeaderLeft>
 				{logoPath ? (
-						<Avatar src={logoPath} size={32} />
-					) : (
-						<Avatar src={CompanyLogoDefault} size={32} />
-					)}
-					{companyDates && (
-						<span>
-							<strong>{companyDates.company_name}</strong>
-						</span>
-					)}
-					<span className='text-muted'>Company</span> 
+					<Avatar src={logoPath} size={32} />
+				) : (
+					<Avatar src={CompanyLogoDefault} size={32} />
+				)}
+				{companyDates && (
+					<span>
+						<strong>{companyDates.company_name}</strong>
+					</span>
+				)}
+				<span className='text-muted'>Company</span>
 			</HeaderLeft>
 			<CommonHeaderRight />
 		</Header>

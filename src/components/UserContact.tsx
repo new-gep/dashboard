@@ -5,7 +5,7 @@ import Card, { CardBody } from './bootstrap/Card';
 import Button from './bootstrap/Button';
 import Avatar from './Avatar';
 import { TColor } from '../type/color-type';
-import {AvatarPicture} from '../constants/avatar';
+import { AvatarPicture } from '../constants/avatar';
 
 interface IUserContactProps {
 	className?: string;
@@ -57,7 +57,9 @@ const UserContact: FC<IUserContactProps> = ({
 									isLight
 									aria-label='Phone'
 									tag='a'
-									href={`https://wa.me/${phone}`} target="_blank" rel="noopener noreferrer"
+									href={`https://wa.me/${phone}`}
+									target='_blank'
+									rel='noopener noreferrer'
 								/>
 							</div>
 						)}
@@ -77,7 +79,7 @@ const UserContact: FC<IUserContactProps> = ({
 				{(src || srcSet) && (
 					<div className='flex-shrink-0'>
 						<Avatar
-							//@ts-ignore
+							// @ts-ignore
 							src={src ? AvatarPicture[src] : AvatarPicture.default}
 							srcSet={srcSet}
 							color={color}

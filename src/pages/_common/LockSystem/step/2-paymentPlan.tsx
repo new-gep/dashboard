@@ -1,25 +1,25 @@
 import React, { useContext, useEffect, useState } from 'react';
-import Button from '../../../../components/bootstrap/Button';
-import Card from '../../../../components/bootstrap/Card';
-import { CardBody, CardHeader, CardTitle } from '../../../../components/bootstrap/Card';
-import ReactCreditCardsContainer from '../../../../components/extras/ReactCreditCardsContainer';
-// @ts-ignore
+//@ts-ignore
 import ReactCreditCards, { Focused } from 'react-credit-cards-2';
 import Payment from 'payment';
+import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
+import Button from '../../../../components/bootstrap/Button';
+import Card, { CardBody } from '../../../../components/bootstrap/Card';
+
+// @ts-ignore
 import 'react-credit-cards-2/es/styles-compiled.css';
 import Icon from '../../../../components/icon/Icon';
-import SubHeader, { SubheaderSeparator } from '../../../../layout/SubHeader/SubHeader';
 import AllCardCompany from '../../../../api/get/card_company/AllCardCompany';
 import AuthContext from '../../../../contexts/authContext';
-import { useFormik } from 'formik';
 import Card_Company from '../../../../api/post/card_company/create';
 import Toasts from '../../../../components/bootstrap/Toasts';
-import { toast } from 'react-toastify';
 import FormGroup from '../../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../../components/bootstrap/forms/Input';
 import Checks, { ChecksGroup } from '../../../../components/bootstrap/forms/Checks';
 import DefaultPayment from '../../../../api/post/payment/Default';
 import Spinner from '../../../../components/bootstrap/Spinner';
+
 const validate = (values: {
 	name: string;
 	number: string;
@@ -48,14 +48,14 @@ const validate = (values: {
 		errors.cvc = 'Deve ter 3 números';
 	}
 
-	//# Antiga validação
+	// # Antiga validação
 	// if (!values.expiry || values.expiry.includes('_')) {
 	// 	errors.expiry = 'Obrigatório';
 	// } else if (parseInt(values.expiry.slice(-2), 10) <= 20) {
 	// 	errors.expiry = 'Data de validade inválida';
 	// }
 
-	//# Nova validação para validar a data de validade
+	// # Nova validação para validar a data de validade
 	const [month, year] = values.expiry.split('/').map(Number);
 	const currentYear = new Date().getFullYear() % 100; // Pegamos os últimos dois dígitos do ano
 	const currentMonth = new Date().getMonth() + 1; // Janeiro é 0, então somamos 1
@@ -74,7 +74,13 @@ const validate = (values: {
 	return errors;
 };
 
-export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (step: number) => void }) {
+export default function PaymentPlan({
+	plan,
+	setStep,
+}: {
+	plan: any;
+	setStep: (step: number) => void;
+}) {
 	const [paymentMethod, setPaymentMethod] = useState('creditCard');
 	const [cardDetails, setCardDetails] = useState({
 		number: '',
@@ -118,8 +124,8 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 	};
 
 	const convertToYearMonth = (expiry: string) => {
-		const [month, year] = expiry.split("/"); // Pega o mês e o "ano"
-		return `20${year}-${month.padStart(2, "0")}`; // Formata para YYYY-MM
+		const [month, year] = expiry.split('/'); // Pega o mês e o "ano"
+		return `20${year}-${month.padStart(2, '0')}`; // Formata para YYYY-MM
 	};
 
 	const handleInputFocus = ({ target }: { target: { name: Focused } }) => setFocused(target.name);
@@ -177,14 +183,14 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 			if (response.status === 201) {
 				toast(
 					<Toasts
-						icon={'Check'}
-						iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={'🥳 Parabéns! '}>
+						icon='Check'
+						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='🥳 Parabéns! '>
 						Cartão adicionado com sucesso.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 4000, //
+						autoClose: 1000, //
 					},
 				);
 				// setModalStatus(false);
@@ -192,14 +198,14 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 			} else {
 				toast(
 					<Toasts
-						icon={'Close'}
-						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={'Erro'}>
+						icon='Close'
+						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Erro'>
 						Erro ao adicionar cartão, tente novamente.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 4000, //
+						autoClose: 1000, //
 					},
 				);
 			}
@@ -224,38 +230,38 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 		switch (response.status) {
 			case 200:
 				console.log(response.payment);
-				switch(response.payment){
+				switch (response.payment) {
 					case 'denied':
 						toast(
 							<Toasts
-								icon={'Close'}
-								iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-								title={'Erro'}>
+								icon='Close'
+								iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+								title='Erro'>
 								Erro ao realizar pagamento, tente novamente.
 							</Toasts>,
 						);
-				break;
+						break;
 					case 'captured':
 						toast(
 							<Toasts
-								icon={'Check'}
-								iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-								title={'🥳 Parabéns! '}>
+								icon='Check'
+								iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+								title='🥳 Parabéns! '>
 								Pagamento realizado com sucesso.
 							</Toasts>,
 						);
 						break;
-				default:
-				toast(
-					<Toasts
-						icon={'Close'}
-						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={'Erro'}>
-						Erro ao realizar pagamento, tente novamente.
-					</Toasts>,
-				);
-			break;
-			}
+					default:
+						toast(
+							<Toasts
+								icon='Close'
+								iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+								title='Erro'>
+								Erro ao realizar pagamento, tente novamente.
+							</Toasts>,
+						);
+						break;
+				}
 		}
 		setWatingPayment(false);
 	};
@@ -277,15 +283,15 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 			phone: userData.phone,
 			additionalInfo: 'Pagamento de assinatura',
 		});
-		
+
 		switch (response.status) {
 			case 200:
 				setQrCodeLink(response.payment.image);
 				toast(
 					<Toasts
-						icon={'Check'}
-						iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={'🥳 Parabéns! '}>
+						icon='Check'
+						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='🥳 Parabéns! '>
 						QRCode gerado com sucesso.
 					</Toasts>,
 				);
@@ -293,9 +299,9 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 			default:
 				toast(
 					<Toasts
-						icon={'Close'}
-						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={'Erro'}>
+						icon='Close'
+						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Erro'>
 						Erro ao realizar pagamento, tente novamente.
 					</Toasts>,
 				);
@@ -317,10 +323,7 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 				clearInterval(interval);
 				setGenerateQRCode(false);
 				toast(
-					<Toasts
-						icon={'Close'}
-						iconColor={'danger'}
-						title={'Tempo Esgotado'}>
+					<Toasts icon='Close' iconColor='danger' title='Tempo Esgotado'>
 						O tempo para pagamento expirou. Por favor, gere um novo QR Code.
 					</Toasts>,
 				);
@@ -338,9 +341,9 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 		if (coupon == '') {
 			toast(
 				<Toasts
-					icon={'Close'}
-					iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={'Erro'}>
+					icon='Close'
+					iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title='Erro'>
 					Digite um cupom de desconto.
 				</Toasts>,
 			);
@@ -353,18 +356,18 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 			setTotal(plan.price - discount);
 			toast(
 				<Toasts
-					icon={'Check'}
-					iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={'🥳 Parabéns! '}>
+					icon='Check'
+					iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title='🥳 Parabéns! '>
 					Cupom aplicado com sucesso.
 				</Toasts>,
 			);
 		} else {
 			toast(
 				<Toasts
-					icon={'Close'}
-					iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={'Erro'}>
+					icon='Close'
+					iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title='Erro'>
 					Cupom incorreto.
 				</Toasts>,
 			);
@@ -494,7 +497,7 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 										}}
 									/>
 									<ReactCreditCards
-										cvc={''}
+										cvc=''
 										expiry={card.expiry}
 										name={card.name}
 										number={card.number.replace(/\d(?!(\d*)$)/g, '*')}
@@ -586,7 +589,7 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 									</FormGroup>
 								</div>
 
-								{ !watingPayment ? 
+								{!watingPayment ? (
 									<div
 										className={`d-flex ${selectedCardId === null ? 'justify-content-between' : 'justify-content-end'} mt-3 px-3 `}>
 										{selectedCardId === null && (
@@ -606,14 +609,14 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 											Pagar
 										</Button>
 									</div>
-									:
+								) : (
 									<div className='d-flex align-items-center justify-content-center mt-3 px-3 '>
 										<Spinner color='success' />
 										<Button isDisable isLink color='success'>
 											Processando Pagamento
 										</Button>
 									</div>
-								}
+								)}
 							</form>
 						</div>
 						<div className='col-md-4 col-12 p-3 text-center px-5'>
@@ -794,19 +797,18 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 											</p>
 										</div>
 									</>
-									{
-										!watingGenerate ?
+									{!watingGenerate ? (
 										<Button onClick={handleGenerateQRCode} color='success'>
 											Gerar QR Code
 										</Button>
-										:
+									) : (
 										<div className='d-flex align-items-center justify-content-center mt-3 px-3 '>
 											<Spinner color='success' />
 											<Button isDisable isLink color='success'>
 												Gerando QR Code
 											</Button>
 										</div>
-									}
+									)}
 								</>
 							) : (
 								<>
@@ -857,7 +859,7 @@ export default function PaymentPlan({ plan, setStep }: { plan: any, setStep: (st
 									<li>
 										<div className='d-flex justify-content-between'>
 											<span className='text-muted'>Desconto:</span>{' '}
-											<span className='text-danger'>R$ - {discount },00</span>
+											<span className='text-danger'>R$ - {discount},00</span>
 										</div>
 									</li>
 

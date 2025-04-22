@@ -5,10 +5,11 @@ import CommonHeaderChat from './CommonHeaderChat';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import Mask from '../../../function/Mask';
+
 const DashboardBookingHeader = () => {
 	const { userData } = useContext(AuthContext);
 	const { darkModeStatus } = useDarkMode();
-	
+
 	return (
 		<Header>
 			<HeaderLeft>
@@ -19,7 +20,11 @@ const DashboardBookingHeader = () => {
 								className={classNames('fs-3', 'fw-bold', {
 									'text-dark': !darkModeStatus,
 								})}>
-								Oi, <span className='text-capitalize'>{userData.name && Mask('firstName',userData.name)}</span>!
+								Oi,{' '}
+								<span className='text-capitalize'>
+									{userData.name && Mask('firstName', userData.name)}
+								</span>
+								!
 							</div>
 						</div>
 					</div>

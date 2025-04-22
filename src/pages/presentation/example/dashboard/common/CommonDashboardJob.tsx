@@ -1,53 +1,38 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
-import dayjs from 'dayjs';
-import { ApexOptions } from 'apexcharts';
-import { Link } from 'react-router-dom';
-import classNames from 'classnames';
 import Card, {
-	CardActions,
 	CardBody,
 	CardHeader,
 	CardLabel,
 	CardTitle,
 } from '../../../../../components/bootstrap/Card';
-import Dropdown, {
-	DropdownItem,
-	DropdownMenu,
-	DropdownToggle,
-} from '../../../../../components/bootstrap/Dropdown';
-import Button from '../../../../../components/bootstrap/Button';
+
 import Icon from '../../../../../components/icon/Icon';
 import PaginationButtons, {
 	dataPagination,
 	PER_COUNT,
 } from '../../../../../components/PaginationButtons';
-import data from '../../../../../common/data/dummyProductData';
-import useSortableData from '../../../../../hooks/useSortableData';
 import useDarkMode from '../../../../../hooks/useDarkMode';
-import { demoPagesMenu } from '../../../../../menu';
-import Chart from '../../../../../components/extras/Chart';
-import Badge from '../../../../../components/bootstrap/Badge';
 import Job_Open from '../../../../../api/get/job/Job_Open';
 import AuthContext from '../../../../../contexts/authContext';
 import { AbstractPicture } from '../../../../../constants/abstract';
-import Mask from '../../../../../function/Mask';
-import { priceFormat } from '../../../../../helpers/helpers'; 
+import { priceFormat } from '../../../../../helpers/helpers';
+
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 interface ITableRowProps {
-	id      : number;
-	image   : AbstractPictureKeys;
+	id: number;
+	image: AbstractPictureKeys;
 	function: string;
-	salary  : string;
-	contract: string
-	candidates:any;
+	salary: string;
+	contract: string;
+	candidates: any;
 }
 const TableRow: FC<ITableRowProps> = ({
-	id,     
+	id,
 	image,
 	function: functionTitle,
-	salary ,
+	salary,
 	contract,
-	candidates
+	candidates,
 }) => {
 	const { darkModeStatus } = useDarkMode();
 
@@ -58,26 +43,19 @@ const TableRow: FC<ITableRowProps> = ({
 				<img src={AbstractPicture[image]} alt='' width={54} height={54} />
 			</td>
 			<td>
-				<div>
-					{functionTitle}
-				</div>
+				<div>{functionTitle}</div>
 			</td>
-			<td >
-				R$ {priceFormat(salary)}
-			</td>
+			<td>R$ {priceFormat(salary)}</td>
 			<td>
-				<span className={`${contract == 'contract' ? 'text-capitalize' : 'text-uppercase'}`}>
+				<span
+					className={`${contract == 'contract' ? 'text-capitalize' : 'text-uppercase'}`}>
 					{contract == 'contract' ? 'contrato' : contract}
 				</span>
 			</td>
 			<td>
-				<span>
-					{candidates ? candidates.length : 0}
-				</span>
+				<span>{candidates ? candidates.length : 0}</span>
 			</td>
-			<td className='h5'>
-
-			</td>
+			<td className='h5' />
 		</tr>
 	);
 };
@@ -88,30 +66,30 @@ const CommonDashboardJob = () => {
 	const [perPage, setPerPage] = useState(PER_COUNT['3']);
 	const [jobs, setJobs] = useState<null | any>(null);
 
-	useEffect(()=>{
+	useEffect(() => {
 		const fetchData = async () => {
-			if(userData && userData.cnpj){
-				const response  = await Job_Open(userData.cnpj);
-				if(!response || response.status !== 200){
-					setJobs([])
+			if (userData && userData.cnpj) {
+				const response = await Job_Open(userData.cnpj);
+				if (!response || response.status !== 200) {
+					setJobs([]);
 					return;
 				}
 				switch (response.status) {
 					case 200:
-						setJobs(response.job)
+						setJobs(response.job);
 						break;
-				
+
 					default:
 						break;
 				}
 			}
-		}
-		fetchData()
-	},[userData])
+		};
+		fetchData();
+	}, [userData]);
 
 	return (
 		<>
-			{jobs &&
+			{jobs && (
 				<Card stretch>
 					<CardHeader>
 						<CardLabel icon='Work' iconColor='info'>
@@ -164,7 +142,7 @@ const CommonDashboardJob = () => {
 							</Button>
 						</CardActions> */}
 					</CardHeader>
-						
+
 					<CardBody className='table-responsive'>
 						<table className='table table-modern table-hover'>
 							<thead>
@@ -217,14 +195,12 @@ const CommonDashboardJob = () => {
 									</th>
 								</tr>
 							</thead>
-							
+
 							<tbody>
-							
 								{dataPagination(jobs, currentPage, perPage).map((i) => (
 									// eslint-disable-next-line react/jsx-props-no-spreading
 									<TableRow key={i.id} {...i} />
 								))}
-							
 							</tbody>
 						</table>
 					</CardBody>
@@ -237,7 +213,7 @@ const CommonDashboardJob = () => {
 						setPerPage={setPerPage}
 					/>
 				</Card>
-			}
+			)}
 		</>
 	);
 };

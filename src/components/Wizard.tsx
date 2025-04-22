@@ -46,7 +46,6 @@ WizardItem.defaultProps = {
 	title: undefined,
 };
 
-
 interface IWizardProps extends ICardProps {
 	children: ReactElement<IWizardItemProps> | ReactElement<IWizardItemProps>[];
 	color?: TColor;
@@ -83,7 +82,7 @@ const Wizard: FC<IWizardProps> = ({ children, onSubmit, isHeader, color, stretch
 				aria-hidden={childCount !== activeItemIndex + 1}
 				type='submit'
 				color={color}>
-				Finalizar 
+				Finalizar
 			</Button>
 		</>
 	);

@@ -2,10 +2,7 @@ import React, { useEffect } from 'react';
 import Alert, { AlertHeading } from '../../../../../components/bootstrap/Alert';
 
 const CommonDashboardAlert = () => {
-
-	useEffect(()=>{
-		
-	},[])
+	useEffect(() => {}, []);
 
 	return (
 		<Alert

@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-// @ts-ignore
+//@ts-ignore
 import ReactCreditCards, { Focused } from 'react-credit-cards-2';
 import Payment from 'payment';
 import { useFormik } from 'formik';
 import classNames from 'classnames';
+import { toast } from 'react-toastify';
 import Card, {
 	CardActions,
 	CardBody,
@@ -12,7 +13,12 @@ import Card, {
 	CardTitle,
 } from '../../../components/bootstrap/Card';
 import Button from '../../../components/bootstrap/Button';
-import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
+import Modal, {
+	ModalBody,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from '../../../components/bootstrap/Modal';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 import ReactCreditCardsContainer from '../../../components/extras/ReactCreditCardsContainer';
@@ -21,12 +27,11 @@ import HumanShield from '../../../assets/humans/shield.png';
 import Spinner from '../../../components/bootstrap/Spinner';
 import Card_Company from '../../../api/post/card_company/create';
 import AuthContext from '../../../contexts/authContext';
-import { toast } from 'react-toastify';
 import Toasts from '../../../components/bootstrap/Toasts';
 import AllCardCompany from '../../../api/get/card_company/AllCardCompany';
 import PatchCardCompanyDefault from '../../../api/patch/card_company/Default';
 import DeleteCardCompany from '../../../api/delete/card_company/default';
-import Mask from '../../../function/Mask';
+
 const validate = (values: {
 	name: string;
 	number: string;
@@ -55,14 +60,14 @@ const validate = (values: {
 		errors.cvc = 'Deve ter 3 números';
 	}
 
-	//# Antiga validação
+	// # Antiga validação
 	// if (!values.expiry || values.expiry.includes('_')) {
 	// 	errors.expiry = 'Obrigatório';
 	// } else if (parseInt(values.expiry.slice(-2), 10) <= 20) {
 	// 	errors.expiry = 'Data de validade inválida';
 	// }
 
-	//# Nova validação para validar a data de validade
+	// # Nova validação para validar a data de validade
 	const [month, year] = values.expiry.split('/').map(Number);
 	const currentYear = new Date().getFullYear() % 100; // Pegamos os últimos dois dígitos do ano
 	const currentMonth = new Date().getMonth() + 1; // Janeiro é 0, então somamos 1
@@ -131,14 +136,14 @@ const CompanyWallet = () => {
 			if (response.status === 201) {
 				toast(
 					<Toasts
-						icon={'Check'}
-						iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={'🥳 Parabéns! '}>
+						icon='Check'
+						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='🥳 Parabéns! '>
 						Cartão adicionado com sucesso.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 4000, //
+						autoClose: 1000, //
 					},
 				);
 				setModalStatus(false);
@@ -146,14 +151,14 @@ const CompanyWallet = () => {
 			} else {
 				toast(
 					<Toasts
-						icon={'Close'}
-						iconColor={'danger'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={'Erro'}>
+						icon='Close'
+						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Erro'>
 						Erro ao adicionar cartão, tente novamente.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 4000, //
+						autoClose: 1000, //
 					},
 				);
 			}
@@ -177,14 +182,14 @@ const CompanyWallet = () => {
 					cardList.map((card) => (card.id === selectedCard.id ? response.data : card)),
 				);
 				toast(
-					<Toasts icon={'Check'} iconColor={'success'} title={'🥳 Parabéns! '}>
+					<Toasts icon='Check' iconColor='success' title='🥳 Parabéns! '>
 						Cartão editado com sucesso.
 					</Toasts>,
 				);
 				setModalStatus(false);
 			} else {
 				toast(
-					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+					<Toasts icon='Close' iconColor='danger' title='Erro'>
 						Erro ao editar cartão, tente novamente.
 					</Toasts>,
 				);
@@ -216,19 +221,18 @@ const CompanyWallet = () => {
 			setCardList(cardList.filter((card) => card.id !== selectedCard.id));
 			setModalDelete(false);
 			toast(
-				<Toasts icon={'Check'} iconColor={'success'} title={'🥳 Parabéns! '}>
+				<Toasts icon='Check' iconColor='success' title='🥳 Parabéns! '>
 					Cartão excluído com sucesso.
 				</Toasts>,
 			);
 		} else {
 			toast(
-				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro'}>
+				<Toasts icon='Close' iconColor='danger' title='Erro'>
 					Erro ao excluir cartão, tente novamente.
 				</Toasts>,
 			);
 		}
 	};
-
 
 	useEffect(() => {
 		if (userData) {
@@ -236,8 +240,8 @@ const CompanyWallet = () => {
 				const response = await AllCardCompany(userData.cnpj);
 				if (response.status === 200) {
 					setCardList(response.data);
-					if(response.data.length > 0){
-						setSelectedCardId(response.data[0].id)
+					if (response.data.length > 0) {
+						setSelectedCardId(response.data[0].id);
 					}
 				}
 			};
@@ -279,20 +283,22 @@ const CompanyWallet = () => {
 											<Button
 												color='warning'
 												icon='Edit'
-												isLink={true}
+												isLink
 												onClick={() => {
 													setActionCard('edit');
 													editCard(selectedCard);
-												}}></Button>
+												}}
+											/>
 
 											<Button
 												color='danger'
 												icon='Delete'
-												isLink={true}
+												isLink
 												onClick={() => {
 													setActionCard('delete');
 													setModalDelete(true);
-												}}></Button>
+												}}
+											/>
 										</div>
 									</div>
 									<ReactCreditCardsContainer
@@ -351,10 +357,9 @@ const CompanyWallet = () => {
 														color='light'
 														icon='AddCircle'
 														size='lg'
-														isLink={true}
-														onClick={() =>
-															setModalStatus(true)
-														}></Button>
+														isLink
+														onClick={() => setModalStatus(true)}
+													/>
 												</div>
 												<div className='d-flex align-items-end'>
 													<p>
@@ -403,7 +408,10 @@ const CompanyWallet = () => {
 										autoComplete='ccName'
 										className='capitalize'
 										onChange={(e: any) => {
-											const value = e.target.value.replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ\s]/g, '');
+											const value = e.target.value.replace(
+												/[^a-zA-ZÀ-ÖØ-öø-ÿ\s]/g,
+												'',
+											);
 											formik.setFieldValue('name', value.toUpperCase());
 										}}
 										value={formik.values.name}
@@ -565,7 +573,8 @@ const CompanyWallet = () => {
 			<Modal setIsOpen={setModalDelete} isOpen={modalDelete} size='xl' titleId='delete-card'>
 				<ModalHeader setIsOpen={setModalDelete}>
 					<ModalTitle id='delete-card'>
-						Excluir Cartão <span className='text-danger text-capitalize'>{selectedCard?.name}</span>
+						Excluir Cartão{' '}
+						<span className='text-danger text-capitalize'>{selectedCard?.name}</span>
 					</ModalTitle>
 				</ModalHeader>
 
@@ -575,20 +584,16 @@ const CompanyWallet = () => {
 						<span className='text-danger text-capitalize'>{selectedCard?.name}</span> ?
 					</p>
 				</ModalBody>
-				
+
 				<ModalFooter>
-					<Button color='info'
-						isLink
-						onClick={() => setModalDelete(false)}
-					>
+					<Button color='info' isLink onClick={() => setModalDelete(false)}>
 						Fechar
 					</Button>
-					<Button 
-						color='danger' 
+					<Button
+						color='danger'
 						icon='Delete'
 						isLight
-						onClick={() => deleteCard(selectedCard)}
-					>
+						onClick={() => deleteCard(selectedCard)}>
 						Excluir
 					</Button>
 				</ModalFooter>

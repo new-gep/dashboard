@@ -1,7 +1,3 @@
-export default function DossieResignation(){
-    return(
-        <div>
-            Demissao
-        </div>
-    )
-};
+export default function DossieResignation() {
+	return <div>Demissao</div>;
+}

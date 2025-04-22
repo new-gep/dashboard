@@ -82,6 +82,7 @@ interface IBreadcrumbProps extends Record<string, any> {
 	ariaLabel?: string | null;
 	autoActive?: boolean;
 	isToHome?: ReactNode;
+	homePath?: string;
 	divider?: ReactElement<any, string | JSXElementConstructor<any>> | string;
 }
 const Breadcrumb: FC<IBreadcrumbProps> = ({
@@ -93,6 +94,7 @@ const Breadcrumb: FC<IBreadcrumbProps> = ({
 	ariaLabel,
 	autoActive,
 	isToHome,
+	homePath,
 	divider,
 }) => {
 	const DIVIDER = divider !== 'string' && divider;
@@ -110,7 +112,7 @@ const Breadcrumb: FC<IBreadcrumbProps> = ({
 			}>
 			<TagWrapper tag={listTag} className='breadcrumb'>
 				{isToHome && (
-					<BreadcrumbItem to='/' ariaLabel='Home'>
+					<BreadcrumbItem to={homePath || '/'} ariaLabel='Home'>
 						{isToHome}
 					</BreadcrumbItem>
 				)}

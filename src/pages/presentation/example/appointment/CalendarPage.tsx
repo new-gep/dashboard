@@ -15,7 +15,6 @@ import {
 } from '../../../../components/extras/calendarHelper';
 import SERVICES, { getServiceDataWithServiceName } from '../../../../common/data/serviceDummyData';
 import PageWrapper from '../../../../layout/PageWrapper/PageWrapper';
-import { demoPagesMenu } from '../../../../menu';
 import SubHeader, { SubHeaderLeft, SubHeaderRight } from '../../../../layout/SubHeader/SubHeader';
 import Icon from '../../../../components/icon/Icon';
 import Button from '../../../../components/bootstrap/Button';
@@ -302,7 +301,7 @@ const CalendarPage = () => {
 	// END:: Calendar
 	return (
 		// <PageWrapper title={demoPagesMenu.appointment.subMenu.dashboard.text}>
-			<PageWrapper>
+		<PageWrapper>
 			<SubHeader>
 				<SubHeaderLeft>
 					<Icon icon='Info' className='me-2' size='2x' />

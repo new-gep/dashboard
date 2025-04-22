@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import dayjs from 'dayjs';
 import classNames from 'classnames';
-import { getUserDataWithId } from '../../../common/data/userDummyData';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
-import SubHeader, {
-	SubHeaderLeft,
-	SubHeaderRight,
-	SubheaderSeparator,
-} from '../../../layout/SubHeader/SubHeader';
+import SubHeader, { SubHeaderLeft } from '../../../layout/SubHeader/SubHeader';
 import Button from '../../../components/bootstrap/Button';
 import Card, {
-	CardActions,
 	CardBody,
 	CardHeader,
 	CardLabel,
@@ -21,24 +14,12 @@ import Card, {
 import Avatar from '../../../components/Avatar';
 import Icon from '../../../components/icon/Icon';
 import { dashboardPagesMenu } from '../../../menu';
-import Badge from '../../../components/bootstrap/Badge';
-import Dropdown, {
-	DropdownItem,
-	DropdownMenu,
-	DropdownToggle,
-} from '../../../components/bootstrap/Dropdown';
-import Chart, { IChartOptions } from '../../../components/extras/Chart';
-import dummyEventsData from '../../../common/data/dummyEventsData';
+
 import { priceFormat } from '../../../helpers/helpers';
-import EVENT_STATUS from '../../../common/data/enumEventStatus';
-import Alert from '../../../components/bootstrap/Alert';
-import CommonAvatarTeam from '../../../common/other/CommonAvatarTeam';
-import COLORS from '../../../common/data/enumColors';
 import useDarkMode from '../../../hooks/useDarkMode';
 import useTourStep from '../../../hooks/useTourStep';
 import Collaborator from '../../../api/get/collaborator/Collaborator';
 import Mask from '../../../function/Mask';
-import Job_One from '../../../api/get/job/Job_One';
 import DossieAdmission from './dossie/Admission';
 import DossieDocument from './dossie/Document';
 import DossiePayStub from './dossie/PayStub';
@@ -48,7 +29,6 @@ import DossieAttest from './dossie/Attest';
 import ModalDemission from './modal/modalDemission';
 import ModalChangeWork from './modal/modalChangeWork';
 import Spinner from '../../../components/bootstrap/Spinner';
-import Job_All_Collaborator from '../../../api/get/job/Job_All_Collaborator';
 
 const CollaboratorProfilePage = () => {
 	useTourStep(19);
@@ -58,7 +38,7 @@ const CollaboratorProfilePage = () => {
 		RESIGNATION: 'Demissão',
 		PAYSTUB: 'Holerite',
 		POINT: 'Ponto',
-		ATTEST: 'Ausência'
+		ATTEST: 'Ausência',
 	};
 	const [activeTab, setActiveTab] = useState(TABS.COLLABORATOR);
 	const { darkModeStatus } = useDarkMode();
@@ -78,7 +58,7 @@ const CollaboratorProfilePage = () => {
 				if (response && response.status == 200) {
 					setCollaborator(response.collaborator);
 					setPicture(response.picture);
-					console.log('teste',response.collaborator.id_work)
+					console.log('teste', response.collaborator.id_work);
 					setJob(response.collaborator.id_work);
 					// const responseJob = await Job_One(response.collaborator.id_work);
 					// if (responseJob.status == 200) {
@@ -89,7 +69,7 @@ const CollaboratorProfilePage = () => {
 					// 	}
 					// }
 				}
-			};
+			}
 		};
 		fetchData();
 	}, [cpf, listen]);
@@ -150,8 +130,8 @@ const CollaboratorProfilePage = () => {
 							<Button
 								icon='DoorFront'
 								color='danger'
-								isOutline={true}
-								size={'lg'}
+								isOutline
+								size='lg'
 								isDisable={job && job.motion_demission}
 								onClick={startDemission}>
 								{job && job.motion_demission ? 'Desligado' : 'Desligar'}
@@ -309,14 +289,11 @@ const CollaboratorProfilePage = () => {
 							<Card>
 								{job && job.PCD == '1' && (
 									<div className='px-4 mt-3'>
-										<Icon icon='AccessibleForward' size={'2x'} />
+										<Icon icon='AccessibleForward' size='2x' />
 									</div>
 								)}
 								<CardHeader>
-									<CardLabel
-										icon='Stream'
-										className=' col-6'
-										iconColor='warning'>
+									<CardLabel icon='Stream' className=' col-6' iconColor='warning'>
 										<CardTitle
 											tag='div'
 											className='h4 d-flex justify-content-between'>
@@ -326,17 +303,17 @@ const CollaboratorProfilePage = () => {
 											Função
 										</CardTitle>
 									</CardLabel>
-									<CardLabel
-										className=' col-6 d-flex justify-content-end'
-									>
-										{ allJob &&
-											<Button 
-												onClick={()=>{setModalChangeWork(true)}}
-												icon='Sync' 
-												isLink={true}
+									<CardLabel className=' col-6 d-flex justify-content-end'>
+										{allJob && (
+											<Button
+												onClick={() => {
+													setModalChangeWork(true);
+												}}
+												icon='Sync'
+												isLink
 												color='light'
 											/>
-										}
+										)}
 									</CardLabel>
 								</CardHeader>
 								<CardBody>
@@ -568,9 +545,7 @@ const CollaboratorProfilePage = () => {
 											{TABS.RESIGNATION === activeTab && (
 												<DossieResignation />
 											)}
-											{TABS.ATTEST === activeTab && (
-												<DossieAttest/>
-											)}
+											{TABS.ATTEST === activeTab && <DossieAttest />}
 										</CardBody>
 									</Card>
 								</CardBody>

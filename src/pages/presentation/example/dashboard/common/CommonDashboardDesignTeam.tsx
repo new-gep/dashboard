@@ -9,10 +9,8 @@ import Card, {
 	CardTitle,
 } from '../../../../../components/bootstrap/Card';
 import Button from '../../../../../components/bootstrap/Button';
-import Avatar, { AvatarGroup } from '../../../../../components/Avatar';
-import USERS from '../../../../../common/data/userDummyData';
-import { demoPagesMenu } from '../../../../../menu';
 import { dashboardPagesMenu } from '../../../../../menu';
+
 import useDarkMode from '../../../../../hooks/useDarkMode';
 
 const CommonDashboardDesignTeam = () => {
@@ -20,7 +18,7 @@ const CommonDashboardDesignTeam = () => {
 
 	const navigate = useNavigate();
 	const handleOnClickToEmployeeListPage = useCallback(
-		() => navigate(`../${dashboardPagesMenu.collaborator.path}`),	
+		() => navigate(`../${dashboardPagesMenu.collaborator.path}`),
 		[navigate],
 	);
 
@@ -32,7 +30,7 @@ const CommonDashboardDesignTeam = () => {
 						Collaborator Connect
 					</CardTitle>
 					<CardSubTitle tag='div' className='h6 text-muted'>
-						Seus colaboradores 
+						Seus colaboradores
 					</CardSubTitle>
 				</CardLabel>
 				<CardActions>

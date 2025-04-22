@@ -1,8 +1,8 @@
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import AuthSingUp from '../../../function/AuthSingUp';
+import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import AuthSingUp from '../../../function/AuthSingUp';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
@@ -11,7 +11,6 @@ import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
-import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
 import Spinner from '../../../components/bootstrap/Spinner';
 import Alert, { AlertHeading } from '../../../components/bootstrap/Alert';
 import Logo from '../../../assets/logo/logo.png';
@@ -21,6 +20,7 @@ import Cnpj from '../../../api/get/Cnpj';
 import Company from '../../../api/post/Company';
 import User from '../../../api/get/user/SingIn';
 import Mask from '../../../function/Mask';
+
 interface ILoginHeaderProps {
 	isNewUser?: boolean;
 }
@@ -143,7 +143,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}, 5000);
 				break;
 		}
-		return;
 	};
 
 	const handleSingUp = async (e: any) => {
@@ -191,7 +190,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				district: company.address.district,
 				number: company.address.number,
 			};
-			let response = await Company(paramsCreateAccount);
+			const response = await Company(paramsCreateAccount);
 			switch (response.status) {
 				case 201:
 					setToken(response.token);
@@ -217,7 +216,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					setTimeout(() => {
 						setIsRegisterInvalid(false);
 					}, 5000);
-					return;
 			}
 		} catch (e) {
 			setTextInvalid('Algo deu errado, tente novamente.');
@@ -265,8 +263,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					<div
 						className='col-md-5 col-lg-3 col-sm-8 position-fixed mt-5'
 						style={{ left: 5, zIndex: 10 }}>
-						<Alert icon='Dangerous' color='danger' isLight={true} shadow={'md'}>
-							<AlertHeading tag={'h4'}>Acesso incorreto</AlertHeading>
+						<Alert icon='Dangerous' color='danger' isLight shadow='md'>
+							<AlertHeading tag='h4'>Acesso incorreto</AlertHeading>
 							<p>Algo deu errado, tente novamente!</p>
 						</Alert>
 					</div>
@@ -275,8 +273,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					<div
 						className='col-md-5 col-lg-3 col-sm-8 position-fixed mt-5'
 						style={{ left: 5, zIndex: 10 }}>
-						<Alert icon='Warning' color='warning' isLight={true} shadow={'md'}>
-							<AlertHeading tag={'h4'}>Registro incompleto</AlertHeading>
+						<Alert icon='Warning' color='warning' isLight shadow='md'>
+							<AlertHeading tag='h4'>Registro incompleto</AlertHeading>
 							<p style={{ whiteSpace: 'pre-line' }}>{textInvalid}</p>
 						</Alert>
 					</div>
@@ -542,7 +540,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 															<Icon
 																icon='CustomFactory'
 																size='7x'
-																color={'dark'}
+																color='dark'
 															/>
 														) : (
 															<div className='text-white'>
@@ -597,7 +595,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												<Button
 													color='warning'
 													className='w-100 py-3'
-													type={'submit'}>
+													type='submit'>
 													{isLoading && (
 														<Spinner isSmall inButton isGrow />
 													)}

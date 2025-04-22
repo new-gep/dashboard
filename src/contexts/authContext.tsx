@@ -1,4 +1,12 @@
-import React, { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+	createContext,
+	FC,
+	ReactNode,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+} from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
@@ -21,12 +29,11 @@ interface IAuthContextProviderProps {
 const verifyTokenWithAPI = async (token: string) => {
 	try {
 		const response = await axios.get(`${process.env.REACT_APP_API}user/verifyToken/${token}`);
-		
+
 		if (response.status === 200) {
 			return response.data; // Retorna os dados do usuário se o token for válido
-		} else {
-			return null; // Token inválido
 		}
+		return null; // Token inválido
 	} catch (error) {
 		console.error('Erro ao verificar token:', error);
 		return null; // Em caso de erro na verificação
@@ -35,9 +42,7 @@ const verifyTokenWithAPI = async (token: string) => {
 
 export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children }) => {
 	const navigate = useNavigate();
-	const handleLogin = useCallback(() => 
-		navigate('/auth-pages/login'), [navigate]
-	);
+	const handleLogin = useCallback(() => navigate('/auth-pages/login'), [navigate]);
 	// Gerencia o estado do token
 	const [token, setToken] = useState<string>(localStorage.getItem('gep_authToken') || '');
 	const [userData, setUserData] = useState<any>({});
@@ -55,20 +60,20 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 	// Efeito para buscar os dados do usuário na API quando o token é definido
 	useEffect(() => {
 		const fetchUserData = async () => {
-			try{
+			try {
 				if (token !== '') {
 					const userData = await verifyTokenWithAPI(token);
 					switch (userData.status) {
 						case 400:
 							setUserData({});
-							setToken('')
+							setToken('');
 							localStorage.removeItem('gep_authToken');
-							handleLogin()
+							handleLogin();
 							break;
 						case 200:
-							if(typeof userData.dates.user === 'object'){
+							if (typeof userData.dates.user === 'object') {
 								setUserData(userData.dates.user);
-								break
+								break;
 							}
 							setUserData(userData.dates);
 							break;
@@ -76,18 +81,18 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 							localStorage.removeItem('gep_authToken');
 							setUserData({});
 							setToken(''); // Limpa o token se for inválido
-							handleLogin()
+							handleLogin();
 							break;
 					}
 				} else {
 					setUserData({});
-					handleLogin()
+					handleLogin();
 				}
-			}catch(e){
-				console.log('erro Context:', e)
+			} catch (e) {
+				console.log('erro Context:', e);
 				setUserData({});
 				setToken(''); // Limpa o token se for inválido
-				handleLogin()
+				handleLogin();
 			}
 		};
 		fetchUserData();
@@ -100,7 +105,7 @@ export const AuthContextProvider: FC<IAuthContextProviderProps> = ({ children })
 			setToken,
 			isAuthenticated,
 			userData,
-			setUserData
+			setUserData,
 		}),
 		[token, isAuthenticated, userData, setUserData],
 	);

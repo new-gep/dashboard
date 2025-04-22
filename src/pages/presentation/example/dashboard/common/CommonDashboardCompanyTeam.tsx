@@ -31,7 +31,7 @@ const CommonDashboardClientsTeam = () => {
 						Company Connect
 					</CardTitle>
 					<CardSubTitle tag='div' className='h6 text-muted'>
-						Empresa filial 
+						Empresa filial
 					</CardSubTitle>
 				</CardLabel>
 				<CardActions>

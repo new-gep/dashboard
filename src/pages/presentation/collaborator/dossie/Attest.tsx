@@ -1,7 +1,3 @@
-export default function DossieAttest(){
-    return(
-        <div>
-            Ausência 
-        </div>
-    )
-};
+export default function DossieAttest() {
+	return <div>Ausência</div>;
+}

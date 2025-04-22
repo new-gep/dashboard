@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useFormik, Form } from 'formik';
-import dayjs, { Dayjs } from 'dayjs';
+import { useFormik } from 'formik';
 import PageWrapper from '../../../../layout/PageWrapper/PageWrapper';
 import { demoPagesMenu } from '../../../../menu';
 import SubHeader, {
@@ -9,7 +8,6 @@ import SubHeader, {
 	SubheaderSeparator,
 } from '../../../../layout/SubHeader/SubHeader';
 import Page from '../../../../layout/Page/Page';
-import validate from './helper/editPagesValidate';
 import showNotification from '../../../../components/extras/showNotification';
 import Icon from '../../../../components/icon/Icon';
 import Card, {
@@ -39,9 +37,14 @@ import Label from '../../../../components/bootstrap/forms/Label';
 import Checks, { ChecksGroup } from '../../../../components/bootstrap/forms/Checks';
 import AuthContext from '../../../../contexts/authContext';
 import Mask from '../../../../function/Mask';
-import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../../../../components/bootstrap/Modal';
-import { color } from 'framer-motion';
+import Modal, {
+	ModalBody,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from '../../../../components/bootstrap/Modal';
 import User from '../../../../api/patch/User';
+
 const EditModernPage = () => {
 	const { themeStatus } = useDarkMode();
 	const { userData, setUserData, setToken } = useContext(AuthContext);
@@ -59,74 +62,72 @@ const EditModernPage = () => {
 		formik.setFieldValue('avatar', key);
 	};
 
-	const handleSave = async (picture?:boolean) => {
-		try{
+	const handleSave = async (picture?: boolean) => {
+		try {
 			if (picture) {
-				setUserData((prevUserData:any) => ({
-					...prevUserData,   
-					avatar: selectedAvatar   
+				setUserData((prevUserData: any) => ({
+					...prevUserData,
+					avatar: selectedAvatar,
 				}));
-			};
-			setModalAvatar(false)
+			}
+			setModalAvatar(false);
 			setIsLoading(false);
-			const response = await User(userData.id, formik.values)
-			console.log('response', response)
+			const response = await User(userData.id, formik.values);
+			console.log('response', response);
 			switch (response.status) {
 				case 200:
-					setPasswordChangeCTA(false)
-					setToken(response.token)
-					setUserData((prevUserData:any) => ({
-						...prevUserData,   
-						lastUpdate: response.update_at   
+					setPasswordChangeCTA(false);
+					setToken(response.token);
+					setUserData((prevUserData: any) => ({
+						...prevUserData,
+						lastUpdate: response.update_at,
 					}));
-					setLastSave(true)
+					setLastSave(true);
 					localStorage.setItem('gep_authToken', response.token);
 					showNotification(
 						<span className='d-flex align-items-center'>
 							<Icon icon='Info' size='lg' className='me-1' />
 							<span>Sucesso</span>
 						</span>,
-						"Os detalhes da conta foram atualizados com sucesso.",
+						'Os detalhes da conta foram atualizados com sucesso.',
 					);
-				return;
+					return;
 				default:
 					showNotification(
 						<span className='d-flex align-items-center'>
 							<Icon icon='Info' size='lg' className='me-1' />
 							<span>Error</span>
 						</span>,
-						"Os detalhes da conta não foram atualizados.",
+						'Os detalhes da conta não foram atualizados.',
 					);
-				break;
+					break;
 			}
-
-		}catch(e){
-			console.log(e)
+		} catch (e) {
+			console.log(e);
 		}
 	};
 
 	const cancelEditPassword = async () => {
-		setPasswordChangeCTA(false)
+		setPasswordChangeCTA(false);
 		formik.setFieldValue('currentPassword', '');
 		formik.setFieldValue('newPassword', '');
 		formik.setFieldValue('confirmPassword', '');
-		return
 	};
 
 	interface IValues {
-		firstName :string;
-		lastName  : string;
-		name  : string;
-		email : string;
-		phone : string;
-		currentPassword: string
+		firstName: string;
+		lastName: string;
+		name: string;
+		email: string;
+		phone: string;
+		currentPassword: string;
 		newPassword: string;
-		confirmPassword : string;
-		checkOne : boolean;
-		checkTwo : boolean;
-		checkThree : boolean;
-		avatar : any;
-	};
+		confirmPassword: string;
+		checkOne: boolean;
+		checkTwo: boolean;
+		checkThree: boolean;
+		avatar: any;
+	}
 
 	const validate = (values: IValues) => {
 		const errors: any = {};
@@ -143,9 +144,10 @@ const EditModernPage = () => {
 			errors.name = 'Nome completo é obrigatório';
 		}
 		if (!values.phone) {
-    		errors.phone = 'Telefone é obrigatório';
+			errors.phone = 'Telefone é obrigatório';
 		} else if (!phoneRegex.test(Mask('remove', values.phone))) {
-			errors.phone = 'Telefone inválido. Formato esperado: DDD seguido do número, ex: (11) 98765-4321';
+			errors.phone =
+				'Telefone inválido. Formato esperado: DDD seguido do número, ex: (11) 98765-4321';
 		}
 
 		if (!values.email) {
@@ -158,29 +160,33 @@ const EditModernPage = () => {
 			if (!values.currentPassword) {
 				errors.currentPassword = 'Senha atual é obrigatória';
 			}
-			
+
 			// Validar nova senha
 			if (!values.newPassword) {
 				errors.newPassword = 'Nova senha é obrigatória';
 			} else if (values.newPassword.length < 6) {
 				errors.newPassword = 'Nova senha deve ter pelo menos 6 caracteres';
 			}
-			
+
 			// Validar confirmação da nova senha
 			if (!values.confirmPassword) {
 				errors.confirmPassword = 'Confirmação de senha é obrigatória';
 			} else if (values.confirmPassword.length < 6) {
 				errors.confirmPassword = 'Confirmação de senha deve ter pelo menos 6 caracteres';
 			}
-			
+
 			// Verificar se nova senha e confirmação são iguais
-			if (values.newPassword && values.confirmPassword && values.newPassword !== values.confirmPassword) {
+			if (
+				values.newPassword &&
+				values.confirmPassword &&
+				values.newPassword !== values.confirmPassword
+			) {
 				errors.confirmPassword = 'As senhas não correspondem';
 			}
-		};
-	
+		}
+
 		// Não validamos os campos opcionais (benefits, details, obligations)
-	
+
 		return errors;
 	};
 
@@ -197,12 +203,12 @@ const EditModernPage = () => {
 			checkOne: true,
 			checkTwo: false,
 			checkThree: true,
-			avatar: null
+			avatar: null,
 		},
 		validate,
 		onSubmit: () => {
 			setIsLoading(true);
-			handleSave()
+			handleSave();
 		},
 	});
 
@@ -211,7 +217,7 @@ const EditModernPage = () => {
 			formik.setValues({
 				avatar: userData.avatar && userData.avatar,
 				firstName: userData.name && Mask('firstName', userData.name),
-				lastName : userData.name && Mask('secondName', userData.name),
+				lastName: userData.name && Mask('secondName', userData.name),
 				name: userData.name || '',
 				email: userData.email || '',
 				phone: userData.phone,
@@ -228,34 +234,42 @@ const EditModernPage = () => {
 	return (
 		<PageWrapper title={demoPagesMenu.editPages.subMenu.editModern.text}>
 			<Modal isOpen={modalAvatar} setIsOpen={setModalAvatar}>
-				<ModalHeader >
-					<ModalTitle id={ 'teste' }>
+				<ModalHeader>
+					<ModalTitle id='teste'>
 						<h5>Escolha seu Avatar</h5>
 					</ModalTitle>
 				</ModalHeader>
 				<ModalBody>
-					<div className="d-flex align-items-center flex-wrap p-2 gap-4 ">
+					<div className='d-flex align-items-center flex-wrap p-2 gap-4 '>
 						{Object.keys(AvatarPicture)
-						.filter((key) => key !== 'default')
-						.map((key, index) => (
-							<img
-								height={70}
-								width={70}
-								key={index}
-								//@ts-ignore
-								src={AvatarPicture[key]} // Supondo que cada avatar tenha uma propriedade `src`
-								alt={'Avatar do Usuário'} // Supondo que cada avatar tenha uma propriedade `alt`
-								onClick={() => handleAvatarClick(key)}
-								className={`border-hover cursor-pointer ${selectedAvatar === key && 'rounded-1 bg-primary' }`}
-							/>
-						))}
+							.filter((key) => key !== 'default')
+							.map((key, index) => (
+								<img
+									height={70}
+									width={70}
+									key={index}
+									// @ts-ignore
+									src={AvatarPicture[key]} // Supondo que cada avatar tenha uma propriedade `src`
+									alt='Avatar do Usuário' // Supondo que cada avatar tenha uma propriedade `alt`
+									onClick={() => handleAvatarClick(key)}
+									className={`border-hover cursor-pointer ${selectedAvatar === key && 'rounded-1 bg-primary'}`}
+								/>
+							))}
 					</div>
 				</ModalBody>
 				<ModalFooter>
-					<Button className='btn btn-outline-info border-0' onClick={()=>setModalAvatar(false)}>
+					<Button
+						className='btn btn-outline-info border-0'
+						onClick={() => setModalAvatar(false)}>
 						Fechar
 					</Button>
-					<Button type='submit' icon='Save' className='btn btn-info' onClick={()=>handleSave(true)}>Salvar</Button>
+					<Button
+						type='submit'
+						icon='Save'
+						className='btn btn-info'
+						onClick={() => handleSave(true)}>
+						Salvar
+					</Button>
 				</ModalFooter>
 			</Modal>
 			<SubHeader>
@@ -294,14 +308,14 @@ const EditModernPage = () => {
 										<div className='col-lg-auto'>
 											<Avatar
 												src={
-													selectedAvatar 
-													//@ts-ignore
-													  ? AvatarPicture[selectedAvatar]                // Se o usuário selecionou um avatar, exiba-o
-													  : userData.avatar 
-													  // @ts-ignore
-													  ? AvatarPicture[userData.avatar]                           // Caso contrário, exiba o avatar do usuário (se disponível)
-													  : AvatarPicture.default                       // Caso contrário, exiba o avatar padrão
-												  }
+													selectedAvatar
+														? // @ts-ignore
+															AvatarPicture[selectedAvatar] // Se o usuário selecionou um avatar, exiba-o
+														: userData.avatar
+															? // @ts-ignore
+																AvatarPicture[userData.avatar] // Caso contrário, exiba o avatar do usuário (se disponível)
+															: AvatarPicture.default // Caso contrário, exiba o avatar padrão
+												}
 												color='storybook'
 												rounded={3}
 											/>
@@ -313,24 +327,31 @@ const EditModernPage = () => {
 														type='file'
 														autoComplete='photo'
 														ariaLabel='Upload image file'
-														disabled={true}
+														disabled
 													/>
 												</div>
 												<div className='col-auto'>
-													<Button color='dark' isLight icon='Sync'
-														onClick={()=>setModalAvatar(true)}
-													>
+													<Button
+														color='dark'
+														isLight
+														icon='Sync'
+														onClick={() => setModalAvatar(true)}>
 														Alterar Avatar
 													</Button>
 												</div>
 												<div className='col-auto'>
-													<Button color='dark' isLight icon='Delete' isDisable>
+													<Button
+														color='dark'
+														isLight
+														icon='Delete'
+														isDisable>
 														Deletar Avatar
 													</Button>
 												</div>
 												<div className='col-12'>
 													<p className='lead text-muted'>
-														Atualmente não é possível colocar sua foto, apenas avatares. 
+														Atualmente não é possível colocar sua foto,
+														apenas avatares.
 													</p>
 												</div>
 											</div>
@@ -401,7 +422,7 @@ const EditModernPage = () => {
 												isTouched={formik.touched.name}
 												invalidFeedback={formik.errors.name}
 												validFeedback='Ótimo'
-												disabled={true}
+												disabled
 											/>
 										</FormGroup>
 									</div>
@@ -422,10 +443,7 @@ const EditModernPage = () => {
 							<CardBody>
 								<div className='row g-4'>
 									<div className='col-md-6'>
-										<FormGroup
-											id='email'
-											label='Email'
-											isFloating>
+										<FormGroup id='email' label='Email' isFloating>
 											<Input
 												type='email'
 												placeholder='Email'
@@ -557,7 +575,8 @@ const EditModernPage = () => {
 							)}
 							<CardFooter>
 								<CommonDesc>
-									Para sua segurança, recomendamos que você altere sua senha a cada 3 meses, no máximo.
+									Para sua segurança, recomendamos que você altere sua senha a
+									cada 3 meses, no máximo.
 								</CommonDesc>
 							</CardFooter>
 						</Card>
@@ -577,7 +596,8 @@ const EditModernPage = () => {
 										<FormGroup>
 											{/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
 											<Label>
-												Escolha quais mensagens você gostaria de receber por e-mail.
+												Escolha quais mensagens você gostaria de receber por
+												e-mail.
 											</Label>
 											<ChecksGroup>
 												<Checks
@@ -627,16 +647,13 @@ const EditModernPage = () => {
 												/>
 												<span className='me-2 text-muted'>Atualizado</span>
 												<strong>
-													{userData.lastUpdate && Mask('lastUpdate', userData.lastUpdate)}
+													{userData.lastUpdate &&
+														Mask('lastUpdate', userData.lastUpdate)}
 												</strong>
 											</>
 										) : (
 											<>
-												<Icon
-													icon='Warning'
-													size='lg'
-													className='me-2'
-												/>
+												<Icon icon='Warning' size='lg' className='me-2' />
 												<span className=''>Ainda não salvo</span>
 											</>
 										)}

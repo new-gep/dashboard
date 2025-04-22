@@ -282,7 +282,7 @@ export const demoPagesMenu = {
 				hide: true,
 			},
 			customerID: {
-				cpf:'cpf',
+				cpf: 'cpf',
 				id: 'JobID',
 				text: 'JobID',
 				path: 'sales/Job/Customer',
@@ -1064,14 +1064,26 @@ export const productsExampleMenu = {
 	companyD: { id: 'companyD', text: 'Company D', path: '/', subMenu: null },
 };
 
-// 
+//
 
 export const secondaryPath = {
+	// collaborator
 	collaboratorProfile: {
 		id: 'collaboratorProfile',
 		text: 'Perfil',
 		path: 'collaborator/profile/:cpf',
 		hide: true,
+	},
+	// recruit
+	vacancies: {
+		id: 'collaboratorProfile',
+		text: 'Perfil',
+		path: 'recruit/vacancies',
+	},
+	vacanciesCreate: {
+		id: 'vacanciesCreate',
+		text: 'Criar Vagas',
+		path: 'recruit/create',
 	},
 };
 
@@ -1081,8 +1093,7 @@ export const mainMenu = {
 		text: 'Agentes',
 		path: 'process-pages',
 		icon: 'SupportAgent',
-		subMenu: {
-		},
+		subMenu: {},
 	},
 	recruit: {
 		id: 'examplePages',
@@ -1091,11 +1102,17 @@ export const mainMenu = {
 		icon: 'PersonAddAlt1',
 		subMenu: {
 			job: {
-				id  : 'Job',
+				id: 'Job',
 				text: 'Vaga',
-				path: 'sales/grid',
+				path: 'recruit/home',
 				icon: 'Work',
 			},
+			// processSelection:{
+			// 	id  : 'selection',
+			// 	text: 'Talentos',
+			// 	path: 'recruit/talent',
+			// 	icon: 'Star',
+			// }
 		},
 	},
 	process: {
@@ -1135,8 +1152,6 @@ export const mainMenu = {
 		text: 'Academy',
 		path: 'academy-pages',
 		icon: 'School',
-		subMenu: {
-			
-		},
-	}
+		subMenu: {},
+	},
 };

@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
-import Button from '../../../components/bootstrap/Button';
 import { useNavigate } from 'react-router-dom';
+import classNames from 'classnames';
+import { toast } from 'react-toastify';
+import Button from '../../../components/bootstrap/Button';
 import Card, {
 	CardHeader,
 	CardTitle,
@@ -8,30 +10,30 @@ import Card, {
 	CardActions,
 	CardBody,
 } from '../../../components/bootstrap/Card';
-import JobCollaboratorCompany from '../../../api/get/job/Job_Collaborator_Company';
 import AuthContext from '../../../contexts/authContext';
-import classNames from 'classnames';
 import useDarkMode from '../../../hooks/useDarkMode';
 import { DropdownToggle } from '../../../components/bootstrap/Dropdown';
 import Mask from '../../../function/Mask';
-import {
+import OffCanvas, {
 	OffCanvasBody,
 	OffCanvasTitle,
 	OffCanvasHeader,
 } from '../../../components/bootstrap/OffCanvas';
-import { toast } from 'react-toastify';
 import Toasts from '../../../components/bootstrap/Toasts';
-import OffCanvas from '../../../components/bootstrap/OffCanvas';
+
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Service_Upload from '../../../api/post/company/Service_Upload';
-import InputGroup from '../../../components/bootstrap/forms/InputGroup';
 import Input from '../../../components/bootstrap/forms/Input';
 import Company_Redis from '../../../api/post/company/Redis';
 import Icon from '../../../components/icon/Icon';
-import Modal, { ModalBody, ModalFooter } from '../../../components/bootstrap/Modal';
-import { ModalHeader, ModalTitle } from '../../../components/bootstrap/Modal';
+import Modal, {
+	ModalBody,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from '../../../components/bootstrap/Modal';
+
 import FindAllByMonthAndYear from '../../../api/get/service/FindAll';
-import Spinner from '../../../components/bootstrap/Spinner';
 import { priceFormat } from '../../../helpers/helpers';
 import ServiceSignedDocument from '../../../components/canva/signatures/Service';
 
@@ -75,46 +77,46 @@ const PointTable = ({
 
 	const handleImport = async (file: File) => {
 		toast(
-			<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso!'}>
+			<Toasts icon='Check' iconColor='success' title='Sucesso!'>
 				Processamento iniciado com sucesso, o relatório será enviado para o seu e-mail.
 				<br />
 				<span className='font-weight-bold text-success'>{userData.email}</span>
 			</Toasts>,
 			{
 				closeButton: true,
-				autoClose: 5000, //
+				autoClose: 1000, //
 			},
 		);
 		setCache(true);
 		setModalImport(false);
 		const response = await Service_Upload({
 			cnpj: userData.cnpj,
-			file: file,
+			file,
 			user: userData.id,
 			type: 'Point',
 			mothAndYear: selectedMonthImport.month,
 		});
 		if (response && response.status == 200) {
 			toast(
-				<Toasts icon={'Check'} iconColor={'success'} title={'Sucesso!'}>
+				<Toasts icon='Check' iconColor='success' title='Sucesso!'>
 					Processamento realizado com sucesso, o relatório será enviado para o seu e-mail.
 					<br />
 					<span className='font-weight-bold text-success'>{userData.email}</span>
 				</Toasts>,
 				{
 					closeButton: true,
-					autoClose: 5000, //
+					autoClose: 1000, //
 				},
 			);
 		} else {
 			setTimeout(() => {
 				toast(
-					<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+					<Toasts icon='Close' iconColor='danger' title='Erro!'>
 						Erro ao processar o relatório, verifique se o arquivo está correto.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 7000, //
+						autoClose: 1000, //
 					},
 				);
 			}, 5000);
@@ -125,7 +127,7 @@ const PointTable = ({
 	const openInputFile = async () => {
 		if (selectedMonthImport.month == '') {
 			toast(
-				<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+				<Toasts icon='Close' iconColor='danger' title='Erro!'>
 					Selecione o mês e ano para importar o ponto.
 				</Toasts>,
 			);
@@ -186,7 +188,7 @@ const PointTable = ({
 			const item = manipulating.service[0];
 			const key = Object.keys(item)[0];
 			const pictureData = item[key].pictureService;
-	
+
 			setManipulatingPath(pictureData.path);
 			setModalDocument(true);
 		} else {
@@ -204,7 +206,7 @@ const PointTable = ({
 			return;
 		}
 		toast(
-			<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+			<Toasts icon='Close' iconColor='danger' title='Erro!'>
 				O colaborador não enviou a assinatura.
 			</Toasts>,
 		);
@@ -218,11 +220,9 @@ const PointTable = ({
 	const buildDocumentSignature = (item: any) => {
 		setModalAction('buildSignatureDocument');
 		setModalSelectPoint(true);
-	}
+	};
 
-	const closeAfterSaveDocumentSignature = () => {
-		
-	}
+	const closeAfterSaveDocumentSignature = () => {};
 
 	// Rotacionar o icone de loading
 	useEffect(() => {
@@ -298,18 +298,29 @@ const PointTable = ({
 
 	return (
 		<section>
-			{manipulating && <ServiceSignedDocument type={'Point'}  closeAfterSave={closeAfterSaveDocumentSignature} nameDocument={manipulatingDocument} data={data} setData={setData} dataIndex={dataIndex} manipulatingKey={manipulatingKey} manipulatingIndex={manipulatingIndex} id={manipulating.job.id_work} modal={modalSignedDocument} setModal={setModalSignedDocument} document={allDocument} assignature={allSignature} />}
+			{manipulating && (
+				<ServiceSignedDocument
+					type='Point'
+					closeAfterSave={closeAfterSaveDocumentSignature}
+					nameDocument={manipulatingDocument}
+					data={data}
+					setData={setData}
+					dataIndex={dataIndex}
+					manipulatingKey={manipulatingKey}
+					manipulatingIndex={manipulatingIndex}
+					id={manipulating.job.id_work}
+					modal={modalSignedDocument}
+					setModal={setModalSignedDocument}
+					document={allDocument}
+					assignature={allSignature}
+				/>
+			)}
 
-			<Modal 
-				isStaticBackdrop={true} 
-				isOpen={modalImport} 
-				setIsOpen={setModalImport}
-				size={`sm`}
-			>
+			<Modal isStaticBackdrop isOpen={modalImport} setIsOpen={setModalImport} size='sm'>
 				<ModalHeader>
 					<ModalTitle
 						className='d-flex justify-content-end align-items-start gap-2'
-						id={'import-modal'}>
+						id='import-modal'>
 						<div className='d-flex flex-column justify-content-end'>
 							<h1 className='h4 font-weight-bold'>Importar</h1>
 							<p className='text-muted small'>
@@ -353,9 +364,8 @@ const PointTable = ({
 			<Modal
 				isOpen={modalSelectPoint}
 				setIsOpen={setModalSelectPoint}
-				size={`sm`}
-				isStaticBackdrop={true}>
-
+				size='sm'
+				isStaticBackdrop>
 				<ModalHeader setIsOpen={setModalSelectPoint}>
 					<ModalTitle id='signature-modal'>Selecione o Ponto</ModalTitle>
 				</ModalHeader>
@@ -369,54 +379,59 @@ const PointTable = ({
 							const serviceData = item[key].item; // Acessa o conteúdo do objeto
 							const pictureData = item[key].pictureService;
 							const pictureFullData = item[key].pictureFull;
-							const signatureData = manipulating.signature.picture; 
-							
+							const signatureData = manipulating.signature.picture;
+
 							return (
 								<div key={index} className='d-flex flex-column gap-2 '>
 									<div>
 										<Button
 											color='primary'
-											isLink={true}
+											isLink
 											onClick={() => {
 												// console.log('pictureData', pictureData);
-												if(modalAction == 'viewDocument'){
+												if (modalAction == 'viewDocument') {
 													setManipulatingPath(pictureData.path);
 													setModalSelectPoint(false);
 													setModalDocument(true);
-												}else if(modalAction == 'viewDocumentFull'){
-													if(pictureFullData && pictureFullData.path){
+												} else if (modalAction == 'viewDocumentFull') {
+													if (pictureFullData && pictureFullData.path) {
 														setManipulatingPath(pictureFullData.path);
 														setModalDocument(true);
-													}else{
+													} else {
 														toast(
-															<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+															<Toasts
+																icon='Close'
+																iconColor='danger'
+																title='Erro!'>
 																Documento completo não encontrado.
 															</Toasts>,
 														);
 													}
-
-												}else if(modalAction == 'viewSignatureDocument'){
-												}else if(modalAction == 'buildSignatureDocument'){
-													
+												} else if (modalAction == 'viewSignatureDocument') {
+												} else if (
+													modalAction == 'buildSignatureDocument'
+												) {
 													setAllDocument(pictureData);
 													setAllSignature(signatureData);
 													setManipulatingIndex(index);
 													setManipulatingKey(key);
 													setManipulatingDocument(serviceData.name);
-													if(signatureData && pictureData){
+													if (signatureData && pictureData) {
 														setModalSignedDocument(true);
-													}else{
+													} else {
 														toast(
-															<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+															<Toasts
+																icon='Close'
+																iconColor='danger'
+																title='Erro!'>
 																Assinatura não encontrada.
 															</Toasts>,
 														);
 													}
-												}else{
-													console.log('modalAction:', modalAction)
+												} else {
+													console.log('modalAction:', modalAction);
 												}
-												
-											}}>	
+											}}>
 											Ponto {index}
 										</Button>
 									</div>
@@ -432,11 +447,7 @@ const PointTable = ({
 				</ModalFooter>
 			</Modal>
 
-			<Modal
-				isStaticBackdrop={true}
-				isOpen={modalDocument}
-				setIsOpen={setModalDocument}
-				size={`lg`}>
+			<Modal isStaticBackdrop isOpen={modalDocument} setIsOpen={setModalDocument} size='lg'>
 				<ModalHeader>
 					<div>
 						<h1 className='mb-0 p-0'>Documento</h1>
@@ -456,28 +467,40 @@ const PointTable = ({
 
 				<ModalFooter className='d-flex justify-content-between'>
 					<div>
-						<Button isLink={true} color='light' icon={ modalAction == 'viewDocument' || modalAction == 'viewDocumentFull' ? 'ArrowBack' : 'Close'} onClick={() => {
-							if(modalAction == 'viewDocument' || modalAction == 'viewDocumentFull'){
-								setModalDocument(false);
-								setModalSelectPoint(true);
-							}else{
-								setModalDocument(false);
+						<Button
+							isLink
+							color='light'
+							icon={
+								modalAction == 'viewDocument' || modalAction == 'viewDocumentFull'
+									? 'ArrowBack'
+									: 'Close'
 							}
-						}}>
-							{modalAction == 'viewDocument' || modalAction == 'viewDocumentFull' ? 'Voltar' : 'Fechar'}
+							onClick={() => {
+								if (
+									modalAction == 'viewDocument' ||
+									modalAction == 'viewDocumentFull'
+								) {
+									setModalDocument(false);
+									setModalSelectPoint(true);
+								} else {
+									setModalDocument(false);
+								}
+							}}>
+							{modalAction == 'viewDocument' || modalAction == 'viewDocumentFull'
+								? 'Voltar'
+								: 'Fechar'}
 						</Button>
 					</div>
-					{ modalAction !== 'viewDocument' && modalAction !== 'viewDocumentFull' &&
+					{modalAction !== 'viewDocument' && modalAction !== 'viewDocumentFull' && (
 						<div className='d-flex gap-4'>
-							<Button isLight={true} color='danger' onClick={() => {}}>
+							<Button isLight color='danger' onClick={() => {}}>
 								Recusar
 							</Button>
-							<Button isLight={true} color='success' onClick={() => {}}>
+							<Button isLight color='success' onClick={() => {}}>
 								Aprovar
 							</Button>
 						</div>
-						
-					}
+					)}
 				</ModalFooter>
 			</Modal>
 
@@ -502,7 +525,7 @@ const PointTable = ({
 						<Button
 							icon='PersonSearch'
 							color='dark'
-							isLink={true}
+							isLink
 							onClick={() => menuController('profile')}>
 							Perfil
 						</Button>
@@ -511,7 +534,7 @@ const PointTable = ({
 						<Button
 							icon='Markunread'
 							color='dark'
-							isLink={true}
+							isLink
 							onClick={() => menuController('email')}>
 							Enviar e-mail
 						</Button>
@@ -520,7 +543,7 @@ const PointTable = ({
 						<Button
 							icon='Textsms'
 							color='dark'
-							isLink={true}
+							isLink
 							onClick={() => menuController('whatsapp')}>
 							Conversar no Whatsapp
 						</Button>
@@ -528,7 +551,7 @@ const PointTable = ({
 				</ul>
 			)}
 
-			<Card stretch={true}>
+			<Card stretch>
 				<CardHeader borderSize={1}>
 					<CardLabel icon='AccessAlarm' iconColor='primary'>
 						<CardTitle tag='div' className='h5'>
@@ -546,16 +569,15 @@ const PointTable = ({
 									handleImport(file);
 								} else {
 									toast(
-										<Toasts icon={'Close'} iconColor={'danger'} title={'Erro!'}>
+										<Toasts icon='Close' iconColor='danger' title='Erro!'>
 											Envie apenas <span>PDF</span>, não aceitamos outros
 											tipos de documentos.
 										</Toasts>,
 										{
 											closeButton: true,
-											autoClose: 5000, //
+											autoClose: 1000, //
 										},
 									);
-									return;
 								}
 							}}
 						/>
@@ -571,23 +593,23 @@ const PointTable = ({
 									if (verifyCache && verifyCache.status == 200) {
 										toast(
 											<Toasts
-												icon={'Warning'}
-												iconColor={'warning'}
-												title={'Atenção!'}>
+												icon='Warning'
+												iconColor='warning'
+												title='Atenção!'>
 												Estamos processando os dados, aguarde alguns
 												instantes.
 											</Toasts>,
 											{
 												closeButton: true,
-												autoClose: 5000, //
+												autoClose: 1000, //
 											},
 										);
 									} else {
 										toast(
 											<Toasts
-												icon={'Check'}
-												iconColor={'success'}
-												title={'Sucesso!'}>
+												icon='Check'
+												iconColor='success'
+												title='Sucesso!'>
 												Processamento realizado com sucesso, o relatório
 												será enviado para o seu e-mail.
 												<br />
@@ -597,7 +619,7 @@ const PointTable = ({
 											</Toasts>,
 											{
 												closeButton: true,
-												autoClose: 5000, //
+												autoClose: 1000, //
 											},
 										);
 										setCache(false);
@@ -630,7 +652,7 @@ const PointTable = ({
 									// 		</Toasts>,
 									// 		{
 									// 			closeButton: true,
-									// 			autoClose: 5000, //
+									// 			autoClose: 1000, //
 									// 		}
 									// 	);
 									// 	return;
@@ -746,7 +768,7 @@ const PointTable = ({
 													className={classNames('text-nowrap col-12 ', {
 														'border-light': !darkModeStatus,
 													})}
-													icon={'PhotoLibrary'}
+													icon='PhotoLibrary'
 													onClick={() => {
 														handleOpenOffcanvas(item);
 														setDataIndex(index);
@@ -810,7 +832,7 @@ const PointTable = ({
 						<FormGroup label='Visualizar' className='gap-2 d-flex flex-column'>
 							<div>
 								<Button
-									isLink={true}
+									isLink
 									icon='Description'
 									color='info'
 									onClick={() => {
@@ -821,22 +843,22 @@ const PointTable = ({
 							</div>
 							<div>
 								<Button
-									isLink={true}
+									isLink
 									icon='Mode'
 									color='storybook'
 									onClick={() => {
-										ViewSignature()
+										ViewSignature();
 									}}>
 									Assinatura
 								</Button>
 							</div>
 							<div>
 								<Button
-									isLink={true}
+									isLink
 									icon='Verified'
 									color='warning'
 									onClick={() => {
-										ViewSignedDocument()
+										ViewSignedDocument();
 									}}>
 									Documento Assinado
 								</Button>
@@ -846,7 +868,7 @@ const PointTable = ({
 						<FormGroup label='Gerar'>
 							<div>
 								<Button
-									isLink={true}
+									isLink
 									icon='LibraryAdd'
 									color='success'
 									onClick={buildDocumentSignature}>

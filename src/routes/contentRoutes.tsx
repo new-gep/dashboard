@@ -7,13 +7,15 @@ import {
 	gettingStartedPagesMenu,
 	pageLayoutTypesPagesMenu,
 	mainMenu,
-	secondaryPath
+	secondaryPath,
 } from '../menu';
 import Login from '../pages/presentation/auth/Login';
 
 const LANDING = {
 	DASHBOARD: lazy(() => import('../pages/presentation/example/dashboard/DashboardPage')),
-	DASHBOARD_BOOKING: lazy(() => import('../pages/presentation/example/dashboard/DashboardBookingPage')),
+	DASHBOARD_BOOKING: lazy(
+		() => import('../pages/presentation/example/dashboard/DashboardBookingPage'),
+	),
 	SUMMARY: lazy(() => import('../pages/presentation/SummaryPage')),
 };
 const SINGLE = {
@@ -28,6 +30,7 @@ const GRID = {
 	BOXED: lazy(() => import('../pages/presentation/example/demo-pages/GridBoxedPage')),
 	FLUID: lazy(() => import('../pages/presentation/example/demo-pages/GridFluidPage')),
 };
+
 const EDIT = {
 	MODERN: lazy(() => import('../pages/presentation/example/demo-pages/EditModernPage')),
 	BOXED: lazy(() => import('../pages/presentation/example/demo-pages/EditBoxedPage')),
@@ -36,6 +39,7 @@ const EDIT = {
 	IN_CANVAS: lazy(() => import('../pages/presentation/example/demo-pages/EditInCanvasPage')),
 	IN_MODAL: lazy(() => import('../pages/presentation/example/demo-pages/EditInModalPage')),
 };
+
 const PRICING = {
 	PRICING_TABLE: lazy(() => import('../pages/presentation/example/pricing/PricingTablePage')),
 };
@@ -43,44 +47,49 @@ const PRICING = {
 const AUTH = {
 	PAGE_404: lazy(() => import('../pages/presentation/auth/Page404')),
 };
+
 const APP = {
 	PROJECT_MANAGEMENT: {
 		PROJECTS_LIST: lazy(
 			() => import('../pages/presentation/example/project-management/ProjectManagementsList'),
 		),
-		PROJECT: lazy(
-			() => import('../pages/presentation/example/project-management/ProjectManagementsProject'),
-		),
+		// PROJECT: lazy(
+		// 	() => import('../pages/presentation/example/project-management/ProjectManagementsProject'),
+		// ),
 	},
 	KNOWLEDGE: {
 		GRID: lazy(() => import('../pages/presentation/example/knowledge/KnowledgeGridPage')),
 		VIEW: lazy(() => import('../pages/presentation/example/knowledge/KnowledgeViewPage')),
 	},
-	COLLABORATOR:{
+	COLLABORATOR: {
 		INDEX: lazy(() => import('../pages/presentation/collaborator/CollaboratorPage')),
 		PROFILE: lazy(() => import('../pages/presentation/collaborator/CollaboratorProfilePage')),
 	},
-	COMPANY:{
+	COMPANY: {
 		PROFILE: lazy(() => import('../pages/presentation/company/CompanyProfile')),
 	},
-	PROCESS:{
+	PROCESS: {
 		ADMISSION: lazy(() => import('../pages/presentation/process/AdmissionList')),
 		DISMISSAL: lazy(() => import('../pages/presentation/process/DemissionList')),
 		POINT: lazy(() => import('../pages/presentation/process/PointList')),
 		PAY_STUB: lazy(() => import('../pages/presentation/process/PayStubList')),
 	},
 	JOB: {
+		HOME: lazy(() => import('../pages/presentation/job/Home')),
+		CREATE: lazy(() => import('../pages/presentation/job/create/Index')),
 		TRANSACTIONS: lazy(() => import('../pages/presentation/job/TransActionsPage')),
 		PRODUCTS: lazy(() => import('../pages/presentation/job/SalesListPage')),
-		PRODUCTS_GRID: lazy(() => import('../pages/presentation/job/JobGridPage')),
+		VACANCIES: lazy(() => import('../pages/presentation/job/JobGridPage')),
 		PRODUCTS_VIEW: lazy(() => import('../pages/presentation/job/JobViewPage')),
-		VALIDATION_CANDIDATE: lazy(() => import('../pages/presentation/job/CustomerCandidate'))
+		VALIDATION_CANDIDATE: lazy(() => import('../pages/presentation/job/CustomerCandidate')),
 	},
 	APPOINTMENT: {
 		CALENDAR: lazy(() => import('../pages/presentation/example/appointment/CalendarPage')),
 		EMPLOYEE_LIST: lazy(() => import('../pages/presentation/example/appointment/EmployeeList')),
 		EMPLOYEE_VIEW: lazy(() => import('../pages/presentation/example/appointment/EmployeePage')),
-		APPOINTMENT_LIST: lazy(() => import('../pages/presentation/example/appointment/AppointmentList')),
+		APPOINTMENT_LIST: lazy(
+			() => import('../pages/presentation/example/appointment/AppointmentList'),
+		),
 	},
 	CRM: {
 		CRM_DASHBOARD: lazy(() => import('../pages/presentation/example/crm/CrmDashboard')),
@@ -92,14 +101,19 @@ const APP = {
 		ONLY_LIST: lazy(() => import('../pages/presentation/example/chat/OnlyListChatPage')),
 	},
 };
+
 const PAGE_LAYOUTS = {
-	HEADER_SUBHEADER: lazy(() => import('../pages/presentation/example/page-layouts/HeaderAndSubheader')),
+	HEADER_SUBHEADER: lazy(
+		() => import('../pages/presentation/example/page-layouts/HeaderAndSubheader'),
+	),
 	HEADER: lazy(() => import('../pages/presentation/example/page-layouts/OnlyHeader')),
 	SUBHEADER: lazy(() => import('../pages/presentation/example/page-layouts/OnlySubheader')),
 	CONTENT: lazy(() => import('../pages/presentation/example/page-layouts/OnlyContent')),
 	BLANK: lazy(() => import('../pages/presentation/example/page-layouts/Blank')),
 	ASIDE: lazy(() => import('../pages/presentation/example/aside-types/DefaultAsidePage')),
-	MINIMIZE_ASIDE: lazy(() => import('../pages/presentation/example/aside-types/MinimizeAsidePage')),
+	MINIMIZE_ASIDE: lazy(
+		() => import('../pages/presentation/example/aside-types/MinimizeAsidePage'),
+	),
 };
 
 const CONTENT = {
@@ -366,10 +380,10 @@ const presentation: RouteProps[] = [
 		path: demoPagesMenu.projectManagement.subMenu.list.path,
 		element: <APP.PROJECT_MANAGEMENT.PROJECTS_LIST />,
 	},
-	{
-		path: `${demoPagesMenu.projectManagement.subMenu.itemID.path}/:id`,
-		element: <APP.PROJECT_MANAGEMENT.PROJECT />,
-	},
+	// {
+	// 	path: `${demoPagesMenu.projectManagement.subMenu.itemID.path}/:id`,
+	// 	element: <APP.PROJECT_MANAGEMENT.PROJECT />,
+	// },
 
 	/**
 	 * App > Knowledge
@@ -387,16 +401,25 @@ const presentation: RouteProps[] = [
 	 * App > job
 	 */
 	{
-		path: demoPagesMenu.sales.subMenu.transactions.path,
-		element: <APP.JOB.TRANSACTIONS />,
+		path: mainMenu.recruit.subMenu.job.path,
+		element: <APP.JOB.HOME />,
 	},
+	{
+		path: mainMenu.recruit.subMenu.job.path,
+		element: <APP.JOB.VACANCIES />,
+	},
+	{
+		path: secondaryPath.vacanciesCreate.path,
+		element: <APP.JOB.CREATE />,
+	},
+
 	{
 		// path: demoPagesMenu.sales.subMenu.jobList.path,
 		element: <APP.JOB.PRODUCTS />,
 	},
 	{
-		path: demoPagesMenu.sales.subMenu.vaga.path,
-		element: <APP.JOB.PRODUCTS_GRID />,
+		path: secondaryPath.vacancies.path,
+		element: <APP.JOB.VACANCIES />,
 	},
 	{
 		path: `${demoPagesMenu.sales.subMenu.jobID.path}/:id`,

@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import USERS from '../../../../../common/data/userDummyData';
-import { demoPagesMenu } from '../../../../../menu';
 import UserContact from '../../../../../components/UserContact';
 import MasterAdmin from '../../../../../api/get/user/MasterAdmin';
 import AuthContext from '../../../../../contexts/authContext';
@@ -15,7 +13,7 @@ const CommonDashboardUserCard = () => {
 	useEffect(() => {
 		if (userData) {
 			MasterAdmin(userData.cnpj).then((res) => {
-				console.log('res',res);
+				console.log('res', res);
 				if (!res || res.status !== 200) {
 					setMasterAdmin(null);
 					return;
@@ -29,20 +27,18 @@ const CommonDashboardUserCard = () => {
 
 	return (
 		<>
-			{
-				masterAdmin ?
+			{masterAdmin ? (
 				<UserContact
-					name={`${Mask('firstName',masterAdmin.name)} ${Mask('secondName',masterAdmin.name)}`}
+					name={`${Mask('firstName', masterAdmin.name)} ${Mask('secondName', masterAdmin.name)}`}
 					position='Responsável'
 					mail={`${masterAdmin.email}`}
 					phone={`55${masterAdmin.phone}`}
 					// onChat={() => navigate(`../${demoPagesMenu.chat.subMenu.withListChat.path}`)}
 					src={masterAdmin.avatar}
 				/>
-				:
+			) : (
 				<></>
-			}
-		
+			)}
 		</>
 	);
 };

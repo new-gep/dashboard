@@ -1789,3 +1789,4 @@ export { default as ZoomIn } from './ZoomIn';
 export { default as ZoomOut } from './ZoomOut';
 export { default as ZoomOutMap } from './ZoomOutMap';
 export { default as Olw } from './Olw';
+export { default as Dei } from './Dei';

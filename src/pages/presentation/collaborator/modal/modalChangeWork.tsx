@@ -1,12 +1,10 @@
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import Button from '../../../../components/bootstrap/Button';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../../components/bootstrap/Modal';
-import Picture from '../../../../api/patch/Picture';
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import Select from '../../../../components/bootstrap/forms/Select';
 import { Options } from '../../../../components/bootstrap/Option';
 import Toasts from '../../../../components/bootstrap/Toasts';
-import { toast } from 'react-toastify';
-import Job from '../../../../api/patch/Job';
 import AuthContext from '../../../../contexts/authContext';
 import Mask from '../../../../function/Mask';
 
@@ -50,39 +48,38 @@ export default function ModalChangeWork({
 			const selectedJob = allJob.find((jobItem: any) => jobItem.id == jobSelect);
 			if (selectedJob) {
 				setJob(selectedJob);
-				closeModal(false)
+				closeModal(false);
 				toast(
 					<Toasts
-						icon={'Check'}
-						iconColor={'success'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-						title={'Sucesso'}>
+						icon='Check'
+						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Sucesso'>
 						Função <b>{job.function}</b> aplicada com sucesso.
 					</Toasts>,
 					{
 						closeButton: true,
-						autoClose: 5000, //
+						autoClose: 1000, //
 					},
 				);
 			}
 		} else {
 			toast(
 				<Toasts
-					icon={'WarningAmber'}
-					iconColor={'warning'} // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-					title={'Opa!'}>
+					icon='WarningAmber'
+					iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title='Opa!'>
 					Selecione uma função diferente da atual.
 				</Toasts>,
 				{
 					closeButton: true,
-					autoClose: 5000, //
+					autoClose: 1000, //
 				},
 			);
-			return;
 		}
 	};
 
 	return (
-		<Modal isOpen={openModal} setIsOpen={closeModal} size={`lg`}>
+		<Modal isOpen={openModal} setIsOpen={closeModal} size='lg'>
 			<ModalHeader>
 				<div className='flex flex-column items-start justify-start text-start'>
 					<h1 className='text-start'>Funções</h1>
@@ -113,13 +110,13 @@ export default function ModalChangeWork({
 						onClick={() => {
 							closeModal(false);
 						}}
-						isLink={true}
+						isLink
 						color='danger'>
 						Fechar
 					</Button>
 				</div>
 				<div>
-					<Button onClick={changeWork} isLight={true} color='primary'>
+					<Button onClick={changeWork} isLight color='primary'>
 						Buscar
 					</Button>
 				</div>
