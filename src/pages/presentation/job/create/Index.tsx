@@ -19,6 +19,7 @@ import JobUpdate from '../../../../api/patch/Job';
 import Job from '../../../../api/post/Job';
 import Card, {
 	CardBody,
+	CardFooter,
 	CardHeader,
 	CardLabel,
 	CardTitle,
@@ -26,11 +27,24 @@ import Card, {
 import Checks from '../../../../components/bootstrap/forms/Checks';
 import Textarea from '../../../../components/bootstrap/forms/Textarea';
 import Icon from '../../../../components/icon/Icon';
+import Button from '../../../../components/bootstrap/Button';
+import Avatar from '../../../../components/Avatar';
+import { AvatarPicture } from '../../../../constants/avatar';
+import Mask from '../../../../function/Mask';
+import FindCep from '../../../../api/get/Cep';
+import Label from '../../../../components/bootstrap/forms/Label';
+import FormJob from './helper/form';
+import SendFunction from './helper/sendFunction';
+import SelectOptionJob from './helper/selectOption';
+import Chat from './helper/chat';
+import InputGroup from '../../../../components/bootstrap/forms/InputGroup';
 type AbstractPictureKeys = keyof typeof AbstractPicture;
+
 interface Ijob {
 	user_create?: any;
 	image: string;
 	PCD: string;
+	DEI: string;
 	function: string;
 	salary: any;
 	time: any;
@@ -39,29 +53,63 @@ interface Ijob {
 	benefits: string;
 	details: string;
 	obligations: string;
+	cep: string;
+	logradouro: string;
+	uf: string;
+	bairro: string;
+	numero: string;
+	complemento: string;
 	CNPJ_company?: string;
 }
+
 interface IjobUpdate {
 	image: string;
-	function: string;
 	PCD: string;
+	DEI: string;
+	function: string;
 	salary: any;
-	journey: any;
 	time: any;
 	contract: string;
 	benefits: string;
 	details: string;
 	obligations: string;
+	cep: string;
+	logradouro: string;
+	uf: string;
+	bairro: string;
+	numero: string;
+	complemento: string;
 	user_edit?: string;
+}
+
+interface IValues {
+	image: any;
+	PCD: string;
+	DEI: string;
+	function: string;
+	salary: any;
+	time: any;
+	journey: string;
+	contract: string;
+	benefits: string;
+	details: string;
+	obligations: string;
+	cep: string;
+	logradouro: string;
+	uf: string;
+	bairro: string;
+	numero: string;
+	complemento: string;
 }
 
 export default function CreateJob() {
 	const { userData } = React.useContext(AuthContext);
-	const [data, setData] = React.useState<any>(null);
-	const [deleteModal, setDeleteModal] = React.useState<boolean>(false);
 	const [editItem, setEditItem] = React.useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = React.useState<boolean>(false);
-	const [imageFile, setImageFile] = React.useState<any>(null);
+	const [decision, setDecision] = React.useState<string | null>(null);
+	const [initial, setInitial] = React.useState<boolean>(false);
+	const [sendFunction, setSendFunction] = React.useState<boolean>(false);
+	const [IAactive, setIAactive] = React.useState<boolean>(false);
 	const [nameImage, setNameImage] = React.useState<AbstractPictureKeys>('ballSplit');
 	const [rebuild, setRebuild] = React.useState<number>(1);
 
@@ -75,65 +123,40 @@ export default function CreateJob() {
 		if (editItem && 'id' in editItem) {
 			const update: IjobUpdate = job;
 			update.user_edit = userData.id;
-			delete update.journey;
 			const response = await JobUpdate(update, editItem.id);
 			switch (response.status) {
 				case 200:
 					setRebuild(rebuild + 1);
 					toast(
-						<Toasts
-							icon='Work'
-							iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Successo'>
+						<Toasts icon='Work' iconColor='success' title='Successo'>
 							Vaga editada com sucesso!
 						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
+						{ closeButton: true, autoClose: 1000 },
 					);
 					setEditPanel(false);
 					break;
 				case 404:
 					toast(
-						<Toasts
-							icon='Work'
-							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro'>
+						<Toasts icon='Work' iconColor='danger' title='Erro'>
 							Algo deu errado, tente novamente!
 						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
+						{ closeButton: true, autoClose: 1000 },
 					);
 					break;
 				case 500:
 					toast(
-						<Toasts
-							icon='Work'
-							iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro'>
+						<Toasts icon='Work' iconColor='warning' title='Erro'>
 							Erro interno, tente novamente!
 						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
+						{ closeButton: true, autoClose: 1000 },
 					);
 					break;
 				default:
 					toast(
-						<Toasts
-							icon='Work'
-							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro Desconhecido'>
+						<Toasts icon='Work' iconColor='danger' title='Erro Desconhecido'>
 							Algo deu errado, tente novamente!
 						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
+						{ closeButton: true, autoClose: 1000 },
 					);
 					break;
 			}
@@ -143,90 +166,78 @@ export default function CreateJob() {
 				case 201:
 					setRebuild(rebuild + 1);
 					toast(
-						<Toasts
-							icon='Work'
-							iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Successo'>
+						<Toasts icon='Work' iconColor='success' title='Successo'>
 							Vaga criada com sucesso!
 						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
+						{ closeButton: true, autoClose: 1000 },
 					);
 					setEditPanel(false);
 					break;
 				case 500:
 					toast(
-						<Toasts
-							icon='Work'
-							iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro'>
+						<Toasts icon='Work' iconColor='warning' title='Erro'>
 							Algo deu errado, tente novamente!
 						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
+						{ closeButton: true, autoClose: 1000 },
 					);
 					break;
-
 				default:
 					toast(
-						<Toasts
-							icon='Work'
-							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro Desconhecido'>
+						<Toasts icon='Work' iconColor='danger' title='Erro Desconhecido'>
 							Algo deu errado, tente novamente!
 						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
+						{ closeButton: true, autoClose: 1000 },
 					);
 					break;
 			}
 		}
 	};
 
-	interface IValues {
-		image: any;
-		PCD: string;
-		function: string;
-		salary: any;
-		time: any;
-		journey: string;
-		contract: string;
-		benefits: string;
-		details: string;
-		obligations: string;
-	}
-
 	const validate = (values: IValues) => {
 		const errors: any = {};
-		// Campos obrigatórios
 
+		// Validações para campos obrigatórios
 		if (!values.function) {
 			errors.function = 'Função é obrigatória';
 		}
 		if (!values.salary || values.salary <= 0) {
-			errors.salary = 'Salário é obrigatório';
+			errors.salary = 'Salário deve ser maior que zero';
 		}
 		if (!values.time || values.time <= 0) {
 			errors.time = 'Horas semanais são obrigatórias';
-		} else if (values.time.length < 1) {
-			errors.time = 'Horário mínimo é 1 digito';
-		} else if (values.time.length > 3) {
-			errors.time = 'Horário máximo é 3 digitos';
+		} else if (values.time < 1 || values.time > 168) {
+			errors.time = 'Horas semanais devem ser entre 1 e 168';
 		}
 		if (!values.journey) {
-			errors.journey = 'Jornada é obrigatória';
+			errors.journey = 'Modelo de trabalho é obrigatório';
 		}
 		if (!values.contract) {
-			errors.contract = 'Contrato é obrigatório';
+			errors.contract = 'Tipo de contratação é obrigatório';
+		}
+		if (!values.cep) {
+			errors.cep = 'CEP é obrigatório';
+		} else if (!/^\d{5}-?\d{3}$/.test(values.cep)) {
+			errors.cep = 'CEP deve estar no formato 12345-678';
+		}
+		if (!values.logradouro) {
+			errors.logradouro = 'Logradouro é obrigatório';
+		}
+		if (!values.uf) {
+			errors.uf = 'UF é obrigatório';
+		} else if (!/^[A-Z]{2}$/.test(values.uf)) {
+			errors.uf = 'UF deve ter exatamente 2 letras maiúsculas';
+		}
+		if (!values.bairro) {
+			errors.bairro = 'Bairro é obrigatório';
+		}
+		if (!values.numero) {
+			errors.numero = 'Número é obrigatório';
+		} else if (!/^\d+$/.test(values.numero)) {
+			errors.numero = 'Número deve conter apenas dígitos';
 		}
 
-		// Não validamos os campos opcionais (benefits, details, obligations)
+		// Campos opcionais (não requerem validação)
+		// benefits, details, obligations, complemento
 
 		return errors;
 	};
@@ -235,6 +246,7 @@ export default function CreateJob() {
 		initialValues: {
 			function: '',
 			PCD: '0',
+			DEI: '0',
 			salary: '',
 			time: '',
 			journey: '',
@@ -242,6 +254,12 @@ export default function CreateJob() {
 			benefits: '',
 			details: '',
 			obligations: '',
+			cep: '',
+			logradouro: '',
+			uf: '',
+			bairro: '',
+			numero: '',
+			complemento: '',
 			image: '',
 		},
 		validate,
@@ -252,11 +270,12 @@ export default function CreateJob() {
 			if (!editItem) {
 				resetForm();
 			}
-			// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
 		},
 	});
 
-	React.useEffect(() => {}, [userData]);
+	React.useEffect(() => {
+		console.log('cep mudo', formik.values.cep.length > 7);
+	}, [formik.values.cep]);
 
 	return (
 		<PageWrapper title={secondaryPath.vacanciesCreate.text}>
@@ -272,330 +291,135 @@ export default function CreateJob() {
 						]}
 					/>
 					<SubheaderSeparator />
-					{/* {data && <span className='text-muted'>{data.length} vagas abertas</span>} */}
 				</SubHeaderLeft>
-				{/* <SubHeaderRight>
-					<Button
-						color='dark'
-						isLight
-						icon='Add'
-						onClick={() => {
-							setEditItem(null);
-							setEditPanel(true);
-						}}>
-						Gerar Vaga
-					</Button>
-				</SubHeaderRight> */}
 			</SubHeader>
-			<div className='p-5'>
-				<Card>
-					<CardHeader>
-						<CardLabel icon='Description' iconColor='success'>
-							<CardTitle>Detalhes da Vaga</CardTitle>
-						</CardLabel>
-					</CardHeader>
-					<CardBody>
-						<div className='row g-4'>
-							<div className='col-2 d-flex align-items-center'>
-                                <Icon
-									icon={'Accessible'}
-									color={'success'}
-                                    size={'2x'}
-						        />
-								<div className='ms-2'>
-									<Checks
-										isInline
-										type={'switch'}
-										label={'PCD'}
-										onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-											const isChecked = event.target.checked;
-											formik.setFieldValue('PCD', isChecked ? '1' : '0');
-										}}
-										checked={formik.values.PCD == '1' ? true : false}
+			<div className='flex row p-4 g-4 d-flex align-items-stretch'>
+				<div className='col-4 h-100'>
+					<Card className='h-50'>
+						<CardHeader>
+							<CardLabel icon='robot' iconColor='success'>
+								<CardTitle>Assistente IA (Beta)</CardTitle>
+							</CardLabel>
+							{ IAactive &&
+								<CardTitle>
+								<Checks
+									isInline
+									type={'switch'}
+									label={'Ativar'}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+										const isChecked = event.target.checked;
+										setIAactive(isChecked);
+									}}
+									checked={IAactive}
+								/>
+								</CardTitle>
+							}
+						</CardHeader>
+						{!IAactive ? (
+							<CardBody>
+								<>
+									<div className='d-flex flex-column items-center justify-content-center'>
+										Ative e deixe que a gente te ajude a encontrar a pessoa
+										certa.
+										<p className='text-muted small'>
+											Vamos te ajudar a preencher a vaga
+										</p>
+									</div>
+									<div className='mt-2'>
+										<Checks
+											isInline
+											type={'switch'}
+											label={'Ativar'}
+											onChange={(
+												event: React.ChangeEvent<HTMLInputElement>,
+											) => {
+												const isChecked = event.target.checked;
+												setIAactive(isChecked);
+											}}
+											checked={IAactive}
+										/>
+									</div>
+								</>
+							</CardBody>
+						) : (
+							<Chat userData={userData}/>
+						)}
+					</Card>
+
+					<Card >
+						<CardHeader>
+							<CardLabel icon='LibraryAdd' iconColor='success'>
+								<CardTitle>Criador da Vaga</CardTitle>
+							</CardLabel>
+						</CardHeader>
+						<CardBody>
+							<div className='d-flex flex-column items-center justify-content-center'>
+								<div className='d-flex items-center justify-content-center h-50'>
+									<Avatar
+										className='bg-secondary'
+										src={
+											userData
+												? // @ts-ignore
+													AvatarPicture[userData.avatar] // Se o usuário selecionou um avatar, exiba-o
+												: userData.avatar
+													? // @ts-ignore
+														AvatarPicture[userData.avatar] // Caso contrário, exiba o avatar do usuário (se disponível)
+													: AvatarPicture.default // Caso contrário, exiba o avatar padrão
+										}
+										color='storybook'
+										rounded={'circle'}
 									/>
 								</div>
-							</div>
-							
-                            <div className='col-2 d-flex align-items-center'>
-								<Icon
-									icon={'Dei'}
-									color={'success'}
-                                    size={'2x'}
-						        />
-                                <div className='ms-2'>
-                                    <Checks
-                                        isInline
-                                        type={'switch'}
-                                        label={'DEI'}
-                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                            const isChecked = event.target.checked;
-                                            formik.setFieldValue('PCD', isChecked ? '1' : '0');
-                                        }}
-                                        checked={formik.values.PCD == '1' ? true : false}
-                                    />
-                                </div>
-							</div>
 
-							<div className='row g-2'>
-								<div className='col-8'>
-									<FormGroup id='function' label='Função' isFloating>
-										<Input
-											className='text-capitalize'
-											placeholder='Função'
-											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
-											value={formik.values.function}
-											isValid={formik.isValid}
-											isTouched={formik.touched.function}
-											invalidFeedback={formik.errors.function}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-								<div className='col-4'>
-									<FormGroup id='salary' label='Salário' isFloating>
-										<Input
-											type='number'
-											onChange={formik.handleChange}
-											value={formik.values.salary}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											isTouched={formik.touched.salary}
-											invalidFeedback={formik.errors.salary}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
+								<div className='mt-3'>
+									<div className='d-flex align-items-center mb-2'>
+										<Icon icon='person' size='2x' />
+										<p className='ms-2 mb-0 text-capitalize'>
+											{userData && userData.name}
+										</p>
+									</div>
+									<div className='d-flex align-items-center mb-2'>
+										<Icon icon='email' size='2x' />
+										<p className='ms-2 mb-0'>{userData && userData.email}</p>
+									</div>
+									<div className='d-flex align-items-center mb-2'>
+										<Icon icon='phone' size='2x' />
+										<p className='ms-2 mb-0'>
+											{userData && Mask('phone', userData.phone)}
+										</p>
+									</div>
 								</div>
 							</div>
+						</CardBody>
+					</Card>
+				</div>
+				<div className='col-8'>
+					<Card>
+						<CardHeader>
+							<CardLabel icon='Description' iconColor='success'>
+								<CardTitle>Informações da Vaga</CardTitle>
+							</CardLabel>
+						</CardHeader>
 
-                            <div className='row g-2'>
-                                <div className='col-6'>
-                                    <FormGroup id='journey'>
-                                        <Select
-                                            className='form-select fw-medium'
-                                            required={true}
-                                            ariaLabel={''}
-                                            placeholder={'Modelo de Trabalho'}
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.journey}
-                                            isValid={formik.isValid}
-                                            isTouched={formik.touched.journey}
-                                            invalidFeedback={formik.errors.journey}
-                                            validFeedback='Ótimo!'>
-                                            <option value={'5x2'}>Presencial</option>
-                                            <option value={'5x2'}>Híbrido</option>
-                                            <option value={'6x1'}>Home Office</option>
-                                        </Select>
-                                    </FormGroup>
-                                </div>
-                                <div className='col-6'>
-                                    <FormGroup id='contract'>
-                                        <Select
-                                            className='form-select fw-medium'
-                                            required={true}
-                                            ariaLabel={'Contratação'}
-                                            placeholder={'Contratação'}
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.contract}
-                                            isValid={formik.isValid}
-                                            isTouched={formik.touched.contract}
-                                            invalidFeedback={formik.errors.contract}
-                                            validFeedback='Ótimo!'>
-                                            <Option value={'clt'}>CLT</Option>
-                                            <Option value={'pj'}>PJ </Option>
-                                            <Option value={'contract'}>Contrato</Option>
-                                        </Select>
-                                    </FormGroup>
-                                </div>
-                            </div>
-
-                            <div className='row g-2'>
-                                <div className='col-2'>
-                                    <FormGroup id='time' label='CEP' isFloating>
-                                        <Input
-                                            max={3}
-                                            min={1}
-                                            placeholder='CEP'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.time}
-                                            isValid={formik.isValid}
-                                            isTouched={formik.touched.time}
-                                            invalidFeedback={formik.errors.time}
-                                            validFeedback='Ótimo!'
-                                        />
-                                    </FormGroup>
-                                </div>
-                                <div className='col-10'>
-                                    <FormGroup id='time' label='Logradouro' isFloating>
-                                        <Input
-                                            max={3}
-                                            min={1}
-                                            placeholder='Horas semanais'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.time}
-                                            isValid={formik.isValid}
-                                            isTouched={formik.touched.time}
-                                            invalidFeedback={formik.errors.time}
-                                            validFeedback='Ótimo!'
-                                        />
-                                    </FormGroup>
-                                </div>
-                            </div>
-
-                            <div className='row g-2'>
-                                <div className='col-1'>
-                                    <FormGroup id='time' label='UF' isFloating>
-                                        <Input
-                                            max={3}
-                                            min={1}
-                                            placeholder='UF'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.time}
-                                            isValid={formik.isValid}
-                                            isTouched={formik.touched.time}
-                                            invalidFeedback={formik.errors.time}
-                                            validFeedback='Ótimo!'
-                                        />
-                                    </FormGroup>
-                                </div>
-                                <div className='col-4'>
-                                    <FormGroup id='time' label='Bairro' isFloating>
-                                        <Input
-                                            max={3}
-                                            min={1}
-                                            placeholder='UF'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.time}
-                                            isValid={formik.isValid}
-                                            isTouched={formik.touched.time}
-                                            invalidFeedback={formik.errors.time}
-                                            validFeedback='Ótimo!'
-                                        />
-                                    </FormGroup>
-                                </div>
-                                <div className='col-2'>
-                                    <FormGroup id='time' label='Número' isFloating>
-                                        <Input
-                                            max={3}
-                                            min={1}
-                                            placeholder='CEP'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.time}
-                                            isValid={formik.isValid}
-                                            isTouched={formik.touched.time}
-                                            invalidFeedback={formik.errors.time}
-                                            validFeedback='Ótimo!'
-                                        />
-                                    </FormGroup>
-                                </div>
-                                <div className='col-5'>
-                                    <FormGroup id='time' label='UF' isFloating>
-                                        <Input
-                                            max={3}
-                                            min={1}
-                                            placeholder='UF'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.time}
-                                            isValid={formik.isValid}
-                                            isTouched={formik.touched.time}
-                                            invalidFeedback={formik.errors.time}
-                                            validFeedback='Ótimo!'
-                                        />
-                                    </FormGroup>
-                                </div>
-                            </div>
-
-
-							<div className='col-6'>
-								<FormGroup id='journey'>
-									<Select
-										className='form-select fw-medium'
-										required={true}
-										ariaLabel={''}
-										placeholder={'Jornada'}
-										onChange={formik.handleChange}
-										onBlur={formik.handleBlur}
-										value={formik.values.journey}
-										isValid={formik.isValid}
-										isTouched={formik.touched.journey}
-										invalidFeedback={formik.errors.journey}
-										validFeedback='Ótimo!'>
-										<option value={'5x2'}>5x2</option>
-										<option value={'6x1'}>6x1</option>
-									</Select>
-								</FormGroup>
-							</div>
-							<div className='col-6'>
-								<FormGroup id='contract'>
-									<Select
-										className='form-select fw-medium'
-										required={true}
-										ariaLabel={'Contratação'}
-										placeholder={'Contratação'}
-										onChange={formik.handleChange}
-										onBlur={formik.handleBlur}
-										value={formik.values.contract}
-										isValid={formik.isValid}
-										isTouched={formik.touched.contract}
-										invalidFeedback={formik.errors.contract}
-										validFeedback='Ótimo!'>
-										<Option value={'clt'}>CLT</Option>
-										<Option value={'pj'}>PJ </Option>
-										<Option value={'contract'}>Contrato</Option>
-									</Select>
-								</FormGroup>
-							</div>
-
-							<div className='col-12'>
-								<FormGroup
-									id='obligations'
-									label='Obrigações (opcional)'
-									isFloating>
-									<Textarea
-										onChange={formik.handleChange}
-										value={formik.values.obligations}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.obligations}
-										invalidFeedback={formik.errors.obligations}
-										validFeedback='Ótimo!'></Textarea>
-								</FormGroup>
-							</div>
-							<div className='col-12'>
-								<FormGroup id='benefits' label='Benefícios (opcional)' isFloating>
-									<Textarea
-										onChange={formik.handleChange}
-										value={formik.values.benefits}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.benefits}
-										invalidFeedback={formik.errors.benefits}
-										validFeedback='Ótimo!'></Textarea>
-								</FormGroup>
-							</div>
-							<div className='col-12'>
-								<FormGroup id='details' label='Detalhes (opcional)' isFloating>
-									<Textarea
-										onChange={formik.handleChange}
-										value={formik.values.details}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.details}
-										invalidFeedback={formik.errors.details}
-										validFeedback='Ótimo!'></Textarea>
-								</FormGroup>
-							</div>
-						</div>
-					</CardBody>
-				</Card>
+						{initial ? (
+							<CardBody>
+								{formik && <FormJob setInitial={setInitial} formik={formik} />}
+							</CardBody>
+						) : (
+							<CardBody>
+								{sendFunction && formik ? (
+									<SelectOptionJob
+										setSendFunction={setSendFunction}
+										setDecision={setDecision}
+										setInitial={setInitial}
+									/>
+								) : (
+									<SendFunction formik={formik} setFinish={setSendFunction} />
+								)}
+							</CardBody>
+						)}
+					</Card>
+				</div>
 			</div>
 		</PageWrapper>
 	);
