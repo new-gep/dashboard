@@ -38,6 +38,8 @@ import SendFunction from './helper/sendFunction';
 import SelectOptionJob from './helper/selectOption';
 import Chat from './helper/chat';
 import InputGroup from '../../../../components/bootstrap/forms/InputGroup';
+import RecruitAutoComplet from '../../../../api/assistant/recruit/autoComplet';
+
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 
 interface Ijob {
@@ -91,9 +93,8 @@ interface IValues {
 	time: any;
 	journey: string;
 	contract: string;
-	benefits: string;
-	details: string;
-	obligations: string;
+	requirements: any;
+	responsibility: any;
 	cep: string;
 	logradouro: string;
 	uf: string;
@@ -106,10 +107,12 @@ export default function CreateJob() {
 	const { userData } = React.useContext(AuthContext);
 	const [editItem, setEditItem] = React.useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = React.useState<boolean>(false);
+	const [loaderRecruit, setLoaderRecruit] = React.useState<boolean>(false);
 	const [decision, setDecision] = React.useState<string | null>(null);
 	const [initial, setInitial] = React.useState<boolean>(false);
 	const [sendFunction, setSendFunction] = React.useState<boolean>(false);
 	const [IAactive, setIAactive] = React.useState<boolean>(false);
+	const [IAthread, setIAthread] = React.useState<any>(null);
 	const [nameImage, setNameImage] = React.useState<AbstractPictureKeys>('ballSplit');
 	const [rebuild, setRebuild] = React.useState<number>(1);
 
@@ -242,6 +245,41 @@ export default function CreateJob() {
 		return errors;
 	};
 
+	const sendMessageRecruit = async () => {
+		setLoaderRecruit(true); // Ativa o loader
+	  
+		return new Promise(async (resolve, reject) => {
+		  try {
+			const RecruitProps = {
+			  thread: null,
+			  message: formik.values.function,
+			};
+	  
+			const response = await RecruitAutoComplet(RecruitProps);
+			if (response && response?.status === 200) {
+			  const informations = JSON.parse(response.response);
+	  
+			  const updatedValues = {
+				...formik.values, // Mantém os valores atuais
+				requirements: informations.requirements, // Atualiza 'requirements'
+				responsibility: informations.responsibility, // Atualiza 'responsibility'
+			  };
+	  
+			  formik.setValues(updatedValues); // Atualiza os valores no Formik
+			  setLoaderRecruit(false); // Desativa o loader
+			  setInitial(true);
+			  resolve(''); // Resolve a Promise após atualizar os valores
+			} else {
+			  setLoaderRecruit(false); // Desativa o loader em caso de erro
+			  reject('Erro na resposta'); // Rejeita a Promise caso algo dê errado
+			}
+		  } catch (error:any) {
+			setLoaderRecruit(false); // Desativa o loader em caso de erro
+			reject('Erro ao enviar a mensagem: ' + error.message); // Rejeita a Promise com o erro
+		  }
+		});
+	};
+	  
 	const formik = useFormik({
 		initialValues: {
 			function: '',
@@ -251,9 +289,8 @@ export default function CreateJob() {
 			time: '',
 			journey: '',
 			contract: '',
-			benefits: '',
-			details: '',
-			obligations: '',
+			requirements: '',
+			responsibility: '',
 			cep: '',
 			logradouro: '',
 			uf: '',
@@ -266,7 +303,7 @@ export default function CreateJob() {
 		onSubmit: (values, { resetForm }) => {
 			values.image = nameImage;
 			const job = values;
-			createAndEditJob(job);
+			// createAndEditJob(job);
 			if (!editItem) {
 				resetForm();
 			}
@@ -276,6 +313,12 @@ export default function CreateJob() {
 	React.useEffect(() => {
 		console.log('cep mudo', formik.values.cep.length > 7);
 	}, [formik.values.cep]);
+
+	React.useEffect(() => {
+		if (decision == 'ia') {
+			sendMessageRecruit();
+		}
+	}, [decision]);
 
 	return (
 		<PageWrapper title={secondaryPath.vacanciesCreate.text}>
@@ -300,20 +343,20 @@ export default function CreateJob() {
 							<CardLabel icon='robot' iconColor='success'>
 								<CardTitle>Assistente IA (Beta)</CardTitle>
 							</CardLabel>
-							{ IAactive &&
+							{IAactive && (
 								<CardTitle>
-								<Checks
-									isInline
-									type={'switch'}
-									label={'Ativar'}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-										const isChecked = event.target.checked;
-										setIAactive(isChecked);
-									}}
-									checked={IAactive}
-								/>
+									<Checks
+										isInline
+										type={'switch'}
+										label={'Ativar'}
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+											const isChecked = event.target.checked;
+											setIAactive(isChecked);
+										}}
+										checked={IAactive}
+									/>
 								</CardTitle>
-							}
+							)}
 						</CardHeader>
 						{!IAactive ? (
 							<CardBody>
@@ -333,6 +376,15 @@ export default function CreateJob() {
 											onChange={(
 												event: React.ChangeEvent<HTMLInputElement>,
 											) => {
+												if(!initial){
+													toast(
+														<Toasts icon='Close' iconColor='danger' title='Atenção'>
+															Primeiro selecione como gostaria de gerar a vaga
+														</Toasts>,
+														{ closeButton: true, autoClose: 2000 },
+													);
+													return
+												}
 												const isChecked = event.target.checked;
 												setIAactive(isChecked);
 											}}
@@ -342,11 +394,11 @@ export default function CreateJob() {
 								</>
 							</CardBody>
 						) : (
-							<Chat userData={userData}/>
+							<Chat formik={formik} sendFunction={sendFunction} userData={userData} thread={IAthread} setThread={setIAthread} />
 						)}
 					</Card>
 
-					<Card >
+					<Card>
 						<CardHeader>
 							<CardLabel icon='LibraryAdd' iconColor='success'>
 								<CardTitle>Criador da Vaga</CardTitle>
@@ -403,7 +455,7 @@ export default function CreateJob() {
 
 						{initial ? (
 							<CardBody>
-								{formik && <FormJob setInitial={setInitial} formik={formik} />}
+								{formik && <FormJob setInitial={setInitial} formik={formik} setIAactive={setIAactive}/>}
 							</CardBody>
 						) : (
 							<CardBody>
@@ -412,10 +464,11 @@ export default function CreateJob() {
 										setSendFunction={setSendFunction}
 										setDecision={setDecision}
 										setInitial={setInitial}
+										loader={loaderRecruit}
 									/>
 								) : (
 									<SendFunction formik={formik} setFinish={setSendFunction} />
-								)}
+								)} 
 							</CardBody>
 						)}
 					</Card>

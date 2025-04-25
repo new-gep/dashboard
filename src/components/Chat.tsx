@@ -347,7 +347,9 @@ interface IChatProps {
 const Chat: FC<IChatProps> = ({ children, className }) => {
 	return (
 		// eslint-disable-next-line react/jsx-props-no-spreading
-		<div className={classNames('chat-container', className)}>{children}</div>
+		<div className={classNames('chat-container', className)}>
+			{children}
+		</div>
 	);
 };
 Chat.propTypes = {

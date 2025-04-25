@@ -9,10 +9,12 @@ import { CardTitle } from '../../../../../components/bootstrap/Card';
 import Button from '../../../../../components/bootstrap/Button';
 import * as React from 'react';
 import Label from '../../../../../components/bootstrap/forms/Label';
+import Mask from '../../../../../function/Mask';
 
-export default function FormJob({ formik, setInitial }: { formik: any; setInitial: any }) {
+export default function FormJob({ formik, setInitial, setIAactive }: { formik: any; setInitial: any, setIAactive:any }) {
 	const [newBenefitName, setNewBenefitName] = React.useState('');
 	const [AddBenefit, setAddBenefit] = React.useState<boolean>(false);
+	const [searchTerm, setSearchTerm] = React.useState<any>('');
 	const [benefit, setBenefit] = React.useState<any>([
 		{
 			id: 1,
@@ -72,7 +74,7 @@ export default function FormJob({ formik, setInitial }: { formik: any; setInitia
 	const [skills, setSkills] = React.useState<any>(
 		[] as Array<{ id: number; icon: string; name: string; active: boolean }>,
 	);
-
+	
 	const handleToggleSkill = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const selected = e.target.value;
 		if (!selected) return;
@@ -107,9 +109,11 @@ export default function FormJob({ formik, setInitial }: { formik: any; setInitia
 		{ name: 'Adaptabilidade', icon: 'aa' },
 	];
 
-	const removeSkill = (id: number) => {
-		setSkills((prev: any) => prev.filter((skill: any) => skill.id !== id));
-	};
+	const filteredOptions = options.filter(
+		(opt: any) =>
+			opt.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+			!skills.some((s: any) => s.name === opt.name), // já selecionadas não aparecem
+	);
 
 	return (
 		<section className='row g-4'>
@@ -231,6 +235,7 @@ export default function FormJob({ formik, setInitial }: { formik: any; setInitia
 							onChange={formik.handleChange}
 							onBlur={formik.handleBlur}
 							value={formik.values.cep}
+							mask='cep'
 							isValid={formik.isValid}
 							isTouched={formik.touched.cep}
 							invalidFeedback={formik.errors.cep}
@@ -255,136 +260,32 @@ export default function FormJob({ formik, setInitial }: { formik: any; setInitia
 			</div>
 
 			<div className='col-12 g-2 mt-3'>
-				<FormGroup id='obligations' label='Responsabilidades' isFloating>
+				<FormGroup id='responsibility' label='Responsabilidades' isFloating>
 					<Textarea
 						onChange={formik.handleChange}
-						value={formik.values.obligations}
+						value={formik.values.responsibility}
 						onBlur={formik.handleBlur}
 						isValid={formik.isValid}
-						isTouched={formik.touched.obligations}
-						invalidFeedback={formik.errors.obligations}
+						isTouched={formik.touched.responsibility}
+						invalidFeedback={formik.errors.responsibility}
 						validFeedback='Ótimo!'
 					/>
 				</FormGroup>
 			</div>
 
 			<div className='col-12 mb-2 mt-3 g-2'>
-				<FormGroup id='benefits' label='Requisitos' isFloating>
+				<FormGroup id='requirements' label='Requisitos' isFloating>
 					<Textarea
 						onChange={formik.handleChange}
-						value={formik.values.benefits}
+						value={formik.values.requirements}
 						onBlur={formik.handleBlur}
 						isValid={formik.isValid}
-						isTouched={formik.touched.benefits}
-						invalidFeedback={formik.errors.benefits}
+						isTouched={formik.touched.requirements}
+						invalidFeedback={formik.errors.requirements}
 						validFeedback='Ótimo!'
 					/>
 				</FormGroup>
 			</div>
-
-			<div>
-				<div className='d-flex align-items-center'>
-					<Icon
-						color='success'
-						style={{ marginRight: '1%', userSelect: 'none' }}
-						icon='CardGiftcard'
-						size={'2x'}
-					/>
-					<CardTitle className='mb-0' style={{ userSelect: 'none' }}>
-						Benefícios
-					</CardTitle>
-				</div>
-
-				<Label className='mt-1 p-0' style={{ userSelect: 'none' }}>
-					{!AddBenefit
-						? 'Clique em cima, e torne mais atrativo sua vaga'
-						: 'Adicione seu benefício, e torne mais atrativo sua vaga'}
-				</Label>
-			</div>
-
-			{!AddBenefit ? (
-				<div className='col-12 g-2'>
-					{benefit.map((item: any) => {
-						return (
-							<Button
-								color={item.active ? 'primary' : 'light'}
-								isLink={!item.active}
-								icon={item.icon}
-								className='text-capitalize'
-								// size={'lg'}
-								onClick={() => {
-									setBenefit((prev: any[]) =>
-										prev.map((b) =>
-											b.id === item.id
-												? {
-														...b,
-														active: !b.active,
-													}
-												: b,
-										),
-									);
-								}}>
-								{item.name}
-							</Button>
-						);
-					})}
-					<Button
-						className='text-capitalize'
-						color='success'
-						isLink={true}
-						icon={'ControlPoint'}
-						size={'lg'}
-						onClick={() => {
-							setAddBenefit(!AddBenefit);
-						}}
-					/>
-				</div>
-			) : (
-				<div className='d-flex g-2'>
-					<Button
-						color='danger'
-						isLink={true}
-						icon={'RemoveCircle'}
-						size={'lg'}
-						onClick={() => {
-							setAddBenefit(!AddBenefit);
-						}}
-					/>
-
-					<FormGroup
-						className='col-5'
-						id='Benefit'
-						label='Benefício Adicional'
-						isFloating>
-						<Input
-							className='text-capitalize'
-							placeholder='Benefício Adicional'
-							value={newBenefitName}
-							onChange={(e: any) => setNewBenefitName(e.target.value)}
-							onBlur={formik.handleBlur}
-						/>
-					</FormGroup>
-
-					<Button
-						color='success'
-						isLink={true}
-						icon={'CheckCircle'}
-						size={'lg'}
-						onClick={() => {
-							if (!newBenefitName.trim()) return;
-							const newBenefit = {
-								id: benefit.length + 1, // ou use outro sistema de ID único se precisar
-								icon: 'ControlPoint',
-								name: newBenefitName,
-								active: true,
-							};
-							setAddBenefit(!AddBenefit);
-							setNewBenefitName('');
-							setBenefit((prev: any) => [...prev, newBenefit]);
-						}}
-					/>
-				</div>
-			)}
 
 			<div>
 				<div className='d-flex align-items-center'>
@@ -406,23 +307,41 @@ export default function FormJob({ formik, setInitial }: { formik: any; setInitia
 				</Label>
 
 				<FormGroup id='journey'>
-					<Select
-						className='form-select fw-medium'
-						aria-label='competências'
-						placeholder='competências'
-						onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleToggleSkill(e)}
-						ariaLabel={''}>
-						{options.map((opt) => (
-							<option
-								key={opt.name}
-								value={opt.name}
-								className={
-									skills.some((s:any) => s.name === opt.name) ? 'text-muted' : ''
-								}>
-								{opt.name}
-							</option>
-						))}
-					</Select>
+					<div className='relative w-full d-flex'>
+						<Input
+							type='text'
+							className='form-input fw-medium pr-10 w-100'
+							placeholder='Digite uma competência'
+							value={searchTerm}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+								setSearchTerm(e.target.value)
+							}
+						/>
+					</div>
+
+					{searchTerm && (
+						<div className='border mt-2 max-h-60 overflow-y-auto'>
+							{filteredOptions.length > 0 ? (
+								filteredOptions.map((opt: any) => (
+									<div
+										key={opt.name}
+										className='p-2 hover:bg-gray-100 cursor-pointer'
+										onClick={() => {
+											handleToggleSkill({
+												target: { value: opt.name },
+											} as any);
+											setSearchTerm(''); // limpa o input
+										}}>
+										{opt.name}
+									</div>
+								))
+							) : (
+								<div className='p-2 text-gray-500'>
+									Nenhuma competência encontrada
+								</div>
+							)}
+						</div>
+					)}
 				</FormGroup>
 				<div className='mt-3'>
 					{skills.map((item: any) => {
@@ -452,12 +371,120 @@ export default function FormJob({ formik, setInitial }: { formik: any; setInitia
 				</div>
 			</div>
 
+			<>
+				<div className='mt-5'>
+					<div className='d-flex align-items-center'>
+						<Icon
+							color='success'
+							style={{ marginRight: '1%', userSelect: 'none' }}
+							icon='CardGiftcard'
+							size={'2x'}
+						/>
+						<CardTitle className='mb-0' style={{ userSelect: 'none' }}>
+							Benefícios
+						</CardTitle>
+					</div>
+
+					<Label className='mt-1 p-0' style={{ userSelect: 'none' }}>
+						{!AddBenefit
+							? 'Clique em cima, e torne mais atrativo sua vaga'
+							: 'Adicione seu benefício, e torne mais atrativo sua vaga'}
+					</Label>
+				</div>
+
+				{!AddBenefit ? (
+					<div className='col-12 g-2'>
+						{benefit.map((item: any) => {
+							return (
+								<Button
+									color={item.active ? 'primary' : 'light'}
+									isLink={!item.active}
+									icon={item.icon}
+									className='text-capitalize'
+									// size={'lg'}
+									onClick={() => {
+										setBenefit((prev: any[]) =>
+											prev.map((b) =>
+												b.id === item.id
+													? {
+															...b,
+															active: !b.active,
+														}
+													: b,
+											),
+										);
+									}}>
+									{item.name}
+								</Button>
+							);
+						})}
+						<Button
+							className='text-capitalize'
+							color='success'
+							isLink={true}
+							icon={'ControlPoint'}
+							size={'lg'}
+							onClick={() => {
+								setAddBenefit(!AddBenefit);
+							}}
+						/>
+					</div>
+				) : (
+					<div className='d-flex g-2'>
+						<Button
+							color='danger'
+							isLink={true}
+							icon={'RemoveCircle'}
+							size={'lg'}
+							onClick={() => {
+								setAddBenefit(!AddBenefit);
+							}}
+						/>
+
+						<FormGroup
+							className='col-5'
+							id='Benefit'
+							label='Benefício Adicional'
+							isFloating>
+							<Input
+								className='text-capitalize'
+								placeholder='Benefício Adicional'
+								value={newBenefitName}
+								onChange={(e: any) => setNewBenefitName(e.target.value)}
+								onBlur={formik.handleBlur}
+							/>
+						</FormGroup>
+
+						<Button
+							color='success'
+							isLink={true}
+							icon={'CheckCircle'}
+							size={'lg'}
+							onClick={() => {
+								if (!newBenefitName.trim()) return;
+								const newBenefit = {
+									id: benefit.length + 1, // ou use outro sistema de ID único se precisar
+									icon: 'ControlPoint',
+									name: newBenefitName,
+									active: true,
+								};
+								setAddBenefit(!AddBenefit);
+								setNewBenefitName('');
+								setBenefit((prev: any) => [...prev, newBenefit]);
+							}}
+						/>
+					</div>
+				)}
+			</>
+
+
 			<div className='w-100 d-flex justify-content-end'>
 				<Button
 					icon='ArrowBack'
 					style={{ marginRight: '2%' }}
 					onClick={() => {
 						setInitial(false);
+						setIAactive(false)
 					}}>
 					Voltar
 				</Button>
