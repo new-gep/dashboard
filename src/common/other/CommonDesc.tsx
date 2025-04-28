@@ -36,6 +36,7 @@ CommonDesc.propTypes = {
 		'dark',
 	]),
 };
+//@ts-ignore
 CommonDesc.defaultProps = {
 	className: undefined,
 	color: 'warning',

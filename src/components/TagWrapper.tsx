@@ -14,12 +14,13 @@ const TagWrapper = forwardRef<HTMLDivElement | HTMLAnchorElement | HTMLFormEleme
 			</Tag>
 		);
 	},
-);
+) ;
 TagWrapper.displayName = 'TagWrapper';
 TagWrapper.propTypes = {
 	tag: PropTypes.string,
 	children: PropTypes.node.isRequired,
 };
+//@ts-ignore
 TagWrapper.defaultProps = {
 	tag: 'div',
 };

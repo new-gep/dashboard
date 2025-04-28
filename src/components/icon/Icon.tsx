@@ -106,6 +106,7 @@ Icon.propTypes = {
 	]),
 	forceFamily: PropTypes.oneOf([null, 'custom', 'material']),
 };
+// @ts-ignore
 Icon.defaultProps = {
 	className: undefined,
 	color: undefined,

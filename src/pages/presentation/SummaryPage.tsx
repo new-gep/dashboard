@@ -360,6 +360,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item1)}
 						/>
 						<motion.div
@@ -374,6 +375,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item2)}
 						/>
 						<motion.div
@@ -389,6 +391,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item3)}
 						/>
 						<motion.div
@@ -402,6 +405,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item4)}
 						/>
 						<motion.div
@@ -416,6 +420,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item5)}
 						/>
 						<motion.div
@@ -429,6 +434,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item6)}
 						/>
 						<motion.div
@@ -443,6 +449,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item7)}
 						/>
 						<motion.div
@@ -458,6 +465,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item8)}
 						/>
 						<motion.div
@@ -473,6 +481,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item9)}
 						/>
 						<motion.div
@@ -488,6 +497,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item10)}
 						/>
 						<motion.div
@@ -502,6 +512,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item11)}
 						/>
 						<motion.div
@@ -516,6 +527,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item12)}
 						/>
 						<motion.div
@@ -530,6 +542,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item13)}
 						/>
 						<motion.div
@@ -544,6 +557,7 @@ const SummaryPage = () => {
 								repeat: Infinity,
 								repeatType: 'loop',
 							}}
+							//@ts-ignore
 							className={classNames(classes.item, classes.item14)}
 						/>
 					</div>

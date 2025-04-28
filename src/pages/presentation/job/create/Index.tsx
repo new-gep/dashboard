@@ -90,17 +90,12 @@ interface IValues {
 	DEI: string;
 	function: string;
 	salary: any;
-	time: any;
-	journey: string;
+	locality: string;
+	model: string;
 	contract: string;
-	requirements: any;
-	responsibility: any;
+	requirements: string;
+	responsibility: string;
 	cep: string;
-	logradouro: string;
-	uf: string;
-	bairro: string;
-	numero: string;
-	complemento: string;
 }
 
 export default function CreateJob() {
@@ -206,13 +201,8 @@ export default function CreateJob() {
 		if (!values.salary || values.salary <= 0) {
 			errors.salary = 'Salário deve ser maior que zero';
 		}
-		if (!values.time || values.time <= 0) {
-			errors.time = 'Horas semanais são obrigatórias';
-		} else if (values.time < 1 || values.time > 168) {
-			errors.time = 'Horas semanais devem ser entre 1 e 168';
-		}
-		if (!values.journey) {
-			errors.journey = 'Modelo de trabalho é obrigatório';
+		if (!values.model) {
+			errors.model = 'Modelo de trabalho é obrigatório';
 		}
 		if (!values.contract) {
 			errors.contract = 'Tipo de contratação é obrigatório';
@@ -222,81 +212,87 @@ export default function CreateJob() {
 		} else if (!/^\d{5}-?\d{3}$/.test(values.cep)) {
 			errors.cep = 'CEP deve estar no formato 12345-678';
 		}
-		if (!values.logradouro) {
-			errors.logradouro = 'Logradouro é obrigatório';
+		if (!values.locality) {
+			errors.locality = 'Localidade é obrigatório';
 		}
-		if (!values.uf) {
-			errors.uf = 'UF é obrigatório';
-		} else if (!/^[A-Z]{2}$/.test(values.uf)) {
-			errors.uf = 'UF deve ter exatamente 2 letras maiúsculas';
+		if (!values.requirements) {
+			errors.requirements = 'Responsabilidade é obrigatório';
 		}
-		if (!values.bairro) {
-			errors.bairro = 'Bairro é obrigatório';
+		if (!values.responsibility) {
+			errors.responsibility = 'Responsabilidade é obrigatório';
 		}
-		if (!values.numero) {
-			errors.numero = 'Número é obrigatório';
-		} else if (!/^\d+$/.test(values.numero)) {
-			errors.numero = 'Número deve conter apenas dígitos';
-		}
-
-		// Campos opcionais (não requerem validação)
-		// benefits, details, obligations, complemento
 
 		return errors;
 	};
 
 	const sendMessageRecruit = async () => {
 		setLoaderRecruit(true); // Ativa o loader
-	  
+
 		return new Promise(async (resolve, reject) => {
-		  try {
-			const RecruitProps = {
-			  thread: null,
-			  message: formik.values.function,
-			};
-	  
-			const response = await RecruitAutoComplet(RecruitProps);
-			if (response && response?.status === 200) {
-			  const informations = JSON.parse(response.response);
-	  
-			  const updatedValues = {
-				...formik.values, // Mantém os valores atuais
-				requirements: informations.requirements, // Atualiza 'requirements'
-				responsibility: informations.responsibility, // Atualiza 'responsibility'
-			  };
-	  
-			  formik.setValues(updatedValues); // Atualiza os valores no Formik
-			  setLoaderRecruit(false); // Desativa o loader
-			  setInitial(true);
-			  resolve(''); // Resolve a Promise após atualizar os valores
-			} else {
-			  setLoaderRecruit(false); // Desativa o loader em caso de erro
-			  reject('Erro na resposta'); // Rejeita a Promise caso algo dê errado
+			try {
+				const RecruitProps = {
+					thread: null,
+					message: formik.values.function,
+				};
+
+				const response = await RecruitAutoComplet(RecruitProps);
+				if (response && response?.status === 200) {
+					const informations = JSON.parse(response.response);
+
+					const updatedValues = {
+						...formik.values, // Mantém os valores atuais
+						requirements: informations.requirements, // Atualiza 'requirements'
+						responsibility: informations.responsibility, // Atualiza 'responsibility'
+					};
+
+					formik.setValues(updatedValues); // Atualiza os valores no Formik
+					setLoaderRecruit(false); // Desativa o loader
+					setInitial(true);
+					resolve(''); // Resolve a Promise após atualizar os valores
+				} else {
+					setLoaderRecruit(false); // Desativa o loader em caso de erro
+					reject('Erro na resposta'); // Rejeita a Promise caso algo dê errado
+				}
+			} catch (error: any) {
+				setLoaderRecruit(false); // Desativa o loader em caso de erro
+				reject('Erro ao enviar a mensagem: ' + error.message); // Rejeita a Promise com o erro
 			}
-		  } catch (error:any) {
-			setLoaderRecruit(false); // Desativa o loader em caso de erro
-			reject('Erro ao enviar a mensagem: ' + error.message); // Rejeita a Promise com o erro
-		  }
 		});
 	};
-	  
+
+	const findCep = async () => {
+		const response = await FindCep(formik.values.cep.replace(/\D/g, ''));
+		if(response && response.erro){
+			toast(
+				<Toasts
+					icon='Close'
+					iconColor='danger'
+					title='Atenção'>
+					Endereço não Encontrado
+				</Toasts>,
+				{ closeButton: true, autoClose: 1000 },
+			);
+			return
+		}
+		const updatedValues = {
+			...formik.values, // Mantém os valores atuais
+			locality:`${response.estado}, ${response.localidade}`
+		};
+		formik.setValues(updatedValues);
+	};
+
 	const formik = useFormik({
 		initialValues: {
 			function: '',
 			PCD: '0',
 			DEI: '0',
 			salary: '',
-			time: '',
-			journey: '',
+			locality:'',
+			model: '',
 			contract: '',
 			requirements: '',
 			responsibility: '',
 			cep: '',
-			logradouro: '',
-			uf: '',
-			bairro: '',
-			numero: '',
-			complemento: '',
 			image: '',
 		},
 		validate,
@@ -311,7 +307,9 @@ export default function CreateJob() {
 	});
 
 	React.useEffect(() => {
-		console.log('cep mudo', formik.values.cep.length > 7);
+		if (formik.values.cep.length == 9) {
+			findCep();
+		}
 	}, [formik.values.cep]);
 
 	React.useEffect(() => {
@@ -376,14 +374,18 @@ export default function CreateJob() {
 											onChange={(
 												event: React.ChangeEvent<HTMLInputElement>,
 											) => {
-												if(!initial){
+												if (!initial) {
 													toast(
-														<Toasts icon='Close' iconColor='danger' title='Atenção'>
-															Primeiro selecione como gostaria de gerar a vaga
+														<Toasts
+															icon='Close'
+															iconColor='danger'
+															title='Atenção'>
+															Primeiro selecione como gostaria de
+															gerar a vaga
 														</Toasts>,
 														{ closeButton: true, autoClose: 2000 },
 													);
-													return
+													return;
 												}
 												const isChecked = event.target.checked;
 												setIAactive(isChecked);
@@ -394,7 +396,13 @@ export default function CreateJob() {
 								</>
 							</CardBody>
 						) : (
-							<Chat formik={formik} sendFunction={sendFunction} userData={userData} thread={IAthread} setThread={setIAthread} />
+							<Chat
+								formik={formik}
+								sendFunction={sendFunction}
+								userData={userData}
+								thread={IAthread}
+								setThread={setIAthread}
+							/>
 						)}
 					</Card>
 
@@ -455,7 +463,13 @@ export default function CreateJob() {
 
 						{initial ? (
 							<CardBody>
-								{formik && <FormJob setInitial={setInitial} formik={formik} setIAactive={setIAactive}/>}
+								{formik && (
+									<FormJob
+										setInitial={setInitial}
+										formik={formik}
+										setIAactive={setIAactive}
+									/>
+								)}
 							</CardBody>
 						) : (
 							<CardBody>
@@ -468,7 +482,7 @@ export default function CreateJob() {
 									/>
 								) : (
 									<SendFunction formik={formik} setFinish={setSendFunction} />
-								)} 
+								)}
 							</CardBody>
 						)}
 					</Card>

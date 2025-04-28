@@ -8,7 +8,7 @@ interface PropsCreateJob {
 	function: string;
 	obligations: string;
 	salary: string;
-	time: JSON;
+	time: any;
 	user_update?: string;
 }
 

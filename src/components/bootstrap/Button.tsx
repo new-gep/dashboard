@@ -4,6 +4,7 @@ import React, {
 	HTMLAttributes,
 	ReactElement,
 	ReactNode,
+	JSX
 } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -61,6 +62,7 @@ ButtonGroup.propTypes = {
 	size: PropTypes.oneOf(['sm', 'lg']),
 	ariaLabel: PropTypes.string,
 };
+// @ts-ignore
 ButtonGroup.defaultProps = {
 	className: undefined,
 	isToolbar: false,
@@ -323,6 +325,7 @@ Button.propTypes = {
 	]),
 	isVisuallyHidden: PropTypes.bool,
 };
+// @ts-ignore
 Button.defaultProps = {
 	children: null,
 	tag: 'button',

@@ -54,7 +54,8 @@ const App = () => {
 	 * Full Screen
 	 */
 	const { fullScreenStatus, setFullScreenStatus } = useContext(ThemeContext);
-	const ref = useRef(null);
+	const ref = useRef<HTMLDivElement>(null);
+	//@ts-ignore
 	useFullscreen(ref, fullScreenStatus, {
 		onClose: () => setFullScreenStatus(false),
 	});

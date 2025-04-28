@@ -2,7 +2,6 @@
 	"name": "gep",
 	"version": "0.0.1",
 	"private": true,
-	"type": "module",
 	"scripts": {
 		"start": "react-scripts start",
 		"build": "cross-env DISABLE_ESLINT_PLUGIN=true react-scripts build",
@@ -16,11 +15,6 @@
 		"icon": "svgr SvgIcons -d src/components/icon/svg-icons --typescript",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build"
-	},
-	"jest": {
-		"transformIgnorePatterns": [
-			"<rootDir>/node_modules/(?!pascalcase|prismjs|@omtanke/react-use-event-outside/.*)"
-		]
 	},
 	"browserslist": {
 		"production": [
@@ -39,15 +33,12 @@
 		"@omtanke/react-use-event-outside": "^1.0.1",
 		"@popperjs/core": "^2.11.8",
 		"@reactour/tour": "^3.7.0",
-		"@testing-library/jest-dom": "^6.4.6",
-		"@testing-library/react": "^16.0.0",
+		"@testing-library/dom": "^10.4.0",
 		"@testing-library/user-event": "^14.5.2",
-		"@types/jest": "^29.5.12",
 		"@types/node": "^20.14.11",
-		"@types/react": "^18.3.3",
 		"@types/react-dom": "^18.3.0",
+		"ajv": "^8.17.1",
 		"apexcharts": "3.50.0",
-		"axios": "^1.7.7",
 		"classnames": "^2.5.1",
 		"dayjs": "^1.11.12",
 		"fabric": "^6.5.3",
@@ -92,7 +83,7 @@
 		"react-toastify": "^10.0.5",
 		"react-transition-group": "^4.4.5",
 		"react-use": "^17.5.0",
-		"typescript": "*",
+		"typescript": "^5.8.3",
 		"use-clipboard-copy": "^0.2.0",
 		"web-vitals": "^4.2.2",
 		"yup": "^1.6.1"
@@ -113,10 +104,14 @@
 		"@storybook/react-webpack5": "^8.2.4",
 		"@storybook/theming": "^8.2.4",
 		"@svgr/cli": "^8.1.0",
+		"@testing-library/jest-dom": "^6.6.3",
+		"@testing-library/react": "^16.3.0",
+		"@types/jest": "^29.5.14",
 		"@types/pascalcase": "^1.0.3",
 		"@types/payment": "^2.1.7",
 		"@types/pdf-viewer-reactjs": "^2.2.5",
 		"@types/prismjs": "^1.26.4",
+		"@types/react": "^19.1.2",
 		"@types/react-big-calendar": "^1.8.9",
 		"@types/react-date-range": "^1.4.9",
 		"@types/react-input-mask": "^3.0.5",
@@ -127,6 +122,7 @@
 		"@typescript-eslint/eslint-plugin": "^8.31.0",
 		"@typescript-eslint/parser": "^8.31.0",
 		"animate.css": "^4.1.1",
+		"axios": "^1.9.0",
 		"bootstrap": "^5.3.3",
 		"cross-env": "^7.0.3",
 		"eslint": "^8.57.1",
@@ -149,8 +145,11 @@
 		"eslint-plugin-storybook": "^0.8.0",
 		"eslint-plugin-unused-imports": "^4.1.4",
 		"globals": "^15.8.0",
+		"jest": "^27.5.1",
+		"jest-mock-axios": "^4.6.1",
+		"npm-force-resolutions": "^0.0.10",
 		"prettier": "^3.3.3",
-		"react-scripts": "5.0.1",
+		"react-scripts": "^5.0.1",
 		"sass": "^1.77.8",
 		"sass-loader": "^14.2.1",
 		"storybook": "^8.2.4",
@@ -167,6 +166,8 @@
 		"stylelint-scss": "^6.4.1",
 		"tailwindcss": "^3.4.13",
 		"trim-newlines": "^5.0.0",
+		"ts-jest": "^27.1.5",
+		"ts-node": "^10.9.2",
 		"webpack": "5"
 	},
 	"resolutions": {
