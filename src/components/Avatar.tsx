@@ -57,6 +57,7 @@ AvatarGroup.propTypes = {
 	className: PropTypes.string,
 	size: PropTypes.number,
 };
+//@ts-ignore
 AvatarGroup.defaultProps = {
 	className: undefined,
 	size: 32,
@@ -189,6 +190,7 @@ Avatar.propTypes = {
 	isOnline: PropTypes.bool,
 	isReply: PropTypes.bool,
 };
+//@ts-ignore
 Avatar.defaultProps = {
 	srcSet: undefined,
 	className: undefined,

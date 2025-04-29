@@ -17,15 +17,20 @@ import Modal, {
 	ModalHeader,
 } from '../../../../../components/bootstrap/Modal';
 import Preview from './preview';
+import FindCep from '../../../../../api/get/Cep';
+import { toast } from 'react-toastify';
+import Toasts from '../../../../../components/bootstrap/Toasts';
 
 export default function FormJob({
 	formik,
 	setInitial,
 	setIAactive,
+	userData
 }: {
 	formik: any;
 	setInitial: any;
 	setIAactive: any;
+	userData:any
 }) {
 	const [newBenefitName, setNewBenefitName] = React.useState('');
 	const [preview, setPreview] = React.useState<boolean>(false);
@@ -183,25 +188,36 @@ export default function FormJob({
 				!skills.some((s: any) => s.name === opt.name), // já selecionadas não aparecem
 	).slice(0, 6);
 
-	const saveJob = async () => {
-		console.log(formik.values);
-		// const PropsCreateJob = {
-		// 	benefits: 'string',
-		// 	contract: 'string',
-		// 	details: 'string',
-		// 	image: 'string',
-		// 	function: 'string',
-		// 	obligations: 'string',
-		// 	salary: 'string',
-		// 	time: {},
-		// 	user_update: 'string',
-		// };
-		// const response = await Job(PropsCreateJob);
+	const findCep = async () => {
+		const response = await FindCep(formik.values.cep.replace(/\D/g, ''));
+		if(response && response.erro){
+			toast(
+				<Toasts
+					icon='Close'
+					iconColor='danger'
+					title='Atenção'>
+					Endereço não Encontrado
+				</Toasts>,
+				{ closeButton: true, autoClose: 1000 },
+			);
+			return
+		}
+		const updatedValues = {
+			...formik.values, // Mantém os valores atuais
+			locality:`${response.estado}, ${response.localidade}`
+		};
+		formik.setValues(updatedValues);
 	};
+
+	React.useEffect(() => {
+		if (formik.values.cep.length == 9) {
+			findCep();
+		}
+	}, [formik.values.cep]);
 
 	return (
 		<>
-			<Preview formik={formik} skills={skills} benefit={benefit} setPreview={setPreview} preview={preview} saveJob={saveJob} />
+			<Preview userData={userData} formik={formik} skills={skills} benefit={benefit} setPreview={setPreview} preview={preview} />
 			<section className='row g-4'>
 				<div className='d-flex col-12'>
 					<div className=' d-flex align-items-center'>

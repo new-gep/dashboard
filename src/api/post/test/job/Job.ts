@@ -20,9 +20,7 @@ describe('Job API Function', () => {
       time: { start: '09:00', end: '18:00' },
       user_update: 'admin@example.com'
     };
-
-    // Simulando que o axios.post vai retornar sucesso
-    mockedAxios.post.mockResolvedValueOnce({ data: fakeData });
+    //@ts-ignore
     const response = await Job(formData);
 
     // Verifica se chamou axios.post corretamente
@@ -46,7 +44,7 @@ describe('Job API Function', () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
     mockedAxios.post.mockRejectedValueOnce(new Error('Erro de rede'));
-
+    //@ts-ignore
     await Job(formData);
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));

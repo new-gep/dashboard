@@ -43,20 +43,24 @@ import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/
 import AuthContext from '../../../contexts/authContext';
 import Checks from '../../../components/bootstrap/forms/Checks';
 import { AvatarPicture } from '../../../constants/avatar';
+import Item from '../../../layout/Navigation/Item';
 
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 
 interface IjobUpdate {
-	journey: any;
 	image: AbstractPictureKeys;
-	PCD: string;
 	function: string;
+	PCD: string;
 	salary: any;
-	time: any;
+	DEI: string;
+	locality: any;
+	model: any;
+	skills: any;
+	cep: any;
+	requirements: any;
+	responsibility: any;
 	contract: string;
-	benefits: string;
-	details: string;
-	obligations: string;
+	benefits: any;
 	user_edit?: string;
 	update_at?: string;
 }
@@ -76,16 +80,7 @@ const validate = (values: IjobUpdate) => {
 	if (!values.salary || values.salary <= 0) {
 		errors.salary = 'Salário é obrigatório';
 	}
-	if (!values.time || values.time <= 0) {
-		errors.time = 'Horas semanais são obrigatórias';
-	} else if (values.time.length < 1) {
-		errors.time = 'Horário mínimo é 1 digito';
-	} else if (values.time.length > 3) {
-		errors.time = 'Horário máximo é 3 digitos';
-	}
-	if (!values.journey) {
-		errors.journey = 'Jornada é obrigatória';
-	}
+
 	if (!values.contract) {
 		errors.contract = 'Contrato é obrigatório';
 	}
@@ -106,7 +101,6 @@ const JobViewPage = () => {
 	};
 	type AbstractPictureKeys = keyof typeof AbstractPicture;
 	const [nameImage, setNameImage] = useState<AbstractPictureKeys>('ballSplit');
-	// @ts-ignore
 	const [activeTab, setActiveTab] = useState(TABS.DETAILS);
 	const [editItem, setEditItem] = useState<IjobUpdate | null>(null);
 	const [deleteModal, setDeleteModal] = useState<boolean>(false);
@@ -184,11 +178,7 @@ const JobViewPage = () => {
 	const editJob = async (job: any) => {
 		if (editItem) {
 			const update: IjobUpdate = job;
-			update.time = JSON.stringify({
-				time: job.time,
-				journey: job.journey,
-			});
-			delete update.journey;
+			// delete update.journey;
 			update.user_edit = userData.id;
 			const response = await JobUpdate(update, id);
 			switch (response.status) {
@@ -349,46 +339,47 @@ const JobViewPage = () => {
 		}
 	};
 
-	const formik = useFormik({
-		initialValues: {
-			function: '',
-			PCD: '',
-			salary: '',
-			time: '',
-			journey: '',
-			contract: '',
-			benefits: '',
-			details: '',
-			obligations: '',
-			image: 'ballSplit',
-		},
-		validate,
-		onSubmit: (values, { resetForm }) => {
-			values.image = nameImage;
-			const job = values;
-			editJob(job);
-			// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
-		},
-	});
+	// const formik = useFormik({
+	// 	initialValues: {
+	// 		function: '',
+	// 		PCD: '',
+	// 		DEI:'' ,
+	// 		locality:'',
+	// 		salary: '',
+	// 		skills:'',
+	// 		benefits:'',
+	// 		contract: '',
+	// 		responsibility: '',
+	// 		requirements: '',
+	// 		image: 'ballSplit',
+	// 	},
+	// 	validate,
+	// 	onSubmit: (values, { resetForm }) => {
+	// 		values.image = nameImage;
+	// 		const job = values;
+	// 		editJob(job);
+	// 		// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
+	// 	},
+	// });
 
-	useEffect(() => {
-		if (editItem) {
-			formik.setValues({
-				function: editItem.function,
-				PCD: editItem.PCD,
-				salary: editItem.salary,
-				time: editItem.time.time,
-				journey: editItem.time.journey,
-				contract: editItem.contract,
-				benefits: editItem.benefits,
-				details: editItem.details,
-				obligations: editItem.obligations,
-				image: editItem.image,
-			});
-			// @ts-ignore
-			setNameImage(editItem.image);
-		}
-	}, [editItem, rebuild]);
+	// useEffect(() => {
+	// 	if (editItem) {
+	// 		formik.setValues({
+	// 			function: editItem.function,
+	// 			PCD: editItem.PCD,
+	// 			salary: editItem.salary,
+	// 			// time: editItem.time.time,
+	// 			// journey: editItem.time.journey,
+	// 			contract: editItem.contract,
+	// 			benefits: editItem.benefits,
+	// 			details: editItem.details,
+	// 			obligations: editItem.obligations,
+	// 			image: editItem.image,
+	// 		});
+	// 		// @ts-ignore
+	// 		setNameImage(editItem.image);
+	// 	}
+	// }, [editItem, rebuild]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -399,6 +390,7 @@ const JobViewPage = () => {
 			}
 			switch (response.status) {
 				case 200:
+					console.log(response.job);
 					setEditItem(response.job);
 					setuserCreate(response.userCreate);
 					setCandidates(response.job.candidates);
@@ -421,8 +413,8 @@ const JobViewPage = () => {
 					<Avatar
 						src={
 							userCreate && userCreate.avatar
-							// @ts-ignore
-								? AvatarPicture[userCreate.avatar]
+								? // @ts-ignore
+									AvatarPicture[userCreate.avatar]
 								: AvatarPicture.default
 						}
 						size={32}
@@ -478,14 +470,6 @@ const JobViewPage = () => {
 								<Card stretch>
 									<CardBody isScrollable>
 										<div className='row g-3'>
-											<div className='absolute'>
-												{editItem?.PCD == '1' && (
-													<div className='d-flex gap-2 '>
-														<Icon icon='AccessibleForward' size='2x' />
-														<p className='mt-2'>Vaga Afirmativa</p>
-													</div>
-												)}
-											</div>
 											<div className='col-12'>
 												{editItem && (
 													<img
@@ -516,7 +500,7 @@ const JobViewPage = () => {
 													{TABS.CANDIDATE}
 												</Button>
 											</div>
-											<div className='col-12'>
+											{/* <div className='col-12'>
 												<Button
 													icon='Edit'
 													color='success'
@@ -525,7 +509,7 @@ const JobViewPage = () => {
 													onClick={() => setActiveTab(TABS.EDIT)}>
 													{TABS.EDIT}
 												</Button>
-											</div>
+											</div> */}
 										</div>
 									</CardBody>
 									<CardFooter>
@@ -543,15 +527,10 @@ const JobViewPage = () => {
 								</Card>
 							</div>
 							<div className='col-lg-8'>
-								<Card
-									stretch
-									className='overflow-hidden'
-									tag='form'
-									noValidate
-									onSubmit={formik.handleSubmit}>
+								<Card stretch className='overflow-hidden' tag='form' noValidate>
 									{activeTab === TABS.DETAILS && (
 										<>
-											<CardHeader>
+											<CardHeader className='d-flex justify-between'>
 												<CardLabel icon='Summarize' iconColor='info'>
 													<CardTitle tag='div' className='h5'>
 														Informações
@@ -560,9 +539,18 @@ const JobViewPage = () => {
 														Detalhes da Vaga
 													</CardSubTitle>
 												</CardLabel>
+												<div className='d-flex gap-3'>
+													{editItem.PCD == '1' && (
+														<Icon icon='AccessibleForward' size='2x' />
+													)}
+													{editItem.DEI == '1' && (
+														<Icon icon='Dei' size='2x' />
+													)}
+												</div>
 											</CardHeader>
 											<CardBody isScrollable>
 												<div className='row'>
+													{/* Salário */}
 													<div className='col-lg-6'>
 														<Card
 															stretch
@@ -572,7 +560,7 @@ const JobViewPage = () => {
 															}-primary rounded-2`}>
 															<CardHeader className='bg-transparent'>
 																<CardLabel>
-																	<CardTitle>Salario</CardTitle>
+																	<CardTitle>Salário</CardTitle>
 																</CardLabel>
 															</CardHeader>
 															<CardBody>
@@ -586,9 +574,9 @@ const JobViewPage = () => {
 																	</div>
 																	<div className='flex-grow-1 ms-3'>
 																		<div className='fw-bold fs-3 mb-0'>
-																			R${' '}
 																			{editItem &&
-																				priceFormat(
+																				Mask(
+																					'amount',
 																					editItem.salary,
 																				)}
 																		</div>
@@ -597,6 +585,7 @@ const JobViewPage = () => {
 															</CardBody>
 														</Card>
 													</div>
+													{/* Contrato */}
 													<div className='col-lg-6'>
 														<Card
 															stretch
@@ -619,7 +608,7 @@ const JobViewPage = () => {
 																<div className='d-flex align-items-center pb-3'>
 																	<div className='flex-shrink-0'>
 																		<Icon
-																			icon='Construction'
+																			icon='Article'
 																			size='4x'
 																			color='secondary'
 																		/>
@@ -638,6 +627,7 @@ const JobViewPage = () => {
 															</CardBody>
 														</Card>
 													</div>
+													{/* Modelo */}
 													<div className='col-lg-6'>
 														<Card
 															stretch
@@ -647,16 +637,14 @@ const JobViewPage = () => {
 															}-success rounded-2`}>
 															<CardHeader className='bg-transparent'>
 																<CardLabel>
-																	<CardTitle>
-																		Carga Horária
-																	</CardTitle>
+																	<CardTitle>Modelo</CardTitle>
 																</CardLabel>
 															</CardHeader>
 															<CardBody>
 																<div className='d-flex align-items-center pb-3'>
 																	<div className='flex-shrink-0'>
 																		<Icon
-																			icon='Schedule'
+																			icon='CardTravel'
 																			size='4x'
 																			color='success'
 																		/>
@@ -664,15 +652,14 @@ const JobViewPage = () => {
 																	<div className='flex-grow-1 ms-3'>
 																		<div className='fw-bold fs-3 mb-0'>
 																			{editItem &&
-																				editItem.time &&
-																				editItem.time.time}
-																			h semanais
+																				editItem.model}
 																		</div>
 																	</div>
 																</div>
 															</CardBody>
 														</Card>
 													</div>
+													{/* Local */}
 													<div className='col-lg-6'>
 														<Card
 															stretch
@@ -682,16 +669,14 @@ const JobViewPage = () => {
 															}-info rounded-2`}>
 															<CardHeader className='bg-transparent'>
 																<CardLabel>
-																	<CardTitle>
-																		Jornada de Trabalho
-																	</CardTitle>
+																	<CardTitle>Local</CardTitle>
 																</CardLabel>
 															</CardHeader>
 															<CardBody>
 																<div className='d-flex align-items-center pb-3'>
 																	<div className='flex-shrink-0'>
 																		<Icon
-																			icon='DirectionsRun'
+																			icon='LocationOn'
 																			size='4x'
 																			color='info'
 																		/>
@@ -699,38 +684,77 @@ const JobViewPage = () => {
 																	<div className='flex-grow-1 ms-3'>
 																		<div className='fw-bold fs-3 mb-0'>
 																			{editItem &&
-																				editItem.time &&
-																				editItem.time
-																					.journey}
+																				editItem.locality}
 																		</div>
 																	</div>
 																</div>
 															</CardBody>
 														</Card>
 													</div>
+
 													<div className='col-12 shadow-3d-container'>
 														<Accordion id='faq' shadow='sm'>
 															<AccordionItem
 																id='faq1'
-																title='Obrigações'>
-																{editItem &&
-																editItem.obligations ? (
-																	editItem.obligations
-																) : (
-																	<p className='text-muted fw-semibold'>
-																		Nada para mostrar aqui{' '}
-																		<Icon
-																			icon='SentimentNeutral '
-																			size='2x'
-																		/>{' '}
-																	</p>
-																)}
+																title='Benefícios'>
+																<div>
+																	{editItem &&
+																	editItem.benefits &&
+																	editItem.benefits.length > 0 ? (
+																		<div className="d-flex flex-wrap">
+																			{editItem.benefits.map(
+																				(benefit, index) => (
+																					<span
+																						key={index}
+																						className="p-2 bg-success rounded fw-bold text-white mb-2"
+																					>
+																						{benefit}
+																					</span>
+																				),
+																			)}
+																		</div>
+																	) : (
+																		<p className='text-muted fw-semibold'>
+																			Nada para mostrar aqui{' '}
+																			<Icon
+																				icon='SentimentNeutral'
+																				size='2x'
+																			/>{' '}
+																		</p>
+																	)}
+																</div>
 															</AccordionItem>
+
 															<AccordionItem
 																id='faq2'
-																title='Benefícios'>
-																{editItem && editItem.benefits ? (
-																	editItem.benefits
+																title='Competências'>
+																<div>
+																	{editItem.skills.length > 0 ? (
+																		<div className="d-flex flex-wrap">
+																		{editItem.skills.map((skill, index) => (
+																		  <span
+																			key={index}
+																			className="p-2 bg-primary rounded fw-bold text-white mb-2"
+																		  >
+																			{skill}
+																		  </span>
+																		))}
+																	  </div>
+																	) : (
+																		<span className='text-muted'>
+																			Nenhuma competência
+																			adicionada
+																		</span>
+																	)}
+																</div>
+															</AccordionItem>
+
+															<AccordionItem
+																id='faq3'
+																title='Requisitos'>
+																{editItem &&
+																editItem.requirements ? (
+																	editItem.requirements
 																) : (
 																	<p className='text-muted fw-semibold'>
 																		Nada para mostrar aqui{' '}
@@ -741,11 +765,13 @@ const JobViewPage = () => {
 																	</p>
 																)}
 															</AccordionItem>
+
 															<AccordionItem
-																id='faq3'
-																title='Detalhes'>
-																{editItem && editItem.details ? (
-																	editItem.details
+																id='faq4'
+																title='Responsabilidades'>
+																{editItem &&
+																editItem.responsibility ? (
+																	editItem.responsibility
 																) : (
 																	<p className='text-muted fw-semibold'>
 																		Nada para mostrar aqui{' '}
@@ -774,6 +800,7 @@ const JobViewPage = () => {
 													</CardSubTitle>
 												</CardLabel>
 											</CardHeader>
+
 											<CardBody isScrollable>
 												<div className='row g-4'>
 													{Array.isArray(candidates) &&
@@ -931,354 +958,355 @@ const JobViewPage = () => {
 										</>
 									)}
 									{activeTab === TABS.EDIT && (
-										<>
-											<CardHeader>
-												<CardLabel icon='Edit' iconColor='success'>
-													<CardTitle tag='div' className='h5'>
-														Editar
-													</CardTitle>
-													<CardSubTitle tag='div' className='h6'>
-														Informações da Vaga
-													</CardSubTitle>
-												</CardLabel>
-											</CardHeader>
-											<CardBody isScrollable>
-												<Card>
-													<CardHeader>
-														<CardLabel icon='Photo' iconColor='info'>
-															<CardTitle>Imagem da Vaga</CardTitle>
-														</CardLabel>
-													</CardHeader>
-													<CardBody>
-														<div className='row'>
-															<div className='col-lg-12'>
-																{editItem?.image ? (
-																	<img
-																		src={
-																			AbstractPicture[
-																				editItem.image
-																			]
-																		}
-																		alt=''
-																		width='25%'
-																		height='25%'
-																		className='mx-auto d-block img-fluid mb-3'
-																	/>
-																) : (
-																	<PlaceholderImage
-																		width={128}
-																		height={128}
-																		className='mx-auto d-block img-fluid mb-3 rounded'
-																	/>
-																)}
-															</div>
-															{/* <div className='col-lg-8'>
-															<div className='row g-4'>
-																<div className='col-12'>
-																	<Input
-																		type='file'
-																		autoComplete='photo'
-																	/>
-																</div>
-																<div className='col-12'>
-																	<Button
-																		color='dark'
-																		isLight
-																		icon='Delete'
-																		// onClick={() => {
-																		// 	setEditItem({
-																		// 		...editItem,
-																		// 		image: undefined,
-																		// 	});
-																		// }}
-																		>
-																		Delete Image
-																	</Button>
-																</div>
-															</div>
-														</div> */}
-														</div>
-													</CardBody>
-												</Card>
+										<></>
+										// <>
+										// 	<CardHeader>
+										// 		<CardLabel icon='Edit' iconColor='success'>
+										// 			<CardTitle tag='div' className='h5'>
+										// 				Editar
+										// 			</CardTitle>
+										// 			<CardSubTitle tag='div' className='h6'>
+										// 				Informações da Vaga
+										// 			</CardSubTitle>
+										// 		</CardLabel>
+										// 	</CardHeader>
+										// 	<CardBody isScrollable>
+										// 		<Card>
+										// 			<CardHeader>
+										// 				<CardLabel icon='Photo' iconColor='info'>
+										// 					<CardTitle>Imagem da Vaga</CardTitle>
+										// 				</CardLabel>
+										// 			</CardHeader>
+										// 			<CardBody>
+										// 				<div className='row'>
+										// 					<div className='col-lg-12'>
+										// 						{editItem?.image ? (
+										// 							<img
+										// 								src={
+										// 									AbstractPicture[
+										// 										editItem.image
+										// 									]
+										// 								}
+										// 								alt=''
+										// 								width='25%'
+										// 								height='25%'
+										// 								className='mx-auto d-block img-fluid mb-3'
+										// 							/>
+										// 						) : (
+										// 							<PlaceholderImage
+										// 								width={128}
+										// 								height={128}
+										// 								className='mx-auto d-block img-fluid mb-3 rounded'
+										// 							/>
+										// 						)}
+										// 					</div>
+										// 					{/* <div className='col-lg-8'>
+										// 					<div className='row g-4'>
+										// 						<div className='col-12'>
+										// 							<Input
+										// 								type='file'
+										// 								autoComplete='photo'
+										// 							/>
+										// 						</div>
+										// 						<div className='col-12'>
+										// 							<Button
+										// 								color='dark'
+										// 								isLight
+										// 								icon='Delete'
+										// 								// onClick={() => {
+										// 								// 	setEditItem({
+										// 								// 		...editItem,
+										// 								// 		image: undefined,
+										// 								// 	});
+										// 								// }}
+										// 								>
+										// 								Delete Image
+										// 							</Button>
+										// 						</div>
+										// 					</div>
+										// 				</div> */}
+										// 				</div>
+										// 			</CardBody>
+										// 		</Card>
 
-												<Card>
-													<CardHeader>
-														<CardLabel
-															icon='Description'
-															iconColor='success'>
-															<CardTitle>Detalhes da Vaga</CardTitle>
-														</CardLabel>
-													</CardHeader>
-													<CardBody>
-														<div className='row g-4'>
-															<div className='col-12'>
-																<FormGroup id='pcd' isFloating>
-																	<Checks
-																		type='switch'
-																		label='PCD'
-																		onChange={(
-																			e: React.ChangeEvent<HTMLInputElement>,
-																		) => {
-																			formik.setFieldValue(
-																				'PCD',
-																				e.target.checked
-																					? '1'
-																					: '0',
-																			);
-																		}}
-																		value={formik.values.PCD}
-																		checked={
-																			formik.values.PCD ===
-																			'1'
-																		}
-																		isInline
-																	/>
-																</FormGroup>
-															</div>
-															<div className='col-12'>
-																<FormGroup
-																	id='function'
-																	label='Função'
-																	isFloating>
-																	<Input
-																		className='text-capitalize'
-																		placeholder='Função'
-																		onChange={
-																			formik.handleChange
-																		}
-																		onBlur={formik.handleBlur}
-																		value={
-																			formik.values.function
-																		}
-																		isValid={formik.isValid}
-																		isTouched={
-																			formik.touched.function
-																		}
-																		invalidFeedback={
-																			formik.errors.function
-																		}
-																		validFeedback='Ótimo!'
-																	/>
-																</FormGroup>
-															</div>
-															<div className='col-12'>
-																<FormGroup
-																	id='salary'
-																	label='Salario'
-																	isFloating>
-																	<Input
-																		onChange={
-																			formik.handleChange
-																		}
-																		value={formik.values.salary}
-																		onBlur={formik.handleBlur}
-																		isValid={formik.isValid}
-																		isTouched={
-																			!!formik.touched.salary
-																		}
-																		invalidFeedback={
-																			typeof formik.errors
-																				.salary === 'string'
-																				? formik.errors
-																						.salary
-																				: undefined
-																		}
-																		validFeedback='Ótimo!'
-																	/>
-																</FormGroup>
-															</div>
-															<div className='col-12'>
-																<FormGroup
-																	id='time'
-																	label='Horas semanais'
-																	isFloating>
-																	<Input
-																		max={3}
-																		min={1}
-																		placeholder='Horas semanais'
-																		onChange={
-																			formik.handleChange
-																		}
-																		onBlur={formik.handleBlur}
-																		value={formik.values.time}
-																		isValid={formik.isValid}
-																		isTouched={
-																			!!formik.touched.time
-																		}
-																		invalidFeedback={
-																			typeof formik.errors
-																				.time === 'string'
-																				? formik.errors.time
-																				: undefined
-																		}
-																		validFeedback='Ótimo!'
-																	/>
-																</FormGroup>
-															</div>
-															<div className='col-12'>
-																<FormGroup id='journey'>
-																	<Select
-																		className='form-select fw-medium'
-																		required
-																		ariaLabel=''
-																		placeholder='Jornada'
-																		onChange={
-																			formik.handleChange
-																		}
-																		onBlur={formik.handleBlur}
-																		value={
-																			formik.values.journey
-																		}
-																		isValid={formik.isValid}
-																		isTouched={
-																			!!formik.touched.journey
-																		}
-																		invalidFeedback={
-																			typeof formik.errors
-																				.journey ===
-																			'string'
-																				? formik.errors
-																						.journey
-																				: undefined
-																		}
-																		validFeedback='Ótimo!'>
-																		<Option value='5x2'>
-																			5x2
-																		</Option>
-																		<Option value='6x1'>
-																			6x1
-																		</Option>
-																	</Select>
-																</FormGroup>
-															</div>
-															<div className='col-12'>
-																<FormGroup id='contract'>
-																	<Select
-																		className='form-select fw-medium'
-																		required
-																		ariaLabel='Contratação'
-																		placeholder='Contratação'
-																		onChange={
-																			formik.handleChange
-																		}
-																		onBlur={formik.handleBlur}
-																		value={
-																			formik.values.contract
-																		}
-																		isValid={formik.isValid}
-																		isTouched={
-																			formik.touched.contract
-																		}
-																		invalidFeedback={
-																			formik.errors.contract
-																		}
-																		validFeedback='Ótimo!'>
-																		<Option value='clt'>
-																			CLT
-																		</Option>
-																		
-																		<Option value='pj'>
-																			PJ
-																		</Option>
-																		<Option value='contract'>
-																			Contrato
-																		</Option>
-																	</Select>
-																</FormGroup>
-															</div>
-															<div className='col-12'>
-																<FormGroup
-																	id='obligations'
-																	label='Obrigações (opcional)'
-																	isFloating>
-																	<Textarea
-																		onChange={
-																			formik.handleChange
-																		}
-																		value={
-																			formik.values
-																				.obligations
-																		}
-																		onBlur={formik.handleBlur}
-																		isValid={formik.isValid}
-																		isTouched={
-																			formik.touched
-																				.obligations
-																		}
-																		invalidFeedback={
-																			formik.errors
-																				.obligations
-																		}
-																		validFeedback='Ótimo!'
-																	/>
-																</FormGroup>
-															</div>
-															<div className='col-12'>
-																<FormGroup
-																	id='benefits'
-																	label='Benefícios (opcional)'
-																	isFloating>
-																	<Textarea
-																		onChange={
-																			formik.handleChange
-																		}
-																		value={
-																			formik.values.benefits
-																		}
-																		onBlur={formik.handleBlur}
-																		isValid={formik.isValid}
-																		isTouched={
-																			formik.touched.benefits
-																		}
-																		invalidFeedback={
-																			formik.errors.benefits
-																		}
-																		validFeedback='Ótimo!'
-																	/>
-																</FormGroup>
-															</div>
-															<div className='col-12'>
-																<FormGroup
-																	id='details'
-																	label='Detalhes (opcional)'
-																	isFloating>
-																	<Textarea
-																		onChange={
-																			formik.handleChange
-																		}
-																		value={
-																			formik.values.details
-																		}
-																		onBlur={formik.handleBlur}
-																		isValid={formik.isValid}
-																		isTouched={
-																			formik.touched.details
-																		}
-																		invalidFeedback={
-																			formik.errors.details
-																		}
-																		validFeedback='Ótimo!'
-																	/>
-																</FormGroup>
-															</div>
-														</div>
-													</CardBody>
-												</Card>
-											</CardBody>
-											<CardFooter>
-												<CardFooterRight>
-													<Button
-														color='info'
-														icon='Save'
-														type='submit'
-														isDisable={
-															!formik.isValid && !!formik.submitCount
-														}>
-														Editar
-													</Button>
-												</CardFooterRight>
-											</CardFooter>
-										</>
+										// 		<Card>
+										// 			<CardHeader>
+										// 				<CardLabel
+										// 					icon='Description'
+										// 					iconColor='success'>
+										// 					<CardTitle>Detalhes da Vaga</CardTitle>
+										// 				</CardLabel>
+										// 			</CardHeader>
+										// 			<CardBody>
+										// 				<div className='row g-4'>
+										// 					<div className='col-12'>
+										// 						<FormGroup id='pcd' isFloating>
+										// 							<Checks
+										// 								type='switch'
+										// 								label='PCD'
+										// 								onChange={(
+										// 									e: React.ChangeEvent<HTMLInputElement>,
+										// 								) => {
+										// 									formik.setFieldValue(
+										// 										'PCD',
+										// 										e.target.checked
+										// 											? '1'
+										// 											: '0',
+										// 									);
+										// 								}}
+										// 								value={formik.values.PCD}
+										// 								checked={
+										// 									formik.values.PCD ===
+										// 									'1'
+										// 								}
+										// 								isInline
+										// 							/>
+										// 						</FormGroup>
+										// 					</div>
+										// 					<div className='col-12'>
+										// 						<FormGroup
+										// 							id='function'
+										// 							label='Função'
+										// 							isFloating>
+										// 							<Input
+										// 								className='text-capitalize'
+										// 								placeholder='Função'
+										// 								onChange={
+										// 									formik.handleChange
+										// 								}
+										// 								onBlur={formik.handleBlur}
+										// 								value={
+										// 									formik.values.function
+										// 								}
+										// 								isValid={formik.isValid}
+										// 								isTouched={
+										// 									formik.touched.function
+										// 								}
+										// 								invalidFeedback={
+										// 									formik.errors.function
+										// 								}
+										// 								validFeedback='Ótimo!'
+										// 							/>
+										// 						</FormGroup>
+										// 					</div>
+										// 					<div className='col-12'>
+										// 						<FormGroup
+										// 							id='salary'
+										// 							label='Salario'
+										// 							isFloating>
+										// 							<Input
+										// 								onChange={
+										// 									formik.handleChange
+										// 								}
+										// 								value={formik.values.salary}
+										// 								onBlur={formik.handleBlur}
+										// 								isValid={formik.isValid}
+										// 								isTouched={
+										// 									!!formik.touched.salary
+										// 								}
+										// 								invalidFeedback={
+										// 									typeof formik.errors
+										// 										.salary === 'string'
+										// 										? formik.errors
+										// 												.salary
+										// 										: undefined
+										// 								}
+										// 								validFeedback='Ótimo!'
+										// 							/>
+										// 						</FormGroup>
+										// 					</div>
+										// 					{/* <div className='col-12'>
+										// 						<FormGroup
+										// 							id='time'
+										// 							label='Horas semanais'
+										// 							isFloating>
+										// 							<Input
+										// 								max={3}
+										// 								min={1}
+										// 								placeholder='Horas semanais'
+										// 								onChange={
+										// 									formik.handleChange
+										// 								}
+										// 								onBlur={formik.handleBlur}
+										// 								value={formik.values.time}
+										// 								isValid={formik.isValid}
+										// 								isTouched={
+										// 									!!formik.touched.time
+										// 								}
+										// 								invalidFeedback={
+										// 									typeof formik.errors
+										// 										.time === 'string'
+										// 										? formik.errors.time
+										// 										: undefined
+										// 								}
+										// 								validFeedback='Ótimo!'
+										// 							/>
+										// 						</FormGroup>
+										// 					</div> */}
+										// 					<div className='col-12'>
+										// 						<FormGroup id='journey'>
+										// 							<Select
+										// 								className='form-select fw-medium'
+										// 								required
+										// 								ariaLabel=''
+										// 								placeholder='Jornada'
+										// 								onChange={
+										// 									formik.handleChange
+										// 								}
+										// 								onBlur={formik.handleBlur}
+										// 								value={
+										// 									formik.values.journey
+										// 								}
+										// 								isValid={formik.isValid}
+										// 								isTouched={
+										// 									!!formik.touched.journey
+										// 								}
+										// 								invalidFeedback={
+										// 									typeof formik.errors
+										// 										.journey ===
+										// 									'string'
+										// 										? formik.errors
+										// 												.journey
+										// 										: undefined
+										// 								}
+										// 								validFeedback='Ótimo!'>
+										// 								<Option value='5x2'>
+										// 									5x2
+										// 								</Option>
+										// 								<Option value='6x1'>
+										// 									6x1
+										// 								</Option>
+										// 							</Select>
+										// 						</FormGroup>
+										// 					</div>
+										// 					<div className='col-12'>
+										// 						<FormGroup id='contract'>
+										// 							<Select
+										// 								className='form-select fw-medium'
+										// 								required
+										// 								ariaLabel='Contratação'
+										// 								placeholder='Contratação'
+										// 								onChange={
+										// 									formik.handleChange
+										// 								}
+										// 								onBlur={formik.handleBlur}
+										// 								value={
+										// 									formik.values.contract
+										// 								}
+										// 								isValid={formik.isValid}
+										// 								isTouched={
+										// 									formik.touched.contract
+										// 								}
+										// 								invalidFeedback={
+										// 									formik.errors.contract
+										// 								}
+										// 								validFeedback='Ótimo!'>
+										// 								<Option value='clt'>
+										// 									CLT
+										// 								</Option>
+
+										// 								<Option value='pj'>
+										// 									PJ
+										// 								</Option>
+										// 								<Option value='contract'>
+										// 									Contrato
+										// 								</Option>
+										// 							</Select>
+										// 						</FormGroup>
+										// 					</div>
+										// 					<div className='col-12'>
+										// 						<FormGroup
+										// 							id='obligations'
+										// 							label='Obrigações (opcional)'
+										// 							isFloating>
+										// 							<Textarea
+										// 								onChange={
+										// 									formik.handleChange
+										// 								}
+										// 								value={
+										// 									formik.values
+										// 										.obligations
+										// 								}
+										// 								onBlur={formik.handleBlur}
+										// 								isValid={formik.isValid}
+										// 								isTouched={
+										// 									formik.touched
+										// 										.obligations
+										// 								}
+										// 								invalidFeedback={
+										// 									formik.errors
+										// 										.obligations
+										// 								}
+										// 								validFeedback='Ótimo!'
+										// 							/>
+										// 						</FormGroup>
+										// 					</div>
+										// 					<div className='col-12'>
+										// 						<FormGroup
+										// 							id='benefits'
+										// 							label='Benefícios (opcional)'
+										// 							isFloating>
+										// 							<Textarea
+										// 								onChange={
+										// 									formik.handleChange
+										// 								}
+										// 								value={
+										// 									formik.values.benefits
+										// 								}
+										// 								onBlur={formik.handleBlur}
+										// 								isValid={formik.isValid}
+										// 								isTouched={
+										// 									formik.touched.benefits
+										// 								}
+										// 								invalidFeedback={
+										// 									formik.errors.benefits
+										// 								}
+										// 								validFeedback='Ótimo!'
+										// 							/>
+										// 						</FormGroup>
+										// 					</div>
+										// 					<div className='col-12'>
+										// 						<FormGroup
+										// 							id='details'
+										// 							label='Detalhes (opcional)'
+										// 							isFloating>
+										// 							<Textarea
+										// 								onChange={
+										// 									formik.handleChange
+										// 								}
+										// 								value={
+										// 									formik.values.details
+										// 								}
+										// 								onBlur={formik.handleBlur}
+										// 								isValid={formik.isValid}
+										// 								isTouched={
+										// 									formik.touched.details
+										// 								}
+										// 								invalidFeedback={
+										// 									formik.errors.details
+										// 								}
+										// 								validFeedback='Ótimo!'
+										// 							/>
+										// 						</FormGroup>
+										// 					</div>
+										// 				</div>
+										// 			</CardBody>
+										// 		</Card>
+										// 	</CardBody>
+										// 	<CardFooter>
+										// 		<CardFooterRight>
+										// 			<Button
+										// 				color='info'
+										// 				icon='Save'
+										// 				type='submit'
+										// 				isDisable={
+										// 					!formik.isValid && !!formik.submitCount
+										// 				}>
+										// 				Editar
+										// 			</Button>
+										// 		</CardFooterRight>
+										// 	</CardFooter>
+										// </>
 									)}
 								</Card>
 							</div>

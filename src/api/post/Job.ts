@@ -1,15 +1,12 @@
 import axios from 'axios';
 
 interface PropsCreateJob {
-	benefits?: string;
-	contract?: string;
-	details?: string;
-	image?: string;
-	function: string;
-	obligations: string;
-	salary: string;
-	time: any;
-	user_update?: string;
+	default: any;
+	benefits: any;
+	skills: any;
+	localities: any;
+	CNPJ_company:any;
+	user_create: any;
 }
 
 export default async function Job(dates: PropsCreateJob) {

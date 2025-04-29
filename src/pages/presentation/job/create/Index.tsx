@@ -111,85 +111,85 @@ export default function CreateJob() {
 	const [nameImage, setNameImage] = React.useState<AbstractPictureKeys>('ballSplit');
 	const [rebuild, setRebuild] = React.useState<number>(1);
 
-	const createAndEditJob = async (job: Ijob) => {
-		job.user_create = userData.id;
-		job.CNPJ_company = userData.cnpj;
-		job.time = JSON.stringify({
-			time: job.time,
-			journey: job.journey,
-		});
-		if (editItem && 'id' in editItem) {
-			const update: IjobUpdate = job;
-			update.user_edit = userData.id;
-			const response = await JobUpdate(update, editItem.id);
-			switch (response.status) {
-				case 200:
-					setRebuild(rebuild + 1);
-					toast(
-						<Toasts icon='Work' iconColor='success' title='Successo'>
-							Vaga editada com sucesso!
-						</Toasts>,
-						{ closeButton: true, autoClose: 1000 },
-					);
-					setEditPanel(false);
-					break;
-				case 404:
-					toast(
-						<Toasts icon='Work' iconColor='danger' title='Erro'>
-							Algo deu errado, tente novamente!
-						</Toasts>,
-						{ closeButton: true, autoClose: 1000 },
-					);
-					break;
-				case 500:
-					toast(
-						<Toasts icon='Work' iconColor='warning' title='Erro'>
-							Erro interno, tente novamente!
-						</Toasts>,
-						{ closeButton: true, autoClose: 1000 },
-					);
-					break;
-				default:
-					toast(
-						<Toasts icon='Work' iconColor='danger' title='Erro Desconhecido'>
-							Algo deu errado, tente novamente!
-						</Toasts>,
-						{ closeButton: true, autoClose: 1000 },
-					);
-					break;
-			}
-		} else {
-			const response = await Job(job);
-			switch (response.status) {
-				case 201:
-					setRebuild(rebuild + 1);
-					toast(
-						<Toasts icon='Work' iconColor='success' title='Successo'>
-							Vaga criada com sucesso!
-						</Toasts>,
-						{ closeButton: true, autoClose: 1000 },
-					);
-					setEditPanel(false);
-					break;
-				case 500:
-					toast(
-						<Toasts icon='Work' iconColor='warning' title='Erro'>
-							Algo deu errado, tente novamente!
-						</Toasts>,
-						{ closeButton: true, autoClose: 1000 },
-					);
-					break;
-				default:
-					toast(
-						<Toasts icon='Work' iconColor='danger' title='Erro Desconhecido'>
-							Algo deu errado, tente novamente!
-						</Toasts>,
-						{ closeButton: true, autoClose: 1000 },
-					);
-					break;
-			}
-		}
-	};
+	// const createAndEditJob = async (job: Ijob) => {
+	// 	job.user_create = userData.id;
+	// 	job.CNPJ_company = userData.cnpj;
+	// 	job.time = JSON.stringify({
+	// 		time: job.time,
+	// 		journey: job.journey,
+	// 	});
+	// 	if (editItem && 'id' in editItem) {
+	// 		const update: IjobUpdate = job;
+	// 		update.user_edit = userData.id;
+	// 		const response = await JobUpdate(update, editItem.id);
+	// 		switch (response.status) {
+	// 			case 200:
+	// 				setRebuild(rebuild + 1);
+	// 				toast(
+	// 					<Toasts icon='Work' iconColor='success' title='Successo'>
+	// 						Vaga editada com sucesso!
+	// 					</Toasts>,
+	// 					{ closeButton: true, autoClose: 1000 },
+	// 				);
+	// 				setEditPanel(false);
+	// 				break;
+	// 			case 404:
+	// 				toast(
+	// 					<Toasts icon='Work' iconColor='danger' title='Erro'>
+	// 						Algo deu errado, tente novamente!
+	// 					</Toasts>,
+	// 					{ closeButton: true, autoClose: 1000 },
+	// 				);
+	// 				break;
+	// 			case 500:
+	// 				toast(
+	// 					<Toasts icon='Work' iconColor='warning' title='Erro'>
+	// 						Erro interno, tente novamente!
+	// 					</Toasts>,
+	// 					{ closeButton: true, autoClose: 1000 },
+	// 				);
+	// 				break;
+	// 			default:
+	// 				toast(
+	// 					<Toasts icon='Work' iconColor='danger' title='Erro Desconhecido'>
+	// 						Algo deu errado, tente novamente!
+	// 					</Toasts>,
+	// 					{ closeButton: true, autoClose: 1000 },
+	// 				);
+	// 				break;
+	// 		}
+	// 	} else {
+	// 		const response = await Job(job);
+	// 		switch (response.status) {
+	// 			case 201:
+	// 				setRebuild(rebuild + 1);
+	// 				toast(
+	// 					<Toasts icon='Work' iconColor='success' title='Successo'>
+	// 						Vaga criada com sucesso!
+	// 					</Toasts>,
+	// 					{ closeButton: true, autoClose: 1000 },
+	// 				);
+	// 				setEditPanel(false);
+	// 				break;
+	// 			case 500:
+	// 				toast(
+	// 					<Toasts icon='Work' iconColor='warning' title='Erro'>
+	// 						Algo deu errado, tente novamente!
+	// 					</Toasts>,
+	// 					{ closeButton: true, autoClose: 1000 },
+	// 				);
+	// 				break;
+	// 			default:
+	// 				toast(
+	// 					<Toasts icon='Work' iconColor='danger' title='Erro Desconhecido'>
+	// 						Algo deu errado, tente novamente!
+	// 					</Toasts>,
+	// 					{ closeButton: true, autoClose: 1000 },
+	// 				);
+	// 				break;
+	// 		}
+	// 	}
+	// };
 
 	const validate = (values: IValues) => {
 		const errors: any = {};
@@ -305,12 +305,6 @@ export default function CreateJob() {
 			}
 		},
 	});
-
-	React.useEffect(() => {
-		if (formik.values.cep.length == 9) {
-			findCep();
-		}
-	}, [formik.values.cep]);
 
 	React.useEffect(() => {
 		if (decision == 'ia') {
@@ -468,6 +462,7 @@ export default function CreateJob() {
 										setInitial={setInitial}
 										formik={formik}
 										setIAactive={setIAactive}
+										userData={userData}
 									/>
 								)}
 							</CardBody>

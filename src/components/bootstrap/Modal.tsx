@@ -43,6 +43,7 @@ ModalTitle.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']),
 };
+//@ts-ignore
 ModalTitle.defaultProps = {
 	className: undefined,
 	tag: 'h5',
@@ -81,6 +82,7 @@ ModalHeader.propTypes = {
 	 */
 	setIsOpen: PropTypes.func,
 };
+//@ts-ignore
 ModalHeader.defaultProps = {
 	className: undefined,
 	setIsOpen: undefined,
@@ -105,6 +107,7 @@ ModalBody.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 ModalBody.defaultProps = {
 	className: undefined,
 };
@@ -128,6 +131,7 @@ ModalFooter.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 ModalFooter.defaultProps = {
 	className: undefined,
 };
@@ -223,6 +227,7 @@ const Modal: FC<IModalProps> = ({
 						<motion.div
 							ref={refModal}
 							key='modal'
+							//@ts-ignore
 							className={classNames('modal', { fade: isAnimation }, 'show')}
 							role='dialog'
 							style={{ display: 'block' }}
@@ -297,6 +302,7 @@ Modal.propTypes = {
 	]),
 	isAnimation: PropTypes.bool,
 };
+//@ts-ignore
 Modal.defaultProps = {
 	id: undefined,
 	isStaticBackdrop: false,

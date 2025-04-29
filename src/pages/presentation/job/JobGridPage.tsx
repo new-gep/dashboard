@@ -39,6 +39,8 @@ import JobUpdate from '../../../api/patch/Job';
 import JobDelete from '../../../api/delete/job/job';
 import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/bootstrap/Modal';
 import Checks from '../../../components/bootstrap/forms/Checks';
+import Mask from '../../../function/Mask';
+import { useNavigate } from 'react-router-dom';
 
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 interface IValues {
@@ -46,8 +48,6 @@ interface IValues {
 	PCD: string;
 	function: string;
 	salary: any;
-	time: any;
-	journey: string;
 	contract: string;
 	benefits: string;
 	details: string;
@@ -74,8 +74,6 @@ interface IjobUpdate {
 	function: string;
 	PCD: string;
 	salary: any;
-	journey: any;
-	time: any;
 	contract: string;
 	benefits: string;
 	details: string;
@@ -92,16 +90,6 @@ const validate = (values: IValues) => {
 	}
 	if (!values.salary || values.salary <= 0) {
 		errors.salary = 'Salário é obrigatório';
-	}
-	if (!values.time || values.time <= 0) {
-		errors.time = 'Horas semanais são obrigatórias';
-	} else if (values.time.length < 1) {
-		errors.time = 'Horário mínimo é 1 digito';
-	} else if (values.time.length > 3) {
-		errors.time = 'Horário máximo é 3 digitos';
-	}
-	if (!values.journey) {
-		errors.journey = 'Jornada é obrigatória';
 	}
 	if (!values.contract) {
 		errors.contract = 'Contrato é obrigatório';
@@ -121,14 +109,13 @@ const ProductsGridPage = () => {
 	const [imageFile, setImageFile] = useState<any>(null);
 	const [nameImage, setNameImage] = useState<AbstractPictureKeys>('ballSplit');
 	const [rebuild, setRebuild] = useState<number>(1);
+	const navigate = useNavigate();
 
 	const formik = useFormik({
 		initialValues: {
 			function: '',
 			PCD: '0',
 			salary: '',
-			time: '',
-			journey: '',
 			contract: '',
 			benefits: '',
 			details: '',
@@ -139,6 +126,7 @@ const ProductsGridPage = () => {
 		onSubmit: (values, { resetForm }) => {
 			values.image = nameImage;
 			const job = values;
+			//@ts-ignore
 			createAndEditJob(job);
 			if (!editItem) {
 				resetForm();
@@ -163,129 +151,129 @@ const ProductsGridPage = () => {
 		return AbstractPicture[randomKey]; // Retorna a imagem correspondente à chave aleatória
 	};
 
-	const createAndEditJob = async (job: Ijob) => {
-		job.user_create = userData.id;
-		job.CNPJ_company = userData.cnpj;
-		job.time = JSON.stringify({
-			time: job.time,
-			journey: job.journey,
-		});
-		if (editItem && 'id' in editItem) {
-			const update: IjobUpdate = job;
-			update.user_edit = userData.id;
-			delete update.journey;
-			const response = await JobUpdate(update, editItem.id);
-			switch (response.status) {
-				case 200:
-					setRebuild(rebuild + 1);
-					toast(
-						<Toasts
-							icon='Work'
-							iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Successo'>
-							Vaga editada com sucesso!
-						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
-					);
-					setEditPanel(false);
-					break;
-				case 404:
-					toast(
-						<Toasts
-							icon='Work'
-							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro'>
-							Algo deu errado, tente novamente!
-						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
-					);
-					break;
-				case 500:
-					toast(
-						<Toasts
-							icon='Work'
-							iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro'>
-							Erro interno, tente novamente!
-						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
-					);
-					break;
-				default:
-					toast(
-						<Toasts
-							icon='Work'
-							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro Desconhecido'>
-							Algo deu errado, tente novamente!
-						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
-					);
-					break;
-			}
-		} else {
-			const response = await Job(job);
-			switch (response.status) {
-				case 201:
-					setRebuild(rebuild + 1);
-					toast(
-						<Toasts
-							icon='Work'
-							iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Successo'>
-							Vaga criada com sucesso!
-						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
-					);
-					setEditPanel(false);
-					break;
-				case 500:
-					toast(
-						<Toasts
-							icon='Work'
-							iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro'>
-							Algo deu errado, tente novamente!
-						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
-					);
-					break;
+	// const createAndEditJob = async (job: Ijob) => {
+	// 	job.user_create = userData.id;
+	// 	job.CNPJ_company = userData.cnpj;
+	// 	job.time = JSON.stringify({
+	// 		time: job.time,
+	// 		journey: job.journey,
+	// 	});
+	// 	if (editItem && 'id' in editItem) {
+	// 		const update: IjobUpdate = job;
+	// 		update.user_edit = userData.id;
+	// 		delete update.journey;
+	// 		const response = await JobUpdate(update, editItem.id);
+	// 		switch (response.status) {
+	// 			case 200:
+	// 				setRebuild(rebuild + 1);
+	// 				toast(
+	// 					<Toasts
+	// 						icon='Work'
+	// 						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+	// 						title='Successo'>
+	// 						Vaga editada com sucesso!
+	// 					</Toasts>,
+	// 					{
+	// 						closeButton: true,
+	// 						autoClose: 1000, // Examples: 1000, 3000, ...
+	// 					},
+	// 				);
+	// 				setEditPanel(false);
+	// 				break;
+	// 			case 404:
+	// 				toast(
+	// 					<Toasts
+	// 						icon='Work'
+	// 						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+	// 						title='Erro'>
+	// 						Algo deu errado, tente novamente!
+	// 					</Toasts>,
+	// 					{
+	// 						closeButton: true,
+	// 						autoClose: 1000, // Examples: 1000, 3000, ...
+	// 					},
+	// 				);
+	// 				break;
+	// 			case 500:
+	// 				toast(
+	// 					<Toasts
+	// 						icon='Work'
+	// 						iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+	// 						title='Erro'>
+	// 						Erro interno, tente novamente!
+	// 					</Toasts>,
+	// 					{
+	// 						closeButton: true,
+	// 						autoClose: 1000, // Examples: 1000, 3000, ...
+	// 					},
+	// 				);
+	// 				break;
+	// 			default:
+	// 				toast(
+	// 					<Toasts
+	// 						icon='Work'
+	// 						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+	// 						title='Erro Desconhecido'>
+	// 						Algo deu errado, tente novamente!
+	// 					</Toasts>,
+	// 					{
+	// 						closeButton: true,
+	// 						autoClose: 1000, // Examples: 1000, 3000, ...
+	// 					},
+	// 				);
+	// 				break;
+	// 		}
+	// 	} else {
+	// 		const response = await Job(job);
+	// 		switch (response.status) {
+	// 			case 201:
+	// 				setRebuild(rebuild + 1);
+	// 				toast(
+	// 					<Toasts
+	// 						icon='Work'
+	// 						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+	// 						title='Successo'>
+	// 						Vaga criada com sucesso!
+	// 					</Toasts>,
+	// 					{
+	// 						closeButton: true,
+	// 						autoClose: 1000, // Examples: 1000, 3000, ...
+	// 					},
+	// 				);
+	// 				setEditPanel(false);
+	// 				break;
+	// 			case 500:
+	// 				toast(
+	// 					<Toasts
+	// 						icon='Work'
+	// 						iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+	// 						title='Erro'>
+	// 						Algo deu errado, tente novamente!
+	// 					</Toasts>,
+	// 					{
+	// 						closeButton: true,
+	// 						autoClose: 1000, // Examples: 1000, 3000, ...
+	// 					},
+	// 				);
+	// 				break;
 
-				default:
-					toast(
-						<Toasts
-							icon='Work'
-							iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-							title='Erro Desconhecido'>
-							Algo deu errado, tente novamente!
-						</Toasts>,
-						{
-							closeButton: true,
-							autoClose: 1000, // Examples: 1000, 3000, ...
-						},
-					);
-					break;
-			}
-		}
-	};
+	// 			default:
+	// 				toast(
+	// 					<Toasts
+	// 						icon='Work'
+	// 						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+	// 						title='Erro Desconhecido'>
+	// 						Algo deu errado, tente novamente!
+	// 					</Toasts>,
+	// 					{
+	// 						closeButton: true,
+	// 						autoClose: 1000, // Examples: 1000, 3000, ...
+	// 					},
+	// 				);
+	// 				break;
+	// 		}
+	// 	}
+	// };
 
 	const handleRemove = async (id: string) => {
 		const response = await Job_One(id);
@@ -360,8 +348,6 @@ const ProductsGridPage = () => {
 				function: editItem.function,
 				PCD: editItem.PCD,
 				salary: editItem.salary,
-				time: editItem.time.time,
-				journey: editItem.time.journey,
 				contract: editItem.contract,
 				benefits: editItem.benefits,
 				details: editItem.details,
@@ -370,13 +356,14 @@ const ProductsGridPage = () => {
 			});
 			setNameImage(editItem.image);
 		}
-	}, [editItem, formik]);
+	}, [editItem]);
 
 	useEffect(() => {
 		setImageFile(getRandomImage());
 		if (userData.cnpj) {
 			const fetchData = async () => {
 				const response = await Job_Open(userData.cnpj);
+
 				if (!response || response.status !== 200) {
 					return;
 				}
@@ -414,8 +401,7 @@ const ProductsGridPage = () => {
 						isLight
 						icon='Add'
 						onClick={() => {
-							setEditItem(null);
-							setEditPanel(true);
+							navigate('/recruit/create');
 						}}>
 						Gerar Vaga
 					</Button>
@@ -464,6 +450,7 @@ const ProductsGridPage = () => {
 								<CommonGridJobItem
 									id={item.id}
 									isPCD={item.PCD}
+									isDEI={item.DEI}
 									image={item.image}
 									title_job={item.function}
 									candidates={item.candidates}
@@ -484,7 +471,7 @@ const ProductsGridPage = () => {
 				isRightPanel
 				tag='form'
 				noValidate
-				onSubmit={formik.handleSubmit}>
+			>
 				<OffCanvasHeader setOpen={setEditPanel}>
 					<OffCanvasTitle id='edit-panel' className='text-capitalize'>
 						{editItem?.function || 'Nova Vaga'}{' '}
@@ -584,6 +571,7 @@ const ProductsGridPage = () => {
 										checked={formik.values.PCD == '1'}
 									/>
 								</div>
+
 								<div className='col-12'>
 									<FormGroup id='function' label='Função' isFloating>
 										<Input
@@ -599,20 +587,23 @@ const ProductsGridPage = () => {
 										/>
 									</FormGroup>
 								</div>
+
 								<div className='col-12'>
-									<FormGroup id='salary' label='Salario' isFloating>
+									{/* <FormGroup id='salary' label='Salario' isFloating>
 										<Input
 											onChange={formik.handleChange}
 											value={formik.values.salary}
 											onBlur={formik.handleBlur}
 											isValid={formik.isValid}
+											//@ts-ignore
 											isTouched={formik.touched.salary}
+											//@ts-ignore
 											invalidFeedback={formik.errors.salary}
 											validFeedback='Ótimo!'
 										/>
-									</FormGroup>
+									</FormGroup> */}
 								</div>
-								<div className='col-12'>
+								{/* <div className='col-12'>
 									<FormGroup id='time' label='Horas semanais' isFloating>
 										<Input
 											max={3}
@@ -622,13 +613,15 @@ const ProductsGridPage = () => {
 											onBlur={formik.handleBlur}
 											value={formik.values.time}
 											isValid={formik.isValid}
+											//@ts-ignore
 											isTouched={formik.touched.time}
+											//@ts-ignore
 											invalidFeedback={formik.errors.time}
 											validFeedback='Ótimo!'
 										/>
 									</FormGroup>
-								</div>
-								<div className='col-12'>
+								</div> */}
+								{/* <div className='col-12'>
 									<FormGroup id='journey'>
 										<Select
 											className='form-select fw-medium'
@@ -646,9 +639,9 @@ const ProductsGridPage = () => {
 											<option value='6x1'>6x1</option>
 										</Select>
 									</FormGroup>
-								</div>
+								</div> */}
 								<div className='col-12'>
-									<FormGroup id='contract'>
+									{/* <FormGroup id='contract'>
 										<Select
 											className='form-select fw-medium'
 											required
@@ -665,10 +658,10 @@ const ProductsGridPage = () => {
 											<Option value='pj'>PJ </Option>
 											<Option value='contract'>Contrato</Option>
 										</Select>
-									</FormGroup>
+									</FormGroup> */}
 								</div>
 								<div className='col-12'>
-									<FormGroup
+									{/* <FormGroup
 										id='obligations'
 										label='Obrigações (opcional)'
 										isFloating>
@@ -681,10 +674,10 @@ const ProductsGridPage = () => {
 											invalidFeedback={formik.errors.obligations}
 											validFeedback='Ótimo!'
 										/>
-									</FormGroup>
+									</FormGroup> */}
 								</div>
 								<div className='col-12'>
-									<FormGroup
+									{/* <FormGroup
 										id='benefits'
 										label='Benefícios (opcional)'
 										isFloating>
@@ -697,10 +690,10 @@ const ProductsGridPage = () => {
 											invalidFeedback={formik.errors.benefits}
 											validFeedback='Ótimo!'
 										/>
-									</FormGroup>
+									</FormGroup> */}
 								</div>
 								<div className='col-12'>
-									<FormGroup id='details' label='Detalhes (opcional)' isFloating>
+									{/* <FormGroup id='details' label='Detalhes (opcional)' isFloating>
 										<Textarea
 											onChange={formik.handleChange}
 											value={formik.values.details}
@@ -710,7 +703,7 @@ const ProductsGridPage = () => {
 											invalidFeedback={formik.errors.details}
 											validFeedback='Ótimo!'
 										/>
-									</FormGroup>
+									</FormGroup> */}
 								</div>
 							</div>
 						</CardBody>
