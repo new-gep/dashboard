@@ -44,6 +44,7 @@ import Modal, {
 	ModalHeader,
 	ModalTitle,
 } from '../../../components/bootstrap/Modal';
+import CompanySignature from './CompanySignature';
 
 interface IPreviewItemProps {
 	title: string;
@@ -132,6 +133,7 @@ const CompanyPage = () => {
 	const [newLogoPathh, setNewLogoPath] = useState<any>(null);
 	const [newSignaturePath, setNewSignaturePath] = useState<null | any>(null);
 	const [contractPath, setContractPath] = useState<null | string>(null);
+	const [load, setLoad] = useState<boolean>(true);
 	const [modal, setModal] = useState(false);
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -345,21 +347,33 @@ const CompanyPage = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (userData) {
-				const response = await GetCompanyFindOne(userData.cnpj);
-				const responseContract = await GetCompanyDocument(userData.cnpj, 'contractActive');
-				if (response.status == 200) {
-					formik.setValues(response.company);
-					formik.setFieldValue('cnpj', response.company.CNPJ);
-					formik.setFieldValue('zip', response.company.zip_code);
-					setCompanyDates(response.company);
-					setLogoPath(response.logo);
-					setSignaturePath(response.signature);
-					setContractPath(responseContract.path);
+				setLoad(true);
+				try {
+					const response = await GetCompanyFindOne(userData.cnpj);
+					const responseContract = await GetCompanyDocument(userData.cnpj, 'contractActive');
+					
+					if (response.status === 200) {
+						formik.setValues(response.company);
+						formik.setFieldValue('cnpj', response.company.CNPJ);
+						formik.setFieldValue('zip', response.company.zip_code);
+						setSignaturePath(response.signature);
+						setCompanyDates(response.company);
+						setLogoPath(response.logo);
+						setContractPath(responseContract.path);
+					}
+				} catch (error) {
+					console.error('Erro ao carregar os dados da empresa:', error);
+				} finally {
+					setTimeout(() => {
+						setLoad(false); // só será executado após tudo, com ou sem erro
+					}, 1000);
 				}
 			}
 		};
+	
 		fetchData();
 	}, [userData]);
+	
 
 	return (
 		<PageWrapper title={demoPagesMenu.editPages.subMenu.editWizard.text}>
@@ -431,7 +445,7 @@ const CompanyPage = () => {
 											{TABS.USER}
 										</Button>
 									</div>
-									<div className='col-12'>
+									{/* <div className='col-12'>
 										<Button
 											icon='ShoppingCart'
 											color='warning'
@@ -440,7 +454,7 @@ const CompanyPage = () => {
 											onClick={() => setActiveTab(TABS.PLAN)}>
 											{TABS.PLAN}
 										</Button>
-									</div>
+									</div> */}
 								</div>
 							</CardBody>
 						</Card>
@@ -893,79 +907,6 @@ const CompanyPage = () => {
 								</WizardItem>
 							</Wizard>
 						)}
-						{TABS.SIGNATURE === activeTab && (
-							<Card stretch>
-								<CardHeader>
-									<CardLabel icon='Edit' iconColor='info'>
-										<CardTitle>{TABS.SIGNATURE}</CardTitle>
-									</CardLabel>
-								</CardHeader>
-								<CardBody className='pb-0' isScrollable>
-									<div className='row g-4'>
-										<Card
-											className={` ${signaturePath && 'bg-white overflow-hidden'}`}>
-											<CardBody
-												className='d-flex justify-content-center align-items-center'
-												style={{ height: '300px' }}>
-												{signaturePath ? (
-													<div className='rounded h-50 w-50 d-flex justify-content-center align-items-center'>
-														<img
-															src={signaturePath}
-															alt='Assinatura da empresa'
-															className='mx-auto d-block img-fluid mb-3 w-100'
-														/>
-													</div>
-												) : (
-													<div
-														className='shadow-3d-up-hover w-full h-100 d-flex justify-content-center align-items-center cursor-pointer'
-														onClick={clickSignature}>
-														<div>
-															<h1 className='m-0 p-0'>
-																Adicione sua Assinatura{' '}
-																<Icon icon='AddCircle' />
-															</h1>
-															Não há assinaturas ativas
-														</div>
-													</div>
-												)}
-											</CardBody>
-											<input
-												type='file'
-												ref={fileInputRef}
-												accept='image/*'
-												className='d-none'
-												onChange={uploadSignature}
-											/>
-										</Card>
-									</div>
-								</CardBody>
-								<CardFooter>
-									<CardFooterLeft>
-										{signaturePath && (
-											<Button
-												color='info'
-												isLink
-												type='reset'
-												onClick={clickSignature}>
-												Atualizar Assinatura
-											</Button>
-										)}
-									</CardFooterLeft>
-									<CardFooterRight>
-										{newSignaturePath && (
-											<Button
-												type='submit'
-												icon='Save'
-												color='info'
-												isOutline
-												onClick={saveSignature}>
-												Salvar
-											</Button>
-										)}
-									</CardFooterRight>
-								</CardFooter>
-							</Card>
-						)}
 						{TABS.PLAN === activeTab && (
 							<Card stretch>
 								<Modal isOpen={modal} size='lg' setIsOpen={setModal}>
@@ -1101,6 +1042,7 @@ const CompanyPage = () => {
 								</CardFooter>
 							</Card>
 						)}
+						{TABS.SIGNATURE === activeTab && <CompanySignature loadDate={load} TABS={TABS} setSignaturePath={setSignaturePath} signaturePath={signaturePath} userData={userData}/>}
 						{TABS.MY_WALLET === activeTab && <CompanyWallet />}
 						{TABS.USER === activeTab && <CompanyUser />}
 					</div>

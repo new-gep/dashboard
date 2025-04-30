@@ -65,8 +65,8 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 						</DropdownToggle>
 						<DropdownMenu isAlignmentEnd>
 							<DropdownItem>
-								<Button icon='Edit' onClick={() => editAction()}>
-									Editar
+								<Button icon='RemoveRedEye' onClick={() => editAction()}>
+									Resumo
 								</Button>
 							</DropdownItem>
 							<DropdownItem isDivider />

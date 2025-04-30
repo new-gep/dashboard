@@ -18,6 +18,7 @@ type MaskType =
 	| 'dateFormatBrazil'
 	| 'lastUpdate'
 	| 'date'
+	| 'cep'
 	| 'birth';
 
 export default function Mask(type: MaskType, value: any): string {
@@ -255,6 +256,15 @@ export default function Mask(type: MaskType, value: any): string {
 				currency: 'BRL',
 			});
 		}
+		case 'cep': {
+			if (!value) return '';
+			// Remove tudo que não for número
+			const cleaned = value.replace(/\D/g, '').slice(0, 8); // Limita a 8 dígitos
+		  
+			// Aplica a máscara: 00000-000
+			if (cleaned.length <= 5) return cleaned;
+			return cleaned.replace(/^(\d{5})(\d{0,3})$/, '$1-$2');
+		}				
 		default: {
 			return value.toString();
 		}

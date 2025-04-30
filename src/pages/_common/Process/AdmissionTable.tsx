@@ -54,7 +54,6 @@ interface ICommonUpcomingEventsProps {
 const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 	const navigate = useNavigate();
-
 	const [step, setStep] = useState(1);
 	const [stepTitle, setStepTitle] = useState('Exame admisisional');
 	const [stepIcon, setIcon] = useState('LooksOne');
@@ -2553,6 +2552,8 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		</section>
 	);
 };
+
+//@ts-ignore
 AdmissionTable.defaultProps = {
 	isFluid: false,
 };

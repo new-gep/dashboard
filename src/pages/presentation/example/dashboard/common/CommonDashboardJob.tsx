@@ -16,6 +16,9 @@ import Job_Open from '../../../../../api/get/job/Job_Open';
 import AuthContext from '../../../../../contexts/authContext';
 import { AbstractPicture } from '../../../../../constants/abstract';
 import { priceFormat } from '../../../../../helpers/helpers';
+import Mask from '../../../../../function/Mask';
+import Button from '../../../../../components/bootstrap/Button';
+import { useNavigate } from 'react-router-dom';
 
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 interface ITableRowProps {
@@ -25,6 +28,7 @@ interface ITableRowProps {
 	salary: string;
 	contract: string;
 	candidates: any;
+	locality:any
 }
 const TableRow: FC<ITableRowProps> = ({
 	id,
@@ -33,8 +37,12 @@ const TableRow: FC<ITableRowProps> = ({
 	salary,
 	contract,
 	candidates,
+	locality
 }) => {
 	const { darkModeStatus } = useDarkMode();
+	const navigate = useNavigate();
+	
+
 
 	return (
 		<tr>
@@ -43,9 +51,9 @@ const TableRow: FC<ITableRowProps> = ({
 				<img src={AbstractPicture[image]} alt='' width={54} height={54} />
 			</td>
 			<td>
-				<div>{functionTitle}</div>
+				<div className='text-capitalize'>{functionTitle}</div>
 			</td>
-			<td>R$ {priceFormat(salary)}</td>
+			<td>{Mask('amount',salary)}</td>
 			<td>
 				<span
 					className={`${contract == 'contract' ? 'text-capitalize' : 'text-uppercase'}`}>
@@ -53,9 +61,12 @@ const TableRow: FC<ITableRowProps> = ({
 				</span>
 			</td>
 			<td>
+				<span>{locality && locality}</span>
+			</td>
+			<td>
 				<span>{candidates ? candidates.length : 0}</span>
 			</td>
-			<td className='h5' />
+			<td className='h5'><Button isLink color='light' icon='ArrowForward' onClick={()=>navigate(`/sales/Job/${id}`)} /></td> 
 		</tr>
 	);
 };
@@ -152,46 +163,57 @@ const CommonDashboardJob = () => {
 										// onClick={}
 										className='cursor-pointer text-decoration-underline'>
 										#{' '}
-										<Icon
+										{/* <Icon
 											size='lg'
 											// className={}
 											icon='FilterList'
-										/>
+										/> */}
 									</th>
 									<th scope='col'>Imagem</th>
 									<th
 										scope='col'
 										// onClick={}
-										className='cursor-pointer text-decoration-underline'>
+										className='cursor-pointer '>
 										Função{' '}
-										<Icon
+										{/* <Icon
 											size='lg'
 											// className={}
 											icon='FilterList'
-										/>
+										/> */}
 									</th>
 									<th scope='col'>Salario</th>
 									<th
 										scope='col'
 										// onClick={() => requestSort('price')}
-										className='cursor-pointer text-decoration-underline'>
+										className='cursor-pointer '>
 										Contratação{' '}
-										<Icon
-											size='lg'
-											// className={getClassNamesFor('price')}
-											icon='FilterList'
-										/>
+									</th>
+									<th
+										scope='col'
+										// onClick={() => requestSort('price')}
+										className='cursor-pointer '>
+										Local{' '}
 									</th>
 									<th
 										scope='col'
 										// onClick={() => requestSort('store')}
-										className='cursor-pointer text-decoration-underline'>
+										className='cursor-pointer '>
 										Candidatos{' '}
-										<Icon
+										{/* <Icon
 											size='lg'
 											// className={}
 											icon='FilterList'
-										/>
+										/> */}
+									</th>
+									<th
+										scope='col'
+										// onClick={() => requestSort('store')}
+										className='cursor-pointer '>
+										{/* <Icon
+											size='lg'
+											// className={}
+											icon='FilterList'
+										/> */}
 									</th>
 								</tr>
 							</thead>

@@ -41,17 +41,22 @@ import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/
 import Checks from '../../../components/bootstrap/forms/Checks';
 import Mask from '../../../function/Mask';
 import { useNavigate } from 'react-router-dom';
-
 type AbstractPictureKeys = keyof typeof AbstractPicture;
+
 interface IValues {
 	image: any;
 	PCD: string;
+	DEI: string;
 	function: string;
 	salary: any;
 	contract: string;
-	benefits: string;
-	details: string;
-	obligations: string;
+	benefits:any;
+	model: string;
+	skills:any
+	responsibility:string;
+	requirements: string;
+	locality: string;
+	cep: string;
 }
 
 interface Ijob {
@@ -115,12 +120,17 @@ const ProductsGridPage = () => {
 		initialValues: {
 			function: '',
 			PCD: '0',
+			DEI: '0',
+			model:'',
 			salary: '',
 			contract: '',
 			benefits: '',
-			details: '',
-			obligations: '',
+			skills:'',
+			responsibility: '',
+			requirements: '',
 			image: '',
+			locality:'',
+			cep:'',
 		},
 		validate,
 		onSubmit: (values, { resetForm }) => {
@@ -347,11 +357,16 @@ const ProductsGridPage = () => {
 			formik.setValues({
 				function: editItem.function,
 				PCD: editItem.PCD,
+				DEI: editItem.DEI,
+				model: editItem.model,
+				skills: editItem.skills,
 				salary: editItem.salary,
 				contract: editItem.contract,
 				benefits: editItem.benefits,
-				details: editItem.details,
-				obligations: editItem.obligations,
+				requirements: editItem.requirements,
+				locality: editItem.locality,
+				cep: editItem.cep,
+				responsibility: editItem.responsibility,
 				image: editItem.image,
 			});
 			setNameImage(editItem.image);
@@ -474,16 +489,10 @@ const ProductsGridPage = () => {
 			>
 				<OffCanvasHeader setOpen={setEditPanel}>
 					<OffCanvasTitle id='edit-panel' className='text-capitalize'>
-						{editItem?.function || 'Nova Vaga'}{' '}
-						{editItem?.function ? (
-							<Badge color='primary' isLight>
-								Edit
-							</Badge>
-						) : (
-							<Badge color='success' isLight>
-								New
-							</Badge>
-						)}
+						{editItem?.function} {' '}
+						<Badge color='primary' isLight>
+							Resumo
+						</Badge>
 					</OffCanvasTitle>
 				</OffCanvasHeader>
 				<OffCanvasBody>
@@ -559,22 +568,39 @@ const ProductsGridPage = () => {
 						</CardHeader>
 						<CardBody>
 							<div className='row g-4'>
-								<div className='col-12'>
-									<Checks
-										isInline
-										type='switch'
-										label='PCD'
-										onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-											const isChecked = event.target.checked;
-											formik.setFieldValue('PCD', isChecked ? '1' : '0');
-										}}
-										checked={formik.values.PCD == '1'}
-									/>
+								<div className='col-12 d-flex gap-5'>
+									<div>
+										<Checks
+											disabled
+											isInline
+											type='switch'
+											label='DEI'
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+												const isChecked = event.target.checked;
+												formik.setFieldValue('DEI', isChecked ? '1' : '0');
+											}}
+											checked={formik.values.DEI == '1'}
+										/>
+									</div>
+									<div>
+										<Checks
+											disabled
+											isInline
+											type='switch'
+											label='PCD'
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+												const isChecked = event.target.checked;
+												formik.setFieldValue('PCD', isChecked ? '1' : '0');
+											}}
+											checked={formik.values.PCD == '1'}
+										/>
+									</div>
 								</div>
 
 								<div className='col-12'>
 									<FormGroup id='function' label='Função' isFloating>
 										<Input
+											disabled
 											className='text-capitalize'
 											placeholder='Função'
 											onChange={formik.handleChange}
@@ -589,127 +615,130 @@ const ProductsGridPage = () => {
 								</div>
 
 								<div className='col-12'>
-									{/* <FormGroup id='salary' label='Salario' isFloating>
+									<FormGroup id='salary' label='Salario' isFloating>
 										<Input
+											disabled
 											onChange={formik.handleChange}
-											value={formik.values.salary}
+											value={Mask('amount', formik.values.salary)}
 											onBlur={formik.handleBlur}
 											isValid={formik.isValid}
-											//@ts-ignore
-											isTouched={formik.touched.salary}
-											//@ts-ignore
-											invalidFeedback={formik.errors.salary}
 											validFeedback='Ótimo!'
 										/>
-									</FormGroup> */}
+									</FormGroup>
 								</div>
-								{/* <div className='col-12'>
-									<FormGroup id='time' label='Horas semanais' isFloating>
-										<Input
-											max={3}
-											min={1}
-											placeholder='Horas semanais'
-											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
-											value={formik.values.time}
-											isValid={formik.isValid}
-											//@ts-ignore
-											isTouched={formik.touched.time}
-											//@ts-ignore
-											invalidFeedback={formik.errors.time}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div> */}
-								{/* <div className='col-12'>
-									<FormGroup id='journey'>
-										<Select
-											className='form-select fw-medium'
-											required
-											ariaLabel=''
-											placeholder='Jornada'
-											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
-											value={formik.values.journey}
-											isValid={formik.isValid}
-											isTouched={formik.touched.journey}
-											invalidFeedback={formik.errors.journey}
-											validFeedback='Ótimo!'>
-											<option value='5x2'>5x2</option>
-											<option value='6x1'>6x1</option>
-										</Select>
-									</FormGroup>
-								</div> */}
+
 								<div className='col-12'>
-									{/* <FormGroup id='contract'>
-										<Select
-											className='form-select fw-medium'
-											required
-											ariaLabel='Contratação'
-											placeholder='Contratação'
+									<FormGroup id='contract' label='Contrato' isFloating>
+										<Input
+											disabled
 											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
 											value={formik.values.contract}
-											isValid={formik.isValid}
-											isTouched={formik.touched.contract}
-											invalidFeedback={formik.errors.contract}
-											validFeedback='Ótimo!'>
-											<Option value='clt'>CLT</Option>
-											<Option value='pj'>PJ </Option>
-											<Option value='contract'>Contrato</Option>
-										</Select>
-									</FormGroup> */}
-								</div>
-								<div className='col-12'>
-									{/* <FormGroup
-										id='obligations'
-										label='Obrigações (opcional)'
-										isFloating>
-										<Textarea
-											onChange={formik.handleChange}
-											value={formik.values.obligations}
 											onBlur={formik.handleBlur}
 											isValid={formik.isValid}
-											isTouched={formik.touched.obligations}
-											invalidFeedback={formik.errors.obligations}
 											validFeedback='Ótimo!'
 										/>
-									</FormGroup> */}
+									</FormGroup>
 								</div>
+
 								<div className='col-12'>
-									{/* <FormGroup
-										id='benefits'
-										label='Benefícios (opcional)'
+									<FormGroup id='location' label='Localidade' isFloating>
+										<Input
+											disabled
+											onChange={formik.handleChange}
+											value={formik.values.locality}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											validFeedback='Ótimo!'
+										/>
+									</FormGroup>
+								</div>
+
+								<div className='col-12'>
+									<FormGroup id='cep' label='CEP' isFloating>
+										<Input
+											disabled
+											onChange={formik.handleChange}
+											value={Mask('cep',formik.values.cep)}
+											mask="99999-999"
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											validFeedback='Ótimo!'
+										/>
+									</FormGroup>
+								</div>
+
+								<div className='col-12'>
+									<FormGroup
+										id='requirements'
+										label='Responsabilidades'
 										isFloating>
 										<Textarea
+											disabled
+											onChange={formik.handleChange}
+											value={formik.values.requirements}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											isTouched={formik.touched.requirements}
+											invalidFeedback={formik.errors.requirements}
+											validFeedback='Ótimo!'
+										/>
+									</FormGroup>
+								</div>
+
+								<div className='col-12'>
+									<FormGroup
+										id='requirements'
+										label='Requisitos'
+										isFloating>
+										<Textarea
+											disabled
+											onChange={formik.handleChange}
+											value={formik.values.requirements}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											isTouched={formik.touched.requirements}
+											invalidFeedback={formik.errors.requirements}
+											validFeedback='Ótimo!'
+										/>
+									</FormGroup>
+								</div>
+
+								<div className='col-12'>
+									<FormGroup
+										id='skills'
+										label='Competências'
+										isFloating>
+										<Textarea
+											disabled
+											onChange={formik.handleChange}
+											value={formik.values.skills}
+											onBlur={formik.handleBlur}
+											isValid={formik.isValid}
+											validFeedback='Ótimo!'
+										/>
+									</FormGroup>
+								</div>
+
+								<div className='col-12'>
+									<FormGroup
+										id='benefits'
+										label='Benefícios'
+										isFloating>
+										<Textarea
+											disabled
 											onChange={formik.handleChange}
 											value={formik.values.benefits}
 											onBlur={formik.handleBlur}
 											isValid={formik.isValid}
-											isTouched={formik.touched.benefits}
-											invalidFeedback={formik.errors.benefits}
 											validFeedback='Ótimo!'
 										/>
-									</FormGroup> */}
-								</div>
-								<div className='col-12'>
-									{/* <FormGroup id='details' label='Detalhes (opcional)' isFloating>
-										<Textarea
-											onChange={formik.handleChange}
-											value={formik.values.details}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											isTouched={formik.touched.details}
-											invalidFeedback={formik.errors.details}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup> */}
+									</FormGroup>
 								</div>
 							</div>
 						</CardBody>
 					</Card>
 				</OffCanvasBody>
-				<div className='p-3'>
+				{/* <div className='p-3'>
 					<Button
 						color='info'
 						icon='Save'
@@ -717,7 +746,7 @@ const ProductsGridPage = () => {
 						isDisable={!formik.isValid && !!formik.submitCount}>
 						{editItem ? 'Editar' : 'Criar'}
 					</Button>
-				</div>
+				</div> */}
 			</OffCanvas>
 		</PageWrapper>
 	);

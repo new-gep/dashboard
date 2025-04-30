@@ -694,8 +694,67 @@ const JobViewPage = () => {
 
 													<div className='col-12 shadow-3d-container'>
 														<Accordion id='faq' shadow='sm'>
+															
 															<AccordionItem
 																id='faq1'
+																title='Responsabilidades'>
+																{editItem &&
+																editItem.responsibility ? (
+																	editItem.responsibility
+																) : (
+																	<p className='text-muted fw-semibold'>
+																		Nada para mostrar aqui{' '}
+																		<Icon
+																			icon='SentimentVeryDissatisfied '
+																			size='2x'
+																		/>{' '}
+																	</p>
+																)}
+															</AccordionItem>
+
+															<AccordionItem
+																id='faq2'
+																title='Requisitos'>
+																{editItem &&
+																editItem.requirements ? (
+																	editItem.requirements
+																) : (
+																	<p className='text-muted fw-semibold'>
+																		Nada para mostrar aqui{' '}
+																		<Icon
+																			icon='SentimentDissatisfied '
+																			size='2x'
+																		/>{' '}
+																	</p>
+																)}
+															</AccordionItem>
+
+															<AccordionItem
+																id='faq3'
+																title='Competências'>
+																<div>
+																	{editItem.skills.length > 0 ? (
+																		<div className="d-flex flex-wrap">
+																		{editItem.skills.map((skill, index) => (
+																		  <span
+																			key={index}
+																			className="p-2 bg-primary rounded fw-bold text-white mb-2"
+																		  >
+																			{skill}
+																		  </span>
+																		))}
+																	  </div>
+																	) : (
+																		<span className='text-muted'>
+																			Nenhuma competência
+																			adicionada
+																		</span>
+																	)}
+																</div>
+															</AccordionItem>
+
+															<AccordionItem
+																id='faq4'
 																title='Benefícios'>
 																<div>
 																	{editItem &&
@@ -723,64 +782,6 @@ const JobViewPage = () => {
 																		</p>
 																	)}
 																</div>
-															</AccordionItem>
-
-															<AccordionItem
-																id='faq2'
-																title='Competências'>
-																<div>
-																	{editItem.skills.length > 0 ? (
-																		<div className="d-flex flex-wrap">
-																		{editItem.skills.map((skill, index) => (
-																		  <span
-																			key={index}
-																			className="p-2 bg-primary rounded fw-bold text-white mb-2"
-																		  >
-																			{skill}
-																		  </span>
-																		))}
-																	  </div>
-																	) : (
-																		<span className='text-muted'>
-																			Nenhuma competência
-																			adicionada
-																		</span>
-																	)}
-																</div>
-															</AccordionItem>
-
-															<AccordionItem
-																id='faq3'
-																title='Requisitos'>
-																{editItem &&
-																editItem.requirements ? (
-																	editItem.requirements
-																) : (
-																	<p className='text-muted fw-semibold'>
-																		Nada para mostrar aqui{' '}
-																		<Icon
-																			icon='SentimentDissatisfied '
-																			size='2x'
-																		/>{' '}
-																	</p>
-																)}
-															</AccordionItem>
-
-															<AccordionItem
-																id='faq4'
-																title='Responsabilidades'>
-																{editItem &&
-																editItem.responsibility ? (
-																	editItem.responsibility
-																) : (
-																	<p className='text-muted fw-semibold'>
-																		Nada para mostrar aqui{' '}
-																		<Icon
-																			icon='SentimentVeryDissatisfied '
-																			size='2x'
-																		/>{' '}
-																	</p>
-																)}
 															</AccordionItem>
 														</Accordion>
 													</div>

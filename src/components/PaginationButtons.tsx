@@ -156,6 +156,7 @@ PaginationButtons.propTypes = {
 	data: PropTypes.array.isRequired,
 	label: PropTypes.string,
 };
+//@ts-ignore
 PaginationButtons.defaultProps = {
 	label: 'items',
 };

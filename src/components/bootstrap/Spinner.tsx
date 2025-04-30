@@ -79,6 +79,8 @@ Spinner.propTypes = {
 	inButton: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['onlyIcon'])]),
 	className: PropTypes.string,
 };
+
+//@ts-ignore
 Spinner.defaultProps = {
 	children: 'Loading...',
 	tag: 'div',
