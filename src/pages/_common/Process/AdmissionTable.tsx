@@ -565,7 +565,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						setStatusAllSignature(null);
 					}
 				} else {
-					console.log('aqui2');
 					setStatusAllSignature(null);
 				}
 			} else {
