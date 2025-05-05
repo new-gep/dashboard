@@ -71,11 +71,11 @@ const AppointmentList = () => {
 						appointments for today.
 					</span> */}
 				</SubHeaderLeft>
-				<SubHeaderRight>
+				{/* <SubHeaderRight>
 					<Button color={themeStatus}>
 						{dayjs().format('MMM Do')} - {dayjs().add(7, 'days').format('MMM Do')}
 					</Button>
-				</SubHeaderRight>
+				</SubHeaderRight> */}
 			</SubHeader>
 			<Page container='fluid'>
 				<div className='row h-100'>

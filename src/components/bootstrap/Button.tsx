@@ -86,6 +86,7 @@ export interface IButtonProps
 	isLight?: boolean;
 	isLink?: boolean;
 	className?: string;
+	side?:boolean;
 	icon?: TIcons;
 	rounded?:
 		| 'default'
@@ -124,6 +125,7 @@ const Button = forwardRef<HTMLAnchorElement, IButtonProps>(
 			isLink,
 			className,
 			icon,
+			side,
 			rounded,
 			size,
 			isDisable,
@@ -162,12 +164,13 @@ const Button = forwardRef<HTMLAnchorElement, IButtonProps>(
 
 		const INNER = (
 			<>
-				{icon && <Icon icon={icon} className='btn-icon' />}
+				{(!side && icon) && <Icon icon={icon} className='btn-icon' />}
 				{isVisuallyHidden ? (
 					<span className='visually-hidden'>Toggle Dropdown</span>
 				) : (
 					children
 				)}
+				{(side && icon) && <Icon icon={icon} className='btn-icon'  style={{marginLeft:'6px'}}/>}
 			</>
 		);
 

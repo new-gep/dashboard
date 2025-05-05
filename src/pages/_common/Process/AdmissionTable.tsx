@@ -1443,11 +1443,13 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 														</div>
 													</div>
 												</td>
-												<td className='text-uppercase'>{item.contract}</td>
+												<td className={`${item.contract.length < 2 && 'text-uppercase' }`}>
+													{item.contract}
+												</td>
 												<td>
 													{item.function}
 													<div className='small text-muted'>
-														R$ {priceFormat(item.salary)}
+														R$ {Mask('amount',item.salary)}
 													</div>
 												</td>
 												<td>
