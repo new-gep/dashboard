@@ -8,6 +8,7 @@ import Toasts from '../bootstrap/Toasts';
 import Spinner from '../bootstrap/Spinner';
 import GetCompanyDocument from '../../api/get/company/Document';
 import AuthContext from '../../contexts/authContext';
+import CreateSignature from '../../api/post/signature/Default';
 
 interface Props {
 	step?: any;
@@ -41,7 +42,6 @@ export default function SignedDocument({
 	const [loader, setLoader] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const inputFile = useRef(null);
-
 	const [pages, setPages] = useState<any[]>([]); // imagens em base64
 	const [currentPageIndex, setCurrentPageIndex] = useState(0);
 	const [start, setStart] = useState(false);
@@ -56,23 +56,23 @@ export default function SignedDocument({
 			console.error('Erro ao carregar a imagem:', error);
 			throw error;
 		}
-	};
+	}
 
 	async function saveImage() {
 		if (!canvasRef.current) return;
-	
+
 		// Gera o base64 atual da página
 		const dataURL = canvasRef.current.toDataURL('png', 100);
-	
+
 		// Cria uma cópia atualizada do array de páginas
 		const updatedPages = [...pages];
 		updatedPages[currentPageIndex] = {
 			...updatedPages[currentPageIndex],
 			base64: dataURL,
 		};
-	
+
 		setLoader(true);
-	
+		let PropsCreateSignature;
 		let PropsUploadJob;
 		if (where) {
 			PropsUploadJob = {
@@ -85,6 +85,15 @@ export default function SignedDocument({
 				dynamic: dynamic ? nameDocument : null,
 				pages: updatedPages, // usa a versão atualizada aqui!
 			};
+			PropsCreateSignature = {
+				id_job: id,
+				id_user: userData.id,
+				document: dynamic
+					? step == '1'
+						? 'dismissal_communication_dynamic'
+						: 'dismissal_dynamic'
+					: nameDocument,
+			};
 		} else {
 			PropsUploadJob = {
 				name: dynamic ? 'dynamic' : nameDocument,
@@ -92,10 +101,17 @@ export default function SignedDocument({
 				dynamic: dynamic ? nameDocument : null,
 				pages: updatedPages, // usa a versão atualizada aqui!
 			};
+			PropsCreateSignature = {
+				id_job: id,
+				id_user: userData.id,
+				document: nameDocument,
+			};
 		}
-	
+
 		const response = await Job_DocumentSignature(PropsUploadJob);
 		if (response.status == 200) {
+			const response = await CreateSignature(PropsCreateSignature);
+			console.log(response);
 			await closeAfterSave();
 			setModal(false);
 			toast(
@@ -105,12 +121,12 @@ export default function SignedDocument({
 				{
 					closeButton: true,
 					autoClose: 1000,
-				}
+				},
 			);
 			setLoader(false);
 			return;
 		}
-	
+
 		toast(
 			<Toasts icon='Close' iconColor='danger' title='Erro! '>
 				Erro ao gerar documento assinado.
@@ -118,11 +134,11 @@ export default function SignedDocument({
 			{
 				closeButton: true,
 				autoClose: 1000,
-			}
+			},
 		);
 		setLoader(false);
-	};
-	
+	}
+
 	const findSignatureCompany = async () => {
 		try {
 			const response = await GetCompanyDocument(userData.cnpj, 'signature');
@@ -134,11 +150,12 @@ export default function SignedDocument({
 					cornerStrokeColor: 'black',
 					cornerSize: 10,
 				});
+				signature.scaleToWidth(400);
 				const canvasWidth = canvas.getWidth();
 				const canvasHeight = canvas.getHeight();
-				signature.left = (canvasWidth - signature.width! * signature.scaleX!) / 2;
-				signature.top = (canvasHeight - signature.height! * signature.scaleY!) / 2;
-				signature.scaleToWidth(200);
+				signature.left = (canvasWidth - signature.getScaledWidth()) / 2;
+				signature.top = (canvasHeight - signature.getScaledHeight()) / 2;
+
 				canvas.add(signature);
 				canvas.renderAll();
 				toast(
@@ -169,26 +186,26 @@ export default function SignedDocument({
 
 	const findSignatureCollaborator = async () => {
 		const signature = await loadImage(assignature.path);
-	
+
 		signature.set({
 			borderColor: 'black',
 			cornerColor: 'black',
 			cornerStrokeColor: 'black',
 			cornerSize: 10,
 		});
-	
+
 		signature.scaleToWidth(200); // <- Primeiro escale
-	
+
 		const canvasWidth = canvas.getWidth();
 		const canvasHeight = canvas.getHeight();
-	
+
 		// Depois centralize com base nas dimensões reais
 		signature.left = (canvasWidth - signature.getScaledWidth()) / 2;
 		signature.top = (canvasHeight - signature.getScaledHeight()) / 2;
-	
+
 		canvas.add(signature);
 		canvas.renderAll();
-	
+
 		toast(
 			<Toasts icon='Check' iconColor='success' title='Sucesso! '>
 				Sucesso, encontramos sua assinatura!
@@ -196,9 +213,9 @@ export default function SignedDocument({
 			{
 				closeButton: true,
 				autoClose: 1000,
-			}
+			},
 		);
-	};	
+	};
 
 	const openInput = async () => {
 		// @ts-ignore

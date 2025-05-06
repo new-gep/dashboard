@@ -1085,6 +1085,17 @@ export const secondaryPath = {
 		text: 'Criar Vagas',
 		path: 'recruit/create',
 	},
+	// candidate
+	candidate:{
+		id: 'candidate',
+		text: 'Buscar Candidato',
+		path: 'candidate',
+	},
+	candidateProfile:{
+		id: 'candidateProfile',
+		text: 'Perfil Candidato',
+		path: 'candidate/profile',
+	}
 };
 
 export const mainMenu = {

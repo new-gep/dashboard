@@ -2033,11 +2033,11 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 														</div>
 													</div>
 												</td>
-												<td className='text-uppercase'>{item.contract}</td>
+												<td className={`${item.contract.length < 2 && 'text-uppercase'}`}>{item.contract}</td>
 												<td>
-													{item.function}
+													<span className='text-capitalize'>{item.function}</span>
 													<div className='small text-muted'>
-														R$ {priceFormat(item.salary)}
+														{Mask('amount',item.salary)}
 													</div>
 												</td>
 												<td>

@@ -26,7 +26,7 @@ export default function Home() {
 			color: 'TColor',
 		},
 		{
-			id: '3',
+			id: 'candidate',
 			image: Search,
 			title: 'Buscar Candidatos',
 			description: 'Busque novos talentos para sua empresa',
@@ -43,7 +43,8 @@ export default function Home() {
 			case 'create':
 				navigate('/recruit/create'), [navigate];
 				break;
-			case '':
+			case 'candidate':
+				navigate('/candidate'), [navigate];
 				break;
 
 			default:

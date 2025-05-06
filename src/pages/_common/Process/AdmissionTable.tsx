@@ -158,7 +158,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					);
 					// @ts-ignore
 					allSignatureApproved = responseSignature.pictures.every(
-						(picture:any) => picture.status === 'approved',
+						(picture: any) => picture.status === 'approved',
 					);
 					if (obligationExists && dynamicExists && allSignatureApproved) {
 						updateStatusCandidate(manipulatingTable, true, true);
@@ -230,7 +230,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					candidate.observation = formik.values.note;
 					// @ts-ignore
 					const stepCandidates = candidates.filter(
-						(candidate:any) => candidate.step === step,
+						(candidate: any) => candidate.step === step,
 					);
 					setCandidatesStep(stepCandidates);
 					setSpinnerManipulating(false);
@@ -290,6 +290,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						setAllDocument(null);
 						setAllAssignature(null);
 						setDocumentAvaliation(null);
+						setUpcomingEventsEditOffcanvas(false)
 						return;
 					}
 				}
@@ -630,14 +631,16 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				setLoadingStates((prevStates) => ({ ...prevStates, [candidate.cpf]: true }));
 				setDocumentAvaliation(null);
 				response = await Job_Check_Admissional(candidate.id);
-				if (response.status == 200) {
-					setDatesDynamicManipulating(response.date);
-					const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
-					const allTrue = obligationValues.every((value) => value === true);
-					if (allTrue) {
-						updateStatusCandidate(candidate, true, true);
-					}
-				}
+				setDatesDynamicManipulating(response.date);
+				// if (response.status == 200) {
+				// 	const obligationValues = Object.values(response.date.obligation); // Obtém um array com os valores das propriedades
+				// 	const allTrue = obligationValues.every((value) => value === true);
+				// 	if (allTrue) {
+				// 		return
+				// 	}
+				// }
+				// att aqui
+				updateStatusCandidate(candidate, true, true);
 				setManipulatingTable(candidate);
 				setControllerBodyManipulating('kitAdmission');
 				setTitleManipulating('Gerencie seu Kit Admissional');
@@ -767,7 +770,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							);
 						}
 						setOpenDocument(false);
-						break
+						break;
 					case 2:
 						break;
 					case 3:
@@ -1071,7 +1074,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 				setCandidates(removeStep0);
 				// @ts-ignore
 				const stepOneCandidates = response.candidates.filter(
-					(candidate:any) => candidate.step === 1,
+					(candidate: any) => candidate.step === 1,
 				);
 				setCandidatesStep(stepOneCandidates);
 				setLoaderTable(true);
@@ -1443,13 +1446,16 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 														</div>
 													</div>
 												</td>
-												<td className={`${item.contract.length < 2 && 'text-uppercase' }`}>
+												<td
+													className={`${item.contract.length < 2 && 'text-uppercase'}`}>
 													{item.contract}
 												</td>
 												<td>
-													{item.function}
+													<span className='text-capitalize'>
+														{item.function}
+													</span>
 													<div className='small text-muted'>
-														R$ {Mask('amount',item.salary)}
+														{Mask('amount', item.salary)}
 													</div>
 												</td>
 												<td>
@@ -1641,9 +1647,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 												</Button>
 											</DropdownItem>
 
-											<DropdownItem isHeader>Obrigatórios</DropdownItem>
-
-											<DropdownItem>
+											{/* <DropdownItem>
 												<Button
 													onClick={() =>
 														documentController('registration_form')
@@ -1816,13 +1820,11 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 													/>
 													Solicitação de Vale Transporte
 												</Button>
-											</DropdownItem>
+											</DropdownItem> */}
 
 											<DropdownItem isDivider />
 
-											<DropdownItem isText>
-												Documentos Adicionais
-											</DropdownItem>
+											<DropdownItem isText>Documentos</DropdownItem>
 
 											<>
 												{datesDynamicManipulating &&
@@ -1957,35 +1959,21 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 													</FormGroup>
 
 													<FormGroup id='customerName'>
-														<InputGroup>
-															<Input
-																type='file'
-																onChange={(
-																	event: React.ChangeEvent<HTMLInputElement>,
-																) => {
-																	const file =
-																		event.target.files?.[0];
-																	if (file) {
-																		formik.setFieldValue(
-																			'document',
-																			file,
-																		);
-																	}
-																}}
-															/>
-															<Button
-																isOutline
-																color='light'
-																icon={
-																	pathDocumentMain
-																		? 'Autorenew'
-																		: 'CloudUpload'
-																}>
-																{pathDocumentMain
-																	? 'Edit'
-																	: 'Upload'}
-															</Button>
-														</InputGroup>
+														<Input
+															type='file'
+															onChange={(
+																event: React.ChangeEvent<HTMLInputElement>,
+															) => {
+																const file =
+																	event.target.files?.[0];
+																if (file) {
+																	formik.setFieldValue(
+																		'document',
+																		file,
+																	);
+																}
+															}}
+														/>
 													</FormGroup>
 												</>
 											)}
@@ -2058,7 +2046,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 											</Button>
 										</DropdownToggle>
 										<DropdownMenu breakpoint='xxl'>
-											<DropdownItem>
+											{/* <DropdownItem>
 												<Button
 													onClick={() =>
 														documentController(
@@ -2281,13 +2269,11 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 													/>
 													Solicitação de Vale Transporte
 												</Button>
-											</DropdownItem>
+											</DropdownItem> */}
 
-											<DropdownItem isDivider />
+											{/* <DropdownItem isDivider /> */}
 
-											<DropdownItem isText>
-												Documentos Adicionais
-											</DropdownItem>
+											<DropdownItem isText>Documentos</DropdownItem>
 
 											<>
 												{datesDynamicManipulating &&

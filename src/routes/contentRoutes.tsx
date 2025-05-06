@@ -77,6 +77,8 @@ const APP = {
 	JOB: {
 		HOME: lazy(() => import('../pages/presentation/job/Home')),
 		CREATE: lazy(() => import('../pages/presentation/job/create/Index')),
+		CANDIDATE: lazy(() => import('../pages/presentation/job/candidate/Index')),
+		CANDIDATE_PROFILE: lazy(() => import('../pages/presentation/job/candidate/Profile')),
 		TRANSACTIONS: lazy(() => import('../pages/presentation/job/TransActionsPage')),
 		PRODUCTS: lazy(() => import('../pages/presentation/job/SalesListPage')),
 		VACANCIES: lazy(() => import('../pages/presentation/job/JobGridPage')),
@@ -411,6 +413,14 @@ const presentation: RouteProps[] = [
 	{
 		path: secondaryPath.vacanciesCreate.path,
 		element: <APP.JOB.CREATE />,
+	},
+	{
+		path: secondaryPath.candidate.path,
+		element: <APP.JOB.CANDIDATE />,
+	},
+	{
+		path: `${secondaryPath.candidateProfile.path}/:cpf`,
+		element: <APP.JOB.CANDIDATE_PROFILE />
 	},
 
 	{
