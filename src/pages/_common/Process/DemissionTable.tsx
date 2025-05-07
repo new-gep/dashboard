@@ -3281,6 +3281,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 	);
 };
 
+//@ts-ignore
 DemissionTable.defaultProps = {
 	isFluid: false,
 };
