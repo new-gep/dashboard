@@ -679,7 +679,11 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 					);
 					// console.log('obligationExists: ',obligation, 'documentSignatures: ',documentSignatures)
 
-					if (obligationExists && dynamicExists) {
+					// if (obligationExists && dynamicExists) {
+					// 	updateStatusCandidate(candidate, true, true);
+					// }
+
+					if (dynamicExists) {
 						updateStatusCandidate(candidate, true, true);
 					}
 				}
@@ -1069,6 +1073,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		const fetchData = async () => {
 			const response = await Job_Admissional(userData.cnpj);
 			if (response.status == 200) {
+				console.log('response:', response);
 				// @ts-ignore
 				const removeStep0 = response.candidates.filter((candidate) => candidate.step !== 0);
 				setCandidates(removeStep0);
