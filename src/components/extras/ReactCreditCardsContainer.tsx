@@ -70,6 +70,7 @@ ReactCreditCardsContainer.propTypes = {
 	issuer: PropTypes.string,
 	scale: PropTypes.number,
 };
+//@ts-ignore
 ReactCreditCardsContainer.defaultProps = {
 	className: undefined,
 	is3dShadow: true,

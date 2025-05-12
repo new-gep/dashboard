@@ -413,6 +413,7 @@ const CommonUpcomingEvents: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		</>
 	);
 };
+//@ts-ignore
 CommonUpcomingEvents.defaultProps = {
 	isFluid: false,
 };

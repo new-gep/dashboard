@@ -63,6 +63,7 @@ CommonAvatarTeam.propTypes = {
 	children: PropTypes.node,
 	isAlignmentEnd: PropTypes.bool,
 };
+//@ts-ignore
 CommonAvatarTeam.defaultProps = {
 	children: undefined,
 	isAlignmentEnd: false,

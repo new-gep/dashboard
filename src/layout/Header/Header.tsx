@@ -18,6 +18,7 @@ HeaderLeft.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 HeaderLeft.defaultProps = {
 	className: undefined,
 };
@@ -42,6 +43,7 @@ HeaderRight.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 HeaderRight.defaultProps = {
 	className: undefined,
 };
@@ -173,6 +175,7 @@ Header.propTypes = {
 	hasLeftMobileMenu: PropTypes.bool,
 	hasRightMobileMenu: PropTypes.bool,
 };
+//@ts-ignore
 Header.defaultProps = {
 	hasLeftMobileMenu: true,
 	hasRightMobileMenu: true,

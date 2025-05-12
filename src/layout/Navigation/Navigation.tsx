@@ -15,6 +15,7 @@ export const NavigationLine: FC<INavigationLineProps> = ({ className }) => {
 NavigationLine.propTypes = {
 	className: PropTypes.string,
 };
+//@ts-ignore
 NavigationLine.defaultProps = {
 	className: undefined,
 };
@@ -37,6 +38,7 @@ NavigationTitle.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 NavigationTitle.defaultProps = {
 	className: undefined,
 };
@@ -173,6 +175,7 @@ Navigation.propTypes = {
 	id: PropTypes.string.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 Navigation.defaultProps = {
 	horizontal: false,
 	className: undefined,

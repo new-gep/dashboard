@@ -244,6 +244,7 @@ Carousel.propTypes = {
 	isFluid: PropTypes.bool,
 	height: PropTypes.number,
 };
+//@ts-ignore
 Carousel.defaultProps = {
 	id: undefined,
 	items: undefined,

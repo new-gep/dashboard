@@ -35,6 +35,7 @@ CarouselControl.propTypes = {
 	directionText: PropTypes.string,
 	className: PropTypes.string,
 };
+//@ts-ignore
 CarouselControl.defaultProps = {
 	id: undefined,
 	directionText: undefined,

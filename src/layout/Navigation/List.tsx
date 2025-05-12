@@ -41,6 +41,7 @@ List.propTypes = {
 	rootId: PropTypes.string,
 	horizontal: PropTypes.bool,
 };
+//@ts-ignore
 List.defaultProps = {
 	id: undefined,
 	children: null,

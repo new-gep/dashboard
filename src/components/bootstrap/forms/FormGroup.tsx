@@ -49,11 +49,16 @@ const FormGroup: FC<IFormGroupProps> = ({
 	const CHILDREN =
 		id && !Array.isArray(children)
 			? cloneElement(children, {
+				//@ts-ignore
 					id,
+					//@ts-ignore
 					size: size || children?.props.size,
+					//@ts-ignore
 					placeholder: isFloating ? label : children.props.placeholder,
 					'aria-describedby': formText ? `${id}-text` : null,
+					//@ts-ignore
 					mask: children?.props.mask || undefined, // Passa a máscara se estiver usando InputMask
+					//@ts-ignore
 					alwaysShowMask: children?.props.alwaysShowMask || false, // Caso esteja configurado no InputMask
 				})
 			: children;
@@ -100,7 +105,7 @@ FormGroup.propTypes = {
 	// eslint-disable-next-line react/require-default-props
 	formText: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
-
+//@ts-ignore
 FormGroup.defaultProps = {
 	className: undefined,
 	labelClassName: undefined,

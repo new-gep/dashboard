@@ -27,6 +27,7 @@ Logo.propTypes = {
 	width: PropTypes.number,
 	height: PropTypes.number,
 };
+//@ts-ignore
 Logo.defaultProps = {
 	width: 2155,
 	height: 854,

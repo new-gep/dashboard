@@ -75,6 +75,7 @@ PaginationItem.propTypes = {
 	children: PropTypes.node,
 	onClick: PropTypes.func,
 };
+//@ts-ignore
 PaginationItem.defaultProps = {
 	className: undefined,
 	isDisabled: false,
@@ -116,6 +117,7 @@ Pagination.propTypes = {
 	className: PropTypes.string,
 	size: PropTypes.oneOf(['sm', 'lg']),
 };
+//@ts-ignore
 Pagination.defaultProps = {
 	className: undefined,
 	size: null,

@@ -65,6 +65,7 @@ Validation.propTypes = {
 	validFeedback: PropTypes.string,
 	isTooltip: PropTypes.bool,
 };
+//@ts-ignore
 Validation.defaultProps = {
 	isTouched: false,
 	invalidFeedback: undefined,

@@ -41,6 +41,7 @@ WizardItem.propTypes = {
 	title: PropTypes.string,
 	className: PropTypes.string,
 };
+//@ts-ignore
 WizardItem.defaultProps = {
 	className: undefined,
 	title: undefined,
@@ -155,6 +156,7 @@ const Wizard: FC<IWizardProps> = ({ children, onSubmit, isHeader, color, stretch
 				<div className='wizard'>
 					{Children.map(children, (child, index) =>
 						cloneElement(child as unknown as ReactElement, {
+							//@ts-ignore
 							className: index !== activeItemIndex ? 'd-none' : '',
 							'aria-hidden': index !== activeItemIndex,
 						}),
@@ -188,6 +190,7 @@ Wizard.propTypes = {
 	// @ts-ignore
 	stretch: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['full', 'semi'])]),
 };
+//@ts-ignore
 Wizard.defaultProps = {
 	isHeader: false,
 	color: 'primary',

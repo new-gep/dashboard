@@ -14,6 +14,7 @@ SubHeaderLeft.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 SubHeaderLeft.defaultProps = {
 	className: undefined,
 };
@@ -31,6 +32,7 @@ SubHeaderRight.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 SubHeaderRight.defaultProps = {
 	className: undefined,
 };
@@ -44,6 +46,7 @@ export const SubheaderSeparator: FC<ISubheaderSeparatorProps> = ({ className }) 
 SubheaderSeparator.propTypes = {
 	className: PropTypes.string,
 };
+//@ts-ignore
 SubheaderSeparator.defaultProps = {
 	className: undefined,
 };
@@ -75,6 +78,7 @@ SubHeader.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 SubHeader.defaultProps = {
 	className: undefined,
 };

@@ -48,6 +48,7 @@ CommonHowToUse.propTypes = {
 	children: PropTypes.string.isRequired,
 	isPrism: PropTypes.bool,
 };
+//@ts-ignore
 CommonHowToUse.defaultProps = {
 	isPrism: false,
 };

@@ -163,6 +163,7 @@ Textarea.propTypes = {
 	 */
 	onSelect: PropTypes.func,
 };
+//@ts-ignore
 Textarea.defaultProps = {
 	id: undefined,
 	name: undefined,

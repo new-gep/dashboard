@@ -251,6 +251,7 @@ CommonHeaderRight.propTypes = {
 	beforeChildren: PropTypes.node,
 	afterChildren: PropTypes.node,
 };
+//@ts-ignore
 CommonHeaderRight.defaultProps = {
 	beforeChildren: null,
 	afterChildren: null,

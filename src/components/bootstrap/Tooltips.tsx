@@ -158,6 +158,7 @@ Tooltips.propTypes = {
 	modifiers: PropTypes.object,
 	isDisableElements: PropTypes.bool,
 };
+//@ts-ignore
 Tooltips.defaultProps = {
 	placement: 'top',
 	// @ts-ignore

@@ -59,6 +59,7 @@ CarouselIndicators.propTypes = {
 	onClickHandler: PropTypes.func.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 CarouselIndicators.defaultProps = {
 	id: undefined,
 	className: undefined,

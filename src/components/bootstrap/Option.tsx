@@ -25,6 +25,7 @@ Option.propTypes = {
 	disabled: PropTypes.bool,
 	ariaLabelledby: PropTypes.string,
 };
+//@ts-ignore
 Option.defaultProps = {
 	disabled: false,
 	ariaLabelledby: null,

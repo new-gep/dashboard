@@ -49,6 +49,7 @@ ToastHeader.propTypes = {
 	time: PropTypes.string,
 	isDismiss: PropTypes.bool,
 };
+//@ts-ignore
 ToastHeader.defaultProps = {
 	icon: undefined,
 	iconColor: undefined,
@@ -143,6 +144,7 @@ Toasts.propTypes = {
 	]),
 	time: PropTypes.string,
 };
+//@ts-ignore
 Toasts.defaultProps = {
 	icon: undefined,
 	iconColor: undefined,

@@ -61,6 +61,7 @@ BreadcrumbItem.propTypes = {
 	// @ts-ignore
 	divider: PropTypes.node,
 };
+//@ts-ignore
 BreadcrumbItem.defaultProps = {
 	className: undefined,
 	ariaLabel: undefined,
@@ -170,6 +171,7 @@ Breadcrumb.propTypes = {
 	// @ts-ignore
 	divider: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 };
+//@ts-ignore
 Breadcrumb.defaultProps = {
 	children: undefined,
 	tag: 'nav',

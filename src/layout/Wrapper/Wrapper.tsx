@@ -30,6 +30,7 @@ WrapperContainer.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 WrapperContainer.defaultProps = {
 	className: undefined,
 };

@@ -88,6 +88,7 @@ Badge.propTypes = {
 	shadow: PropTypes.oneOf([null, 'none', 'sm', 'default', 'lg']),
 	isLight: PropTypes.bool,
 };
+//@ts-ignore
 Badge.defaultProps = {
 	className: undefined,
 	color: 'primary',

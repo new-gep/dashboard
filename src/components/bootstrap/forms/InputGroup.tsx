@@ -48,6 +48,7 @@ InputGroupText.propTypes = {
 	id: PropTypes.string,
 	className: PropTypes.string,
 };
+//@ts-ignore
 InputGroupText.defaultProps = {
 	tag: 'span',
 	id: undefined,
@@ -156,6 +157,7 @@ InputGroup.propTypes = {
 	isWrap: PropTypes.bool,
 	size: PropTypes.oneOf(['sm', 'lg']),
 };
+//@ts-ignore
 InputGroup.defaultProps = {
 	id: undefined,
 	className: undefined,

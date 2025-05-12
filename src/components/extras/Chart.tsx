@@ -154,6 +154,7 @@ Chart.propTypes = {
 	height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 	className: PropTypes.string,
 };
+//@ts-ignore
 Chart.defaultProps = {
 	type: 'line',
 	width: '100%',

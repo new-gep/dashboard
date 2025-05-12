@@ -25,6 +25,7 @@ AlertHeading.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
 };
+//@ts-ignore
 AlertHeading.defaultProps = {
 	className: undefined,
 	tag: 'h4',
@@ -59,6 +60,7 @@ AlertLink.propTypes = {
 	href: PropTypes.string,
 	to: PropTypes.string,
 };
+//@ts-ignore
 AlertLink.defaultProps = {
 	className: undefined,
 	href: undefined,
@@ -165,6 +167,7 @@ Alert.propTypes = {
 	shadow: PropTypes.oneOf([null, 'sm', 'md', 'lg', '3d']),
 	rounded: PropTypes.oneOf([null, 'default', 0, 1, 2, 3, 'pill']),
 };
+//@ts-ignore
 Alert.defaultProps = {
 	borderWidth: null,
 	className: undefined,

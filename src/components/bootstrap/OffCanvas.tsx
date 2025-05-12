@@ -46,6 +46,7 @@ OffCanvasTitle.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']),
 };
+//@ts-ignore
 OffCanvasTitle.defaultProps = {
 	className: undefined,
 	tag: 'h5',
@@ -81,6 +82,7 @@ OffCanvasHeader.propTypes = {
 	className: PropTypes.string,
 	setOpen: PropTypes.func,
 };
+//@ts-ignore
 OffCanvasHeader.defaultProps = {
 	className: undefined,
 	setOpen: undefined,
@@ -112,6 +114,7 @@ OffCanvasBody.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.oneOf(['div', 'span', 'section', 'form']),
 };
+//@ts-ignore
 OffCanvasBody.defaultProps = {
 	className: undefined,
 	tag: 'div',
@@ -234,6 +237,7 @@ const OffCanvas: FC<IOffCanvasProps> = ({
 							aria-labelledby={titleId}
 							data-bs-scroll={initialProps.isBodyScroll}
 							data-bs-backdrop={initialProps.isBackdrop}
+							//@ts-ignore
 							style={{ visibility: isOpen && 'visible' }}
 							// eslint-disable-next-line react/jsx-props-no-spreading
 							{...props}>
@@ -261,6 +265,7 @@ OffCanvas.propTypes = {
 	isRightPanel: PropTypes.bool,
 	tag: PropTypes.oneOf(['div', 'section', 'form']),
 };
+//@ts-ignore
 OffCanvas.defaultProps = {
 	id: undefined,
 	placement: 'end',

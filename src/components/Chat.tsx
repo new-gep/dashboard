@@ -67,6 +67,7 @@ ChatAvatar.propTypes = {
 	isOnline: PropTypes.bool,
 	size: PropTypes.number,
 };
+//@ts-ignore
 ChatAvatar.defaultProps = {
 	src: undefined,
 	srcSet: undefined,
@@ -181,6 +182,7 @@ ChatListItem.propTypes = {
 	isActive: PropTypes.bool,
 	lastSeenTime: PropTypes.string,
 };
+//@ts-ignore
 ChatListItem.defaultProps = {
 	srcSet: undefined,
 	className: undefined,
@@ -239,6 +241,7 @@ ChatMessages.propTypes = {
 	).isRequired,
 	isReply: PropTypes.bool,
 };
+//@ts-ignore
 ChatMessages.defaultProps = {
 	isReply: false,
 };
@@ -334,6 +337,7 @@ ChatGroup.propTypes = {
 		]),
 	}).isRequired,
 };
+//@ts-ignore
 ChatGroup.defaultProps = {
 	isReply: false,
 	isOnline: false,
@@ -356,6 +360,7 @@ Chat.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 Chat.defaultProps = {
 	className: undefined,
 };

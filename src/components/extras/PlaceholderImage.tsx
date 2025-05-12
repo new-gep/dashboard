@@ -47,6 +47,7 @@ PlaceholderImage.propTypes = {
 	className: PropTypes.string,
 	ariaLabel: PropTypes.string,
 };
+//@ts-ignore
 PlaceholderImage.defaultProps = {
 	width: 75,
 	height: 75,

@@ -1,7 +1,9 @@
 import { Store } from 'react-notifications-component';
 
 const showNotification = (
+	//@ts-ignore
 	title: string | JSX.Element,
+	//@ts-ignore
 	message: string | JSX.Element,
 	type = 'default',
 ) => {

@@ -54,6 +54,7 @@ ScrollspyNav.propTypes = {
 	tag: PropTypes.string,
 	setActiveId: PropTypes.func,
 };
+//@ts-ignore
 ScrollspyNav.defaultProps = {
 	children: null,
 	offset: undefined,

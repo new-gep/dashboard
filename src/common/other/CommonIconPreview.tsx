@@ -51,6 +51,7 @@ CommonIconPreview.propTypes = {
 	icon: PropTypes.string.isRequired,
 	forceFamily: PropTypes.oneOf([null, 'custom', 'material']),
 };
+//@ts-ignore
 CommonIconPreview.defaultProps = {
 	forceFamily: null,
 };

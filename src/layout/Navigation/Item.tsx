@@ -266,6 +266,7 @@ Item.propTypes = {
 	isMore: PropTypes.bool,
 	hide: PropTypes.bool,
 };
+//@ts-ignore
 Item.defaultProps = {
 	children: null,
 	to: undefined,

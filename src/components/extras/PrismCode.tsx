@@ -59,6 +59,7 @@ PrismCode.propTypes = {
 	// eslint-disable-next-line react/forbid-prop-types
 	style: PropTypes.object,
 };
+//@ts-ignore
 PrismCode.defaultProps = {
 	plugins: null,
 	className: undefined,

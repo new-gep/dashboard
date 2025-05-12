@@ -20,7 +20,6 @@ const AppointmentList = () => {
 	const fetchData = async () => {
 		const response = await Job_Admissional(userData.cnpj);
 		if (response.status == 200) {
-			console.log(response);
 			setCount(response.counts);
 			setLoader(true);
 		}

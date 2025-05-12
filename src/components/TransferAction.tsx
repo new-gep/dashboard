@@ -90,6 +90,7 @@ TransferAction.propTypes = {
 	className: PropTypes.string,
 	imgWidth: PropTypes.number,
 };
+//@ts-ignore
 TransferAction.defaultProps = {
 	className: undefined,
 	imgWidth: 150,

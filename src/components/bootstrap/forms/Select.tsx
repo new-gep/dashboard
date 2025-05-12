@@ -200,6 +200,7 @@ Select.propTypes = {
 	 * More information, [react-input-mask](https://github.com/sanniassin/react-input-mask#react-input-mask).
 	 */
 };
+//@ts-ignore
 Select.defaultProps = {
 	id: undefined,
 	className: undefined,

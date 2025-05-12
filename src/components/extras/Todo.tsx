@@ -140,6 +140,7 @@ TodoItem.propTypes = {
 	setList: PropTypes.func.isRequired,
 	index: PropTypes.number.isRequired,
 };
+//@ts-ignore
 TodoItem.defaultProps = {};
 
 export interface ITodoProps {
@@ -166,6 +167,7 @@ Todo.propTypes = {
 	list: TodoPropTypes.list.isRequired,
 	setList: PropTypes.func.isRequired,
 };
+//@ts-ignore
 Todo.defaultProps = {
 	className: undefined,
 };

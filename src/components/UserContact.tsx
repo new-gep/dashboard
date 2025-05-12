@@ -117,6 +117,7 @@ UserContact.propTypes = {
 	phone: PropTypes.string,
 	onChat: PropTypes.func,
 };
+//@ts-ignore
 UserContact.defaultProps = {
 	className: undefined,
 	position: undefined,

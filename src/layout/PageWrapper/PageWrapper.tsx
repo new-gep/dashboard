@@ -60,7 +60,7 @@ PageWrapper.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
-
+//@ts-ignore
 PageWrapper.defaultProps = {
 	isProtected: true,
 	title: undefined,

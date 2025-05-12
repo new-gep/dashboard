@@ -57,6 +57,7 @@ Label.propTypes = {
 	ariaLabelledby: PropTypes.string,
 	ariaLabel: PropTypes.string,
 };
+//@ts-ignore
 Label.defaultProps = {
 	htmlFor: undefined,
 	className: undefined,

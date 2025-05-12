@@ -88,10 +88,15 @@ class CarouselItem extends Component<TCarouselItemProps, TCarouselItemState> {
 				enter={slide}
 				exit={slide}
 				in={isIn}
+				//@ts-ignore
 				onEnter={this.onEnter}
+				//@ts-ignore
 				onEntering={this.onEntering}
+				//@ts-ignore
 				onExit={this.onExit}
+				//@ts-ignore
 				onExiting={this.onExiting}
+				//@ts-ignore
 				onExited={this.onExited}>
 				{(status) => {
 					// @ts-ignore

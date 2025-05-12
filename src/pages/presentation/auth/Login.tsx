@@ -40,6 +40,7 @@ const LoginHeader: FC<ILoginHeaderProps> = ({ isNewUser }) => {
 		</>
 	);
 };
+//@ts-ignore
 LoginHeader.defaultProps = {
 	isNewUser: false,
 };
@@ -740,6 +741,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 Login.propTypes = {
 	isSignUp: PropTypes.bool,
 };
+//@ts-ignore
 Login.defaultProps = {
 	isSignUp: false,
 };

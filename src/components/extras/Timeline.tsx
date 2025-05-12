@@ -45,6 +45,7 @@ TimelineItem.propTypes = {
 	]),
 	label: PropTypes.string.isRequired,
 };
+//@ts-ignore
 TimelineItem.defaultProps = {
 	className: undefined,
 	color: 'primary',
@@ -69,6 +70,7 @@ Timeline.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 Timeline.defaultProps = {
 	className: undefined,
 };

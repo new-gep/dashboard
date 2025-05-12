@@ -86,6 +86,7 @@ ChecksGroup.propTypes = {
 	validFeedback: PropTypes.string,
 	isTooltipFeedback: PropTypes.bool,
 };
+//@ts-ignore
 ChecksGroup.defaultProps = {
 	id: undefined,
 	className: undefined,
@@ -236,6 +237,7 @@ Checks.propTypes = {
 	onSelect: PropTypes.func,
 	ariaLabel: PropTypes.string,
 };
+//@ts-ignore
 Checks.defaultProps = {
 	id: undefined,
 	className: undefined,

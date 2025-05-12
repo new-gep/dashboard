@@ -26,6 +26,7 @@ HookLink.propTypes = {
 	hook: PropTypes.string.isRequired,
 	path: PropTypes.string,
 };
+
 HookLink.defaultProps = {
 	path: null,
 };

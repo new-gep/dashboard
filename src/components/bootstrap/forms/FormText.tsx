@@ -29,6 +29,7 @@ FormText.propTypes = {
 	 */
 	children: PropTypes.node.isRequired,
 };
+//@ts-ignore
 FormText.defaultProps = {
 	id: undefined,
 	className: undefined,

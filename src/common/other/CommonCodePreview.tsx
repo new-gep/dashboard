@@ -59,6 +59,7 @@ CommonCodePreview.propTypes = {
 	code: PropTypes.string,
 	language: PropTypes.string,
 };
+//@ts-ignore
 CommonCodePreview.defaultProps = {
 	children: null,
 	className: undefined,

@@ -32,6 +32,7 @@ Page.propTypes = {
 	]),
 	className: PropTypes.string,
 };
+//@ts-ignore
 Page.defaultProps = {
 	container: 'xxl',
 	className: undefined,

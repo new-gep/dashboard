@@ -81,24 +81,30 @@ const Popovers: FC<IPopoversProps> = ({
 
 	const ON_CLICK = () => {
 		if (trigger === 'click') setPopoverOpen(!popoverOpen);
+		//@ts-ignore
 		if (typeof children !== 'string' && children?.props?.onClick) children.props.onClick();
 	};
 
 	const ON_MOUSE_OVER = () => {
 		if (trigger === 'hover') setPopoverOpen(true);
+		//@ts-ignore
 		if (typeof children !== 'string' && children?.props?.onMouseOver)
+			//@ts-ignore
 			children.props.onMouseOver();
 	};
 
 	const ON_MOUSE_LEAVE = () => {
 		if (trigger === 'hover') setTimeout(() => setPopoverOpen(false), delay);
+		//@ts-ignore
 		if (typeof children !== 'string' && children?.props?.onMouseLeave)
+			//@ts-ignore
 			children.props.onMouseLeave();
 	};
 
 	const PROPS = {
 		className: classNames(
 			{ 'd-inline-block': isDisplayInline, 'popover-string': typeof children === 'string' },
+			//@ts-ignore
 			typeof children !== 'string' && children?.props?.className,
 		),
 		onClick: ON_CLICK,
@@ -215,6 +221,7 @@ Popovers.propTypes = {
 	// eslint-disable-next-line react/forbid-prop-types
 	modifiers: PropTypes.object,
 };
+//@ts-ignore
 Popovers.defaultProps = {
 	title: undefined,
 	desc: null,

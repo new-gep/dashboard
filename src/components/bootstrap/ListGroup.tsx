@@ -53,6 +53,7 @@ ListGroupItem.propTypes = {
 	isActive: PropTypes.bool,
 	isDisable: PropTypes.bool,
 };
+//@ts-ignore
 ListGroupItem.defaultProps = {
 	className: undefined,
 	tag: 'li',
@@ -109,6 +110,7 @@ ListGroup.propTypes = {
 	]),
 	isNumbered: PropTypes.bool,
 };
+//@ts-ignore
 ListGroup.defaultProps = {
 	className: undefined,
 	tag: 'ul',

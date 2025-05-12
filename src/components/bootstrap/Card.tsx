@@ -75,6 +75,7 @@ CardLabel.propTypes = {
 	]),
 	pre: PropTypes.node,
 };
+//@ts-ignore
 CardLabel.defaultProps = {
 	className: undefined,
 	tag: 'div',
@@ -108,6 +109,7 @@ CardActions.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.string,
 };
+//@ts-ignore
 CardActions.defaultProps = {
 	className: undefined,
 	tag: 'div',
@@ -138,6 +140,7 @@ CardTitle.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.string,
 };
+//@ts-ignore
 CardTitle.defaultProps = {
 	className: undefined,
 	tag: 'h5',
@@ -168,6 +171,7 @@ CardSubTitle.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.string,
 };
+//@ts-ignore
 CardSubTitle.defaultProps = {
 	className: undefined,
 	tag: 'h6',
@@ -229,6 +233,7 @@ CardHeader.propTypes = {
 	]),
 	size: PropTypes.oneOf([null, 'sm', 'lg']),
 };
+//@ts-ignore
 CardHeader.defaultProps = {
 	className: undefined,
 	tag: 'div',
@@ -268,6 +273,7 @@ CardBody.propTypes = {
 	tag: PropTypes.string,
 	isScrollable: PropTypes.bool,
 };
+//@ts-ignore
 CardBody.defaultProps = {
 	className: undefined,
 	tag: 'div',
@@ -321,6 +327,7 @@ CardCodeView.propTypes = {
 	// eslint-disable-next-line react/forbid-prop-types
 	customStyle: PropTypes.object,
 };
+//@ts-ignore
 CardCodeView.defaultProps = {
 	language: 'jsx',
 	isPrismJs: true,
@@ -353,6 +360,7 @@ CardFooterLeft.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.string,
 };
+//@ts-ignore
 CardFooterLeft.defaultProps = {
 	className: undefined,
 	tag: 'div',
@@ -383,6 +391,7 @@ CardFooterRight.propTypes = {
 	className: PropTypes.string,
 	tag: PropTypes.string,
 };
+//@ts-ignore
 CardFooterRight.defaultProps = {
 	className: undefined,
 	tag: 'div',
@@ -442,6 +451,7 @@ CardFooter.propTypes = {
 	]),
 	size: PropTypes.oneOf([null, 'sm', 'lg']),
 };
+//@ts-ignore
 CardFooter.defaultProps = {
 	className: undefined,
 	tag: 'div',
@@ -467,6 +477,7 @@ CardTabItem.propTypes = {
 	icon: PropTypes.string,
 	children: PropTypes.node.isRequired,
 };
+//@ts-ignore
 CardTabItem.defaultProps = {
 	icon: undefined,
 };
@@ -608,6 +619,7 @@ Card.propTypes = {
 	stretch: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['full', 'semi'])]),
 	isCompact: PropTypes.bool,
 };
+//@ts-ignore
 Card.defaultProps = {
 	className: undefined,
 	shadow: null,

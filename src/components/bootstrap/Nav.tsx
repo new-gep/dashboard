@@ -26,6 +26,7 @@ NavLinkDropdown.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 NavLinkDropdown.defaultProps = {
 	className: undefined,
 };
@@ -72,6 +73,7 @@ NavItem.propTypes = {
 	isActive: PropTypes.bool,
 	isDisable: PropTypes.bool,
 };
+//@ts-ignore
 NavItem.defaultProps = {
 	className: undefined,
 	isActive: false,
@@ -139,6 +141,7 @@ Nav.propTypes = {
 	isVertical: PropTypes.bool,
 	verticalBreakpoint: PropTypes.oneOf(['sm', 'md', 'lg', 'xl', 'xxl']),
 };
+//@ts-ignore
 Nav.defaultProps = {
 	className: undefined,
 	tag: 'ul',

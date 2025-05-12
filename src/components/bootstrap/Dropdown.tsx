@@ -86,6 +86,7 @@ DropdownToggle.propTypes = {
 	setIsOpen: PropTypes.func,
 	hasIcon: PropTypes.bool,
 };
+//@ts-ignore
 DropdownToggle.defaultProps = {
 	isOpen: false,
 	setIsOpen: () => {},
@@ -195,6 +196,7 @@ DropdownMenu.propTypes = {
 	direction: PropTypes.string,
 	isCloseAfterLeave: PropTypes.bool,
 };
+//@ts-ignore
 DropdownMenu.defaultProps = {
 	isOpen: false,
 	setIsOpen: () => {},
@@ -229,6 +231,7 @@ ItemWrapper.propTypes = {
 	children: PropTypes.node.isRequired,
 	className: PropTypes.string,
 };
+//@ts-ignore
 ItemWrapper.defaultProps = {
 	className: undefined,
 };
@@ -310,6 +313,7 @@ DropdownItem.propTypes = {
 	isDivider: PropTypes.bool,
 	isText: PropTypes.bool,
 };
+//@ts-ignore
 DropdownItem.defaultProps = {
 	children: undefined,
 	isHeader: false,
@@ -369,6 +373,7 @@ const Dropdown: FC<IDropdownProps> = ({
 					// @ts-ignore
 					['DropdownMenu', 'DropdownToggle'].includes(child.type.displayName)
 						? cloneElement(child, {
+							//@ts-ignore
 								isOpen: isOpen !== null && !!setIsOpen ? isOpen : state,
 								setIsOpen: isOpen !== null && !!setIsOpen ? setIsOpen : setState,
 								direction,
@@ -396,6 +401,7 @@ Dropdown.propTypes = {
 	direction: PropTypes.oneOf(['up', 'end', 'down', 'start']),
 	isButtonGroup: PropTypes.bool,
 };
+//@ts-ignore
 Dropdown.defaultProps = {
 	tag: 'div',
 	isOpen: null,

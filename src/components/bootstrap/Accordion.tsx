@@ -105,6 +105,7 @@ AccordionItem.propTypes = {
 		'dark',
 	]),
 };
+//@ts-ignore
 AccordionItem.defaultProps = {
 	parentId: null,
 	icon: undefined,
@@ -197,6 +198,7 @@ Accordion.propTypes = {
 		'dark',
 	]),
 };
+//@ts-ignore
 Accordion.defaultProps = {
 	activeItemId: null,
 	isFlush: false,

@@ -139,6 +139,7 @@ Collapse.propTypes = {
 	isNavbar: PropTypes.bool,
 	isChildClone: PropTypes.bool,
 };
+//@ts-ignore
 Collapse.defaultProps = {
 	// @ts-ignore
 	...Transition.defaultProps,
