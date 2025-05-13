@@ -53,16 +53,18 @@ const Aside: FC<IAsideProps> = ({ children }) => {
 			{mobileDesign ? (
 				<aside className={classes}>{children}</aside>
 			) : (
+				//@ts-ignore
 				<motion.aside style={asideStyle as MotionStyle} className={classes}>
 					{children}
 				</motion.aside>
 			)}
 
 			{asideStatus && hasTouchButton && isModernDesign && (
-				<>
-					<motion.div className='aside-drag-area' ref={constraintsRef} />
+				<>	
+					<motion.div  ref={constraintsRef} />
 					<Tooltips title='Toggle Aside' flip={['top', 'right']}>
 						<motion.div
+							//@ts-ignore
 							className='aside-touch'
 							drag='x'
 							whileDrag={{ scale: 1.2 }}

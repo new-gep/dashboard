@@ -89,9 +89,8 @@ export default function SearchCandidate() {
 																			)}>
 																			<img
 																				src={
-																					job &&
-																					job.picture
-																						.base64Data
+																					job && job.picture &&
+																					job.picture.base64Data
 																				}
 																				alt={job.name}
 																				width={100}

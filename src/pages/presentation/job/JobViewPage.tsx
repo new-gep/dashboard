@@ -733,7 +733,7 @@ const JobViewPage = () => {
 																id='faq3'
 																title='Competências'>
 																<div>
-																	{editItem.skills.length > 0 ? (
+																	{editItem.skills && editItem.skills.length > 0 ? (
 																		<div className="d-flex flex-wrap">
 																		{editItem.skills.map((skill, index) => (
 																		  <span

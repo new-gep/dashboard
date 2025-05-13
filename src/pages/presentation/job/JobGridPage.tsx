@@ -448,7 +448,7 @@ const ProductsGridPage = () => {
 
 			<Page>
 				<div className='display-4 fw-bold py-3'>
-					{Array.isArray(data) && data.length > 0 ? (
+					{(Array.isArray(data) && data.length > 0) ? (
 						'Todas Vagas em Aberto'
 					) : (
 						<>
