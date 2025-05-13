@@ -145,7 +145,7 @@ const CollaboratorProfilePage = () => {
 								? { filter: 'grayscale(70%)' } // Aplica o estilo condicionalmente
 								: undefined // Sem estilo adicional caso a condição seja falsa
 						}>
-						<div className='col-lg-4'>
+						<div className='col-lg-5'>
 							<Card className='shadow-3d-info'>
 								<CardBody>
 									<div className='row g-5'>
@@ -358,7 +358,7 @@ const CollaboratorProfilePage = () => {
 												</div>
 												<div className='flex-grow-1 ms-3'>
 													<div className='fw-bold fs-3 mb-0'>
-														{job && priceFormat(job.salary)}
+														{job && Mask('amount',job.salary)}
 													</div>
 													<div className='text-muted mt-n2 truncate-line-1'>
 														Salário
@@ -377,17 +377,17 @@ const CollaboratorProfilePage = () => {
 												)}>
 												<div className='flex-shrink-0'>
 													<Icon
-														icon='Schedule'
+														icon='CardTravel'
 														size='3x'
 														color='primary'
 													/>
 												</div>
 												<div className='flex-grow-1 ms-3'>
 													<div className='fw-bold fs-3 mb-0'>
-														{job && job.time.time}
+														Modelo
 													</div>
 													<div className='text-muted mt-n2'>
-														Carga Horária
+														{job && job.model}
 													</div>
 												</div>
 											</div>
@@ -403,17 +403,17 @@ const CollaboratorProfilePage = () => {
 												)}>
 												<div className='flex-shrink-0'>
 													<Icon
-														icon='DirectionsRun'
+														icon='LocationOn'
 														size='3x'
 														color='success'
 													/>
 												</div>
 												<div className='flex-grow-1 ms-3'>
 													<div className='fw-bold fs-3 mb-0'>
-														{job && job.time.journey}
+														Local
 													</div>
 													<div className='text-muted mt-n2'>
-														Jornada de Trabalho
+														{job && job.locality}
 													</div>
 												</div>
 											</div>
@@ -422,7 +422,7 @@ const CollaboratorProfilePage = () => {
 								</CardBody>
 							</Card>
 						</div>
-						<div className='col-lg-8'>
+						<div className='col-lg-7'>
 							<Card className='shadow-3d-primary'>
 								<CardHeader>
 									<CardLabel icon='FolderOpen' iconColor='success'>
