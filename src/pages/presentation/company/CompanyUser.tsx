@@ -295,7 +295,7 @@ const CompanyUser = () => {
 																style={{ width: 100 }}>
 																<div
 																	className={classNames(
-																		'bg-primary',
+																		'bg-secondary',
 																		'rounded-2',
 																		'd-flex align-items-center justify-content-center',
 																		'overflow-hidden',
@@ -303,10 +303,18 @@ const CompanyUser = () => {
 																	)}>
 																	<Avatar
 																		src={
-																			// @ts-ignore
-																			AvatarPicture[
-																				user.avatar
-																			]
+																			user && user.avatar
+																				? // @ts-ignore
+																					AvatarPicture[
+																						user.avatar
+																					] // Se o usuário selecionou um avatar, exiba-o
+																				: user.avatar
+																					? // @ts-ignore
+																						AvatarPicture[
+																							user
+																								.avatar
+																						] // Caso contrário, exiba o avatar do usuário (se disponível)
+																					: AvatarPicture.default // Caso contrário, exiba o avatar padrão
 																		}
 																		color='storybook'
 																		rounded={3}
@@ -409,10 +417,20 @@ const CompanyUser = () => {
 																			)}>
 																			<Avatar
 																				src={
-																					// @ts-ignore
-																					AvatarPicture[
-																						user.avatar
-																					]
+																					userData &&
+																					userData.avatar
+																						? // @ts-ignore
+																							AvatarPicture[
+																								userData
+																									.avatar
+																							] // Se o usuário selecionou um avatar, exiba-o
+																						: userData.avatar
+																							? // @ts-ignore
+																								AvatarPicture[
+																									userData
+																										.avatar
+																								] // Caso contrário, exiba o avatar do usuário (se disponível)
+																							: AvatarPicture.default // Caso contrário, exiba o avatar padrão
 																				}
 																				color='storybook'
 																				rounded={3}
@@ -573,12 +591,14 @@ const CompanyUser = () => {
 								<Avatar
 									src={
 										formik.values.avatar
-										// @ts-ignore
-											? AvatarPicture[formik.values.avatar]
-										// @ts-ignore
-											: AvatarPicture[userData.avatar]
+											? // @ts-ignore
+												AvatarPicture[formik.values.avatar]
+											: // @ts-ignore
+												AvatarPicture[userData.avatar] // @ts-ignore
+												? AvatarPicture[userData.avatar] // Caso contrário, exiba o avatar do usuário (se disponível)
+												: AvatarPicture.default
 									}
-									color='storybook'
+									color='secondary'
 									rounded={3}
 									size={150}
 									className='bg-primary'

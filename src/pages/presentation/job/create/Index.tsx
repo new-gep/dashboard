@@ -412,7 +412,7 @@ export default function CreateJob() {
 									<Avatar
 										className='bg-secondary'
 										src={
-											userData
+											(userData && userData.avatar)
 												? // @ts-ignore
 													AvatarPicture[userData.avatar] // Se o usuário selecionou um avatar, exiba-o
 												: userData.avatar

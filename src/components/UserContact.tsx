@@ -76,19 +76,18 @@ const UserContact: FC<IUserContactProps> = ({
 						)}
 					</div>
 				</div>
-				{(src || srcSet) && (
-					<div className='flex-shrink-0'>
-						<Avatar
-							// @ts-ignore
-							src={src ? AvatarPicture[src] : AvatarPicture.default}
-							srcSet={srcSet}
-							color={color}
-							className='rounded-circle'
-							shadow='sm'
-							size={110}
-						/>
-					</div>
-				)}
+
+				<div className='flex-shrink-0'>
+					<Avatar
+						// @ts-ignore
+						src={src ? AvatarPicture[src] : AvatarPicture.default}
+						srcSet={srcSet}
+						color={color}
+						className='rounded-circle'
+						shadow='sm'
+						size={110}
+					/>
+				</div>
 			</CardBody>
 		</Card>
 	);
