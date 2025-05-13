@@ -5,6 +5,7 @@ import CommonHeaderChat from './CommonHeaderChat';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import Mask from '../../../function/Mask';
+import Icon from '../../../components/icon/Icon';
 
 const DashboardBookingHeader = () => {
 	const { userData } = useContext(AuthContext);
@@ -31,7 +32,8 @@ const DashboardBookingHeader = () => {
 				</div>
 			</HeaderLeft>
 			<HeaderRight>
-				<CommonHeaderChat />
+				{/* <CommonHeaderChat /> */}
+				<Icon icon='Olw' size='2x'/>
 			</HeaderRight>
 		</Header>
 	);
