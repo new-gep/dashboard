@@ -1950,7 +1950,7 @@ const DemissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 							{/* <Spinner/> */}
 							<h1>🔍 Buscando candidatos</h1>
 						</div>
-					) : collaborators && collaborators.length > 0 ? (
+					) : (collaborators && collaborators.length > 0 )? (
 						<>
 							<table className='table table-modern' onClick={closeMenu}>
 								<thead>
