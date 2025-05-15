@@ -904,7 +904,7 @@ const ProductsGridPage = () => {
 											</div>
 										)}
 										<div>Competência</div>
-										{skills
+										{(skills && skills.length > 0)
 											? skills.map((item: any) => {
 													return (
 														<Button
@@ -932,7 +932,7 @@ const ProductsGridPage = () => {
 										<div>Benefícios</div>
 										{!AddBenefit ? (
 											<div className='col-12 g-2'>
-												{benefit.map((item: any) => {
+												{(benefit && benefit.length > 0) && benefit.map((item: any) => {
 													return (
 														<Button
 															isDisable={isResume}
