@@ -639,6 +639,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														isFloating
 														label='Senha'>
 														<Input
+															autoComplete='current-password'
 															type='password'
 															value={datesSingIn.password}
 															onChange={(e: any) =>
