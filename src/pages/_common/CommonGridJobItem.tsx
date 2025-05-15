@@ -38,7 +38,7 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 	deleteAction,
 	candidates,
 	isPCD,
-	isDEI
+	isDEI,
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 
@@ -65,8 +65,13 @@ const CommonGridJobItem: FC<ICommonGridJobItemProps> = ({
 						</DropdownToggle>
 						<DropdownMenu isAlignmentEnd>
 							<DropdownItem>
-								<Button icon='RemoveRedEye' onClick={() => editAction()}>
+								<Button icon='RemoveRedEye' onClick={() => editAction('resume')}>
 									Resumo
+								</Button>
+							</DropdownItem>
+							<DropdownItem>
+								<Button icon='Edit' onClick={() => editAction('edit')}>
+									Editar
 								</Button>
 							</DropdownItem>
 							<DropdownItem isDivider />

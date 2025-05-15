@@ -329,8 +329,45 @@ export default function CreateJob() {
 				</SubHeaderLeft>
 			</SubHeader>
 			<div className='flex row p-4 g-4 d-flex align-items-stretch'>
-				<div className='col-4 h-100'>
-					<Card className='h-50'>
+				
+				<div className='col-6'>
+					<Card>
+						<CardHeader>
+							<CardLabel icon='Description' iconColor='success'>
+								<CardTitle>Informações da Vaga</CardTitle>
+							</CardLabel>
+						</CardHeader>
+
+						{initial ? (
+							<CardBody>
+								{formik && (
+									<FormJob
+										setInitial={setInitial}
+										formik={formik}
+										setIAactive={setIAactive}
+										userData={userData}
+									/>
+								)}
+							</CardBody>
+						) : (
+							<CardBody>
+								{sendFunction && formik ? (
+									<SelectOptionJob
+										setSendFunction={setSendFunction}
+										setDecision={setDecision}
+										setInitial={setInitial}
+										loader={loaderRecruit}
+									/>
+								) : (
+									<SendFunction formik={formik} setFinish={setSendFunction} />
+								)}
+							</CardBody>
+						)}
+					</Card>
+				</div>
+				
+				<div className='col-6 h-100'>
+					<Card  style={{ height: '69vh' }}>
 						<CardHeader>
 							<CardLabel icon='robot' iconColor='success'>
 								<CardTitle>Assistente IA (Beta)</CardTitle>
@@ -406,9 +443,28 @@ export default function CreateJob() {
 								<CardTitle>Criador da Vaga</CardTitle>
 							</CardLabel>
 						</CardHeader>
-						<CardBody>
-							<div className='d-flex flex-column items-center justify-content-center'>
-								<div className='d-flex items-center justify-content-center h-50'>
+						<CardBody >
+							<div className='d-flex items-center justify-content-between px-5'>
+								<div className=' d-flex flex-column items-end  justify-content-end'>
+									<div className='d-flex align-items-center mb-2'>
+										<Icon icon='person' size='2x' />
+										<p className='ms-2 mb-0 text-capitalize'>
+											{userData && userData.name}
+										</p>
+									</div>
+									<div className='d-flex align-items-center mb-2'>
+										<Icon icon='email' size='2x' />
+										<p className='ms-2 mb-0'>{userData && userData.email}</p>
+									</div>
+									<div className='d-flex align-items-center'>
+										<Icon icon='phone' size='2x' />
+										<p className='ms-2 mb-0'>
+											{userData && Mask('phone', userData.phone)}
+										</p>
+									</div>
+								</div>
+
+								<div className='d-flex items-top justify-content-top h-100'>
 									<Avatar
 										className='bg-secondary'
 										src={
@@ -424,62 +480,8 @@ export default function CreateJob() {
 										rounded={'circle'}
 									/>
 								</div>
-
-								<div className='mt-3'>
-									<div className='d-flex align-items-center mb-2'>
-										<Icon icon='person' size='2x' />
-										<p className='ms-2 mb-0 text-capitalize'>
-											{userData && userData.name}
-										</p>
-									</div>
-									<div className='d-flex align-items-center mb-2'>
-										<Icon icon='email' size='2x' />
-										<p className='ms-2 mb-0'>{userData && userData.email}</p>
-									</div>
-									<div className='d-flex align-items-center mb-2'>
-										<Icon icon='phone' size='2x' />
-										<p className='ms-2 mb-0'>
-											{userData && Mask('phone', userData.phone)}
-										</p>
-									</div>
-								</div>
 							</div>
 						</CardBody>
-					</Card>
-				</div>
-				<div className='col-8'>
-					<Card>
-						<CardHeader>
-							<CardLabel icon='Description' iconColor='success'>
-								<CardTitle>Informações da Vaga</CardTitle>
-							</CardLabel>
-						</CardHeader>
-
-						{initial ? (
-							<CardBody>
-								{formik && (
-									<FormJob
-										setInitial={setInitial}
-										formik={formik}
-										setIAactive={setIAactive}
-										userData={userData}
-									/>
-								)}
-							</CardBody>
-						) : (
-							<CardBody>
-								{sendFunction && formik ? (
-									<SelectOptionJob
-										setSendFunction={setSendFunction}
-										setDecision={setDecision}
-										setInitial={setInitial}
-										loader={loaderRecruit}
-									/>
-								) : (
-									<SendFunction formik={formik} setFinish={setSendFunction} />
-								)}
-							</CardBody>
-						)}
 					</Card>
 				</div>
 			</div>

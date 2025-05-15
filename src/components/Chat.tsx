@@ -282,7 +282,7 @@ export const ChatGroup: FC<IChatGroupProps> = ({
 	);
 	return (
 		// eslint-disable-next-line react/jsx-props-no-spreading
-		<div className={classNames('chat-group', { 'chat-group-reply': isReply })} {...props}>
+		<div className={ classNames('chat-group', { 'chat-group-reply': isReply })} {...props}>
 			{!isReply && AVATAR}
 			<ChatMessages messages={messages} isReply={isReply} />
 			{isReply && AVATAR}

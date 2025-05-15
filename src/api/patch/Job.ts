@@ -19,7 +19,7 @@ interface PropsUpdateJob {
 	CNPJ_company?: string;
 }
 
-export default async function Job(dates: PropsUpdateJob, id: any) {
+export default async function Job(dates: any, id: any) {
 	try {
 		const response = await axios.patch(`${process.env.REACT_APP_API}job/${id}`, dates);
 		return response.data;

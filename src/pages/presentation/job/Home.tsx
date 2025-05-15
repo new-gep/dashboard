@@ -8,6 +8,7 @@ import My from '../../../assets/unique/marketing.png';
 
 export default function Home() {
 	const navigate = useNavigate();
+	
 	const dates = [
 		{
 			id: 'create',

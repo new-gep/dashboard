@@ -234,7 +234,7 @@ export default function Preview({
 					<section className='p-4 border rounded'>
 						<div className='d-flex justify-content-between mb-3'>
 							<h4>{formik.values.function}</h4>
-							<h4>{Mask('amount', formik.values.salaray)}</h4>
+							<h4>{Mask('amount', formik.values.salary)}</h4>
 						</div>
 
 						<div className='d-flex gap-5 mb-3'>

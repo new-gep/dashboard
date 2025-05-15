@@ -41,22 +41,26 @@ import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../../components/
 import Checks from '../../../components/bootstrap/forms/Checks';
 import Mask from '../../../function/Mask';
 import { useNavigate } from 'react-router-dom';
+import FindCep from '../../../api/get/Cep';
+import Spinner from '../../../components/bootstrap/Spinner';
+
 type AbstractPictureKeys = keyof typeof AbstractPicture;
 
 interface IValues {
+	id?: any;
 	image: any;
 	PCD: string;
 	DEI: string;
 	function: string;
 	salary: any;
 	contract: string;
-	benefits:any;
 	model: string;
-	skills:any
-	responsibility:string;
+	responsibility: string;
 	requirements: string;
 	locality: string;
 	cep: string;
+	benefits?: any;
+	skills?: any;
 }
 
 interface Ijob {
@@ -88,19 +92,34 @@ interface IjobUpdate {
 
 const validate = (values: IValues) => {
 	const errors: any = {};
-	// Campos obrigatórios
 
+	// Validações para campos obrigatórios
 	if (!values.function) {
 		errors.function = 'Função é obrigatória';
 	}
 	if (!values.salary || values.salary <= 0) {
-		errors.salary = 'Salário é obrigatório';
+		errors.salary = 'Salário deve ser maior que zero';
+	}
+	if (!values.model) {
+		errors.model = 'Modelo de trabalho é obrigatório';
 	}
 	if (!values.contract) {
-		errors.contract = 'Contrato é obrigatório';
+		errors.contract = 'Tipo de contratação é obrigatório';
 	}
-
-	// Não validamos os campos opcionais (benefits, details, obligations)
+	if (!values.cep) {
+		errors.cep = 'CEP é obrigatório';
+	} else if (!/^\d{5}-?\d{3}$/.test(values.cep)) {
+		errors.cep = 'CEP deve estar no formato 12345-678';
+	}
+	if (!values.locality) {
+		errors.locality = 'Localidade é obrigatório';
+	}
+	if (!values.requirements) {
+		errors.requirements = 'Responsabilidade é obrigatório';
+	}
+	if (!values.responsibility) {
+		errors.responsibility = 'Responsabilidade é obrigatório';
+	}
 
 	return errors;
 };
@@ -108,29 +127,68 @@ const validate = (values: IValues) => {
 const ProductsGridPage = () => {
 	const { userData } = useContext(AuthContext);
 	const [data, setData] = useState<any>(null);
+	const [newBenefitName, setNewBenefitName] = React.useState('');
 	const [deleteModal, setDeleteModal] = useState<boolean>(false);
 	const [editItem, setEditItem] = useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = useState<boolean>(false);
 	const [imageFile, setImageFile] = useState<any>(null);
 	const [nameImage, setNameImage] = useState<AbstractPictureKeys>('ballSplit');
 	const [rebuild, setRebuild] = useState<number>(1);
+	const [isResume, setIsResume] = useState<boolean>(true);
+	const [searchTerm, setSearchTerm] = React.useState<any>('');
+	const [AddBenefit, setAddBenefit] = React.useState<boolean>(false);
+	const [benefit, setBenefit] = React.useState<any>([]);
+	const [skills, setSkills] = React.useState<any>(
+		[] as Array<{ id: number; icon: string; name: string; active: boolean }>,
+	);
+	const [load, setLoad] = React.useState<boolean>(false);
 	const navigate = useNavigate();
+	const options = [
+		{ name: 'Adaptabilidade', icon: 'aa' },
+		{ name: 'Banco de dados', icon: 'aa' },
+		{ name: 'Comunicação', icon: 'aa' },
+		{ name: 'Comprometimento', icon: 'aa' },
+		{ name: 'Criatividade', icon: 'aa' },
+		{ name: 'Design gráfico', icon: 'aa' },
+		{ name: 'Edição de vídeos', icon: 'aa' },
+		{ name: 'Flexibilidade', icon: 'aa' },
+		{ name: 'Fluência em idiomas', icon: 'aa' },
+		{ name: 'Gestão de contabilidade', icon: 'aa' },
+		{ name: 'Gestão de redes sociais', icon: 'aa' },
+		{ name: 'Gestão de tempo', icon: 'aa' },
+		{ name: 'Liderança', icon: 'aa' },
+		{ name: 'Linguagens de programação', icon: 'aa' },
+		{ name: 'Microsoft Office', icon: 'aa' },
+		{ name: 'Organização', icon: 'aa' },
+		{ name: 'Pensamento analítico', icon: 'aa' },
+		{ name: 'Pensamento lógico', icon: 'aa' },
+		{ name: 'Planejamento', icon: 'aa' },
+		{ name: 'Pesquisar informações', icon: 'aa' },
+		{ name: 'Proatividade', icon: 'aa' },
+		{ name: 'Relacionamento interpessoal', icon: 'aa' },
+		{ name: 'Resiliência', icon: 'aa' },
+		{ name: 'Resolução de problemas', icon: 'aa' },
+		{ name: 'SEO', icon: 'aa' },
+		{ name: 'Sentido de ética', icon: 'aa' },
+		{ name: 'Softwares de Marketing', icon: 'aa' },
+		{ name: 'Softwares de gestão de projetos', icon: 'aa' },
+		{ name: 'Transparência', icon: 'aa' },
+		{ name: 'Trabalho em equipe', icon: 'aa' },
+	];
 
 	const formik = useFormik({
 		initialValues: {
 			function: '',
 			PCD: '0',
 			DEI: '0',
-			model:'',
 			salary: '',
+			locality: '',
+			model: '',
 			contract: '',
-			benefits: '',
-			skills:'',
-			responsibility: '',
 			requirements: '',
+			responsibility: '',
+			cep: '',
 			image: '',
-			locality:'',
-			cep:'',
 		},
 		validate,
 		onSubmit: (values, { resetForm }) => {
@@ -144,6 +202,24 @@ const ProductsGridPage = () => {
 			// setEditPanel(false); // Se você quiser desativar o painel de edição, mantenha essa linha
 		},
 	});
+
+	const findCep = async () => {
+		const response = await FindCep(formik.values.cep.replace(/\D/g, ''));
+		if (response && response.erro) {
+			toast(
+				<Toasts icon='Close' iconColor='danger' title='Atenção'>
+					Endereço não Encontrado
+				</Toasts>,
+				{ closeButton: true, autoClose: 1000 },
+			);
+			return;
+		}
+		const updatedValues = {
+			...formik.values, // Mantém os valores atuais
+			locality: `${response.estado}, ${response.localidade}`,
+		};
+		formik.setValues(updatedValues);
+	};
 
 	const handleImageChange = (e: any) => {
 		setImageFile(null);
@@ -161,129 +237,140 @@ const ProductsGridPage = () => {
 		return AbstractPicture[randomKey]; // Retorna a imagem correspondente à chave aleatória
 	};
 
-	// const createAndEditJob = async (job: Ijob) => {
-	// 	job.user_create = userData.id;
-	// 	job.CNPJ_company = userData.cnpj;
-	// 	job.time = JSON.stringify({
-	// 		time: job.time,
-	// 		journey: job.journey,
-	// 	});
-	// 	if (editItem && 'id' in editItem) {
-	// 		const update: IjobUpdate = job;
-	// 		update.user_edit = userData.id;
-	// 		delete update.journey;
-	// 		const response = await JobUpdate(update, editItem.id);
-	// 		switch (response.status) {
-	// 			case 200:
-	// 				setRebuild(rebuild + 1);
-	// 				toast(
-	// 					<Toasts
-	// 						icon='Work'
-	// 						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-	// 						title='Successo'>
-	// 						Vaga editada com sucesso!
-	// 					</Toasts>,
-	// 					{
-	// 						closeButton: true,
-	// 						autoClose: 1000, // Examples: 1000, 3000, ...
-	// 					},
-	// 				);
-	// 				setEditPanel(false);
-	// 				break;
-	// 			case 404:
-	// 				toast(
-	// 					<Toasts
-	// 						icon='Work'
-	// 						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-	// 						title='Erro'>
-	// 						Algo deu errado, tente novamente!
-	// 					</Toasts>,
-	// 					{
-	// 						closeButton: true,
-	// 						autoClose: 1000, // Examples: 1000, 3000, ...
-	// 					},
-	// 				);
-	// 				break;
-	// 			case 500:
-	// 				toast(
-	// 					<Toasts
-	// 						icon='Work'
-	// 						iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-	// 						title='Erro'>
-	// 						Erro interno, tente novamente!
-	// 					</Toasts>,
-	// 					{
-	// 						closeButton: true,
-	// 						autoClose: 1000, // Examples: 1000, 3000, ...
-	// 					},
-	// 				);
-	// 				break;
-	// 			default:
-	// 				toast(
-	// 					<Toasts
-	// 						icon='Work'
-	// 						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-	// 						title='Erro Desconhecido'>
-	// 						Algo deu errado, tente novamente!
-	// 					</Toasts>,
-	// 					{
-	// 						closeButton: true,
-	// 						autoClose: 1000, // Examples: 1000, 3000, ...
-	// 					},
-	// 				);
-	// 				break;
-	// 		}
-	// 	} else {
-	// 		const response = await Job(job);
-	// 		switch (response.status) {
-	// 			case 201:
-	// 				setRebuild(rebuild + 1);
-	// 				toast(
-	// 					<Toasts
-	// 						icon='Work'
-	// 						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-	// 						title='Successo'>
-	// 						Vaga criada com sucesso!
-	// 					</Toasts>,
-	// 					{
-	// 						closeButton: true,
-	// 						autoClose: 1000, // Examples: 1000, 3000, ...
-	// 					},
-	// 				);
-	// 				setEditPanel(false);
-	// 				break;
-	// 			case 500:
-	// 				toast(
-	// 					<Toasts
-	// 						icon='Work'
-	// 						iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-	// 						title='Erro'>
-	// 						Algo deu errado, tente novamente!
-	// 					</Toasts>,
-	// 					{
-	// 						closeButton: true,
-	// 						autoClose: 1000, // Examples: 1000, 3000, ...
-	// 					},
-	// 				);
-	// 				break;
+	const viewJob = async (action: string) => {
+		if (action == 'resume') {
+			setEditPanel(true);
+			setIsResume(true);
+			return;
+		}
+		if (action == 'edit') {
+			setEditPanel(true);
+			setIsResume(false);
+			return;
+		}
+	};
 
-	// 			default:
-	// 				toast(
-	// 					<Toasts
-	// 						icon='Work'
-	// 						iconColor='danger' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
-	// 						title='Erro Desconhecido'>
-	// 						Algo deu errado, tente novamente!
-	// 					</Toasts>,
-	// 					{
-	// 						closeButton: true,
-	// 						autoClose: 1000, // Examples: 1000, 3000, ...
-	// 					},
-	// 				);
-	// 				break;
-	// 		}
-	// 	}
-	// };
+	const handleToggleSkill = (
+		e: React.ChangeEvent<HTMLSelectElement> | { target: { value: string } },
+	) => {
+		const selected = e.target.value;
+		if (!selected) return;
+
+		const alreadyAdded = skills.find((s: any) => s.name === selected);
+
+		if (alreadyAdded) {
+			// Se já existe, remove do skills
+			setSkills((prev: any) => prev.filter((s: any) => s.name !== selected));
+		} else {
+			// Se não existe, adiciona
+			const skillData = options.find((opt) => opt.name === selected);
+			setSkills((prev: any) => [
+				...prev,
+				{
+					id: Date.now(),
+					name: skillData?.name || selected,
+					icon: skillData?.icon || 'Lightbulb',
+				},
+			]);
+		}
+
+		// Limpa o input
+		if ('target' in e) {
+			e.target.value = '';
+		}
+		setSearchTerm('');
+	};
+
+	const filteredOptions = options
+		.filter(
+			(opt: any) =>
+				opt.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+				!skills.some((s: any) => s.name === opt.name), // já selecionadas não aparecem
+		)
+		.slice(0, 3);
+
+	const updateJob = async () => {
+		setLoad(true);
+		const PropsCreateJob = {
+			default: formik.values,
+			benefits: benefit,
+			skills: skills,
+			user_edit: userData.id,
+			CNPJ_company: userData.cnpj,
+		};
+		console.log('PropsCreateJob: ', PropsCreateJob);
+		try {
+			const response = await JobUpdate(PropsCreateJob, editItem?.id);
+			if (response.status !== 200) {
+				toast(
+					<Toasts
+						icon='Work'
+						iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Erro'>
+						Não foi possivel editar a vaga, algo deu errado!
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 2000, // Examples: 1000, 3000, ...
+					},
+				);
+				return;
+			}
+			if (response.status === 200) {
+				toast(
+					<Toasts
+						icon='Work'
+						iconColor='success' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+						title='Successo'>
+						Vaga editada com sucesso!
+					</Toasts>,
+					{
+						closeButton: true,
+						autoClose: 1000, // Examples: 1000, 3000, ...
+					},
+				);
+				return;
+			}
+			toast(
+				<Toasts
+					icon='Work'
+					iconColor='warning' // 'primary' || 'secondary' || 'success' || 'info' || 'warning' || 'danger' || 'light' || 'dark'
+					title='Erro'>
+					Erro desconhecido, tente mais tarde!
+				</Toasts>,
+				{
+					closeButton: true,
+					autoClose: 2000, // Examples: 1000, 3000, ...
+				},
+			);
+		} catch (e) {
+			console.log(e);
+		} finally {
+			setLoad(false);
+		}
+	};
+
+	const formatMoney = (value: string) => {
+		if (!value) return '';
+
+		// Remove tudo que não for número
+		let cleaned = value.replace(/\D/g, '');
+
+		// Se for vazio, retorna R$ 0,00
+		if (cleaned.length === 0) return 'R$ 0,00';
+
+		// Converte para número e força no formato de centavos
+		const numberValue = parseInt(cleaned, 10);
+
+		// Divide por 100 para colocar centavos
+		const floatValue = numberValue / 100;
+
+		// Formata com padrão brasileiro (pt-BR)
+		return floatValue.toLocaleString('pt-BR', {
+			style: 'currency',
+			currency: 'BRL',
+		});
+	};
 
 	const handleRemove = async (id: string) => {
 		const response = await Job_One(id);
@@ -352,6 +439,12 @@ const ProductsGridPage = () => {
 		setEditItem(response.job);
 	};
 
+	React.useEffect(() => {
+		if (formik.values.cep.length == 9) {
+			findCep();
+		}
+	}, [formik.values.cep]);
+
 	useEffect(() => {
 		if (editItem) {
 			formik.setValues({
@@ -359,16 +452,28 @@ const ProductsGridPage = () => {
 				PCD: editItem.PCD,
 				DEI: editItem.DEI,
 				model: editItem.model,
-				skills: editItem.skills,
 				salary: editItem.salary,
 				contract: editItem.contract,
-				benefits: editItem.benefits,
 				requirements: editItem.requirements,
 				locality: editItem.locality,
 				cep: editItem.cep,
 				responsibility: editItem.responsibility,
 				image: editItem.image,
 			});
+			const formattedBenefits = editItem.benefits.map((name: string, index: number) => ({
+				id: index,
+				icon: '', // ícone padrão se não encontrar
+				name,
+				active: true, // ou true, dependendo do seu fluxo
+			}));
+			const formattedSkills = editItem.skills.map((name, index) => ({
+				id: index,
+				icon: '', // ou um ícone se você tiver mapeado, tipo getIconByName(name)
+				name,
+				active: true, // ou false, depende do contexto
+			}));
+			setBenefit(formattedBenefits);
+			setSkills(formattedSkills);
 			setNameImage(editItem.image);
 		}
 	}, [editItem]);
@@ -448,7 +553,7 @@ const ProductsGridPage = () => {
 
 			<Page>
 				<div className='display-4 fw-bold py-3'>
-					{(Array.isArray(data) && data.length > 0) ? (
+					{Array.isArray(data) && data.length > 0 ? (
 						'Todas Vagas em Aberto'
 					) : (
 						<>
@@ -469,9 +574,9 @@ const ProductsGridPage = () => {
 									image={item.image}
 									title_job={item.function}
 									candidates={item.candidates}
-									editAction={() => {
-										setEditPanel(true);
+									editAction={(action: any) => {
 										handleEdit(item.id);
+										viewJob(action);
 									}}
 									deleteAction={() => handleRemove(item.id)}
 								/>
@@ -482,271 +587,462 @@ const ProductsGridPage = () => {
 
 			<OffCanvas
 				setOpen={setEditPanel}
+				isBackdrop
 				isOpen={editPanel}
 				isRightPanel
 				tag='form'
-				noValidate
-			>
-				<OffCanvasHeader setOpen={setEditPanel}>
+				noValidate>
+				<OffCanvasHeader setOpen={!load && setEditPanel}>
 					<OffCanvasTitle id='edit-panel' className='text-capitalize'>
-						{editItem?.function} {' '}
+						{editItem?.function}{' '}
 						<Badge color='primary' isLight>
 							Resumo
 						</Badge>
 					</OffCanvasTitle>
 				</OffCanvasHeader>
 				<OffCanvasBody>
-					<Card>
-						<CardHeader>
-							<CardLabel icon='Photo' iconColor='info'>
-								<CardTitle>
-									Imagem da Vaga
-									{!editItem && (
-										<p className='fs-6 fw-semibold'>(aleatório)</p>
-									)}{' '}
-								</CardTitle>
-							</CardLabel>
-						</CardHeader>
-						<CardBody>
-							<div className='row'>
-								<div className='col-12'>
-									{editItem ? (
-										<img
-											src={AbstractPicture[nameImage]}
-											alt=''
-											width={128}
-											height={128}
-											className='mx-auto d-block img-fluid mb-3 rounded'
-										/>
-									) : (
-										<img
-											src={imageFile}
-											alt=''
-											width={128}
-											height={128}
-											className='mx-auto d-block img-fluid mb-3 rounded'
-										/>
-										// <PlaceholderImage
-										// 	width={128}
-										// 	height={128}
-										// 	className='mx-auto d-block img-fluid mb-3 rounded'
-										// />
-									)}
+					{editItem ? 
+					<>
+						<Card>
+							<CardHeader>
+								<CardLabel icon='Photo' iconColor='info'>
+									<CardTitle>
+										Imagem da Vaga
+										{!editItem && (
+											<p className='fs-6 fw-semibold'>(aleatório)</p>
+										)}{' '}
+									</CardTitle>
+								</CardLabel>
+							</CardHeader>
+							<CardBody>
+								<div className='row'>
+									<div className='col-12'>
+										{editItem ? (
+											<img
+												src={AbstractPicture[nameImage]}
+												alt=''
+												width={128}
+												height={128}
+												className='mx-auto d-block img-fluid mb-3 rounded'
+											/>
+										) : (
+											<img
+												src={imageFile}
+												alt=''
+												width={128}
+												height={128}
+												className='mx-auto d-block img-fluid mb-3 rounded'
+											/>
+											// <PlaceholderImage
+											// 	width={128}
+											// 	height={128}
+											// 	className='mx-auto d-block img-fluid mb-3 rounded'
+											// />
+										)}
+									</div>
+									<div className='col-12'>
+										{/* <div className='row g-4'>
+											<div className='col-12'>
+												<Input type='file' accept="image/*" autoComplete='photo' 
+													onChange={(e)=>handleImageChange(e)}
+												/>
+											</div>
+											<div className='col-12'>
+												{editItem && (
+													<Button
+														color='dark'
+														isLight
+														icon='Delete'
+														className='w-100'
+														onClick={() => {
+															setEditItem({ ...editItem, image: null });
+														}}>
+														Delete Image
+													</Button>
+												)}
+											</div>
+										</div> */}
+									</div>
 								</div>
-								<div className='col-12'>
-									{/* <div className='row g-4'>
-										<div className='col-12'>
-											<Input type='file' accept="image/*" autoComplete='photo' 
-												onChange={(e)=>handleImageChange(e)}
+							</CardBody>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardLabel icon='Description' iconColor='success'>
+									<CardTitle>Detalhes da Vaga</CardTitle>
+								</CardLabel>
+							</CardHeader>
+							<CardBody>
+								<div className='row g-4'>
+									<div className='col-12 d-flex gap-5'>
+										<div>
+											<Checks
+												disabled={isResume}
+												isInline
+												type='switch'
+												label='DEI'
+												onChange={(
+													event: React.ChangeEvent<HTMLInputElement>,
+												) => {
+													const isChecked = event.target.checked;
+													formik.setFieldValue('DEI', isChecked ? '1' : '0');
+												}}
+												checked={formik.values.DEI == '1'}
 											/>
 										</div>
-										<div className='col-12'>
-											{editItem && (
-												<Button
-													color='dark'
-													isLight
-													icon='Delete'
-													className='w-100'
-													onClick={() => {
-														setEditItem({ ...editItem, image: null });
-													}}>
-													Delete Image
-												</Button>
-											)}
+										<div>
+											<Checks
+												disabled={isResume}
+												isInline
+												type='switch'
+												label='PCD'
+												onChange={(
+													event: React.ChangeEvent<HTMLInputElement>,
+												) => {
+													const isChecked = event.target.checked;
+													formik.setFieldValue('PCD', isChecked ? '1' : '0');
+												}}
+												checked={formik.values.PCD == '1'}
+											/>
 										</div>
-									</div> */}
-								</div>
-							</div>
-						</CardBody>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardLabel icon='Description' iconColor='success'>
-								<CardTitle>Detalhes da Vaga</CardTitle>
-							</CardLabel>
-						</CardHeader>
-						<CardBody>
-							<div className='row g-4'>
-								<div className='col-12 d-flex gap-5'>
-									<div>
-										<Checks
-											disabled
-											isInline
-											type='switch'
-											label='DEI'
-											onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-												const isChecked = event.target.checked;
-												formik.setFieldValue('DEI', isChecked ? '1' : '0');
-											}}
-											checked={formik.values.DEI == '1'}
-										/>
 									</div>
-									<div>
-										<Checks
-											disabled
-											isInline
-											type='switch'
-											label='PCD'
-											onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-												const isChecked = event.target.checked;
-												formik.setFieldValue('PCD', isChecked ? '1' : '0');
-											}}
-											checked={formik.values.PCD == '1'}
-										/>
+
+									<div className='col-12'>
+										<FormGroup id='function' label='Função' isFloating>
+											<Input
+												disabled={isResume}
+												className='text-capitalize'
+												placeholder='Função'
+												onChange={formik.handleChange}
+												onBlur={formik.handleBlur}
+												value={formik.values.function}
+												isValid={formik.isValid}
+												isTouched={formik.touched.function}
+												invalidFeedback={formik.errors.function}
+												validFeedback='Ótimo!'
+											/>
+										</FormGroup>
+									</div>
+
+									<div className='col-12'>
+										<FormGroup id='salary' label='Salário' isFloating>
+											<Input
+												disabled={isResume}
+												onChange={formik.handleChange}
+												value={formatMoney(formik.values.salary)}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												validFeedback='Ótimo!'
+											/>
+										</FormGroup>
+									</div>
+
+									<div className='col-12'>
+										{isResume ? (
+											<FormGroup id='contract' label='Contrato' isFloating>
+												<Input
+													disabled={isResume}
+													onChange={formik.handleChange}
+													value={formik.values.contract}
+													onBlur={formik.handleBlur}
+													isValid={formik.isValid}
+													validFeedback='Ótimo!'
+												/>
+											</FormGroup>
+										) : (
+											<FormGroup id='contract' label='Contrato' isFloating>
+												<Select
+													className='form-select fw-medium'
+													required={true}
+													ariaLabel='Contratação'
+													placeholder='Contratação'
+													onChange={formik.handleChange}
+													onBlur={formik.handleBlur}
+													value={formik.values.contract}
+													isValid={formik.isValid}
+													isTouched={formik.touched.contract}
+													invalidFeedback={formik.errors.contract}
+													validFeedback='Ótimo!'>
+													<Option value='CLT'>CLT</Option>
+													<Option value='PJ'>PJ</Option>
+													<Option value='Contrato'>Contrato</Option>
+												</Select>
+											</FormGroup>
+										)}
+									</div>
+
+									<div className='col-12'>
+										{isResume ? (
+											<FormGroup id='model' label='Modelo de Trabalho' isFloating>
+												<Input
+													disabled={isResume}
+													onChange={formik.handleChange}
+													value={formik.values.model}
+													onBlur={formik.handleBlur}
+													isValid={formik.isValid}
+													validFeedback='Ótimo!'
+												/>
+											</FormGroup>
+										) : (
+											<FormGroup id='model' label='Modelo de Trabalho' isFloating>
+												<Select
+													className='form-select fw-medium'
+													required={true}
+													ariaLabel='Modelo de Trabalho'
+													placeholder='Modelo de Trabalho'
+													onChange={formik.handleChange}
+													onBlur={formik.handleBlur}
+													value={formik.values.model}
+													isValid={formik.isValid}
+													isTouched={formik.touched.model}
+													invalidFeedback={formik.errors.model}
+													validFeedback='Ótimo!'>
+													<Option value='Presencial'>Presencial</Option>
+													<Option value='Remoto'>Remoto</Option>
+													<Option value='Híbrido'>Híbrido</Option>
+												</Select>
+											</FormGroup>
+										)}
+									</div>
+
+									<div className='col-12'>
+										<FormGroup id='location' label='Localidade' isFloating>
+											<Input
+												disabled={isResume}
+												onChange={formik.handleChange}
+												value={formik.values.locality}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												validFeedback='Ótimo!'
+											/>
+										</FormGroup>
+									</div>
+
+									<div className='col-12'>
+										<FormGroup id='cep' label='CEP' isFloating>
+											<Input
+												disabled={isResume}
+												onChange={formik.handleChange}
+												value={Mask('cep', formik.values.cep)}
+												mask='99999-999'
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												validFeedback='Ótimo!'
+											/>
+										</FormGroup>
+									</div>
+
+									<div className='col-12'>
+										<FormGroup
+											id='requirements'
+											label='Responsabilidades'
+											isFloating>
+											<Textarea
+												disabled={isResume}
+												onChange={formik.handleChange}
+												value={formik.values.requirements}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												isTouched={formik.touched.requirements}
+												invalidFeedback={formik.errors.requirements}
+												validFeedback='Ótimo!'
+											/>
+										</FormGroup>
+									</div>
+
+									<div className='col-12'>
+										<FormGroup id='requirements' label='Requisitos' isFloating>
+											<Textarea
+												disabled={isResume}
+												onChange={formik.handleChange}
+												value={formik.values.requirements}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												isTouched={formik.touched.requirements}
+												invalidFeedback={formik.errors.requirements}
+												validFeedback='Ótimo!'
+											/>
+										</FormGroup>
+									</div>
+
+									<div className='col-12'>
+										{!isResume && (
+											<div className='relative w-full d-flex mb-3'>
+												<Input
+													type='text'
+													className='form-input fw-medium pr-10 w-100'
+													placeholder='Digite uma competência'
+													value={searchTerm}
+													onChange={(
+														e: React.ChangeEvent<HTMLInputElement>,
+													) => setSearchTerm(e.target.value)}
+												/>
+											</div>
+										)}
+										{searchTerm && (
+											<div className='border mt-2 max-h-60 overflow-y-auto'>
+												{filteredOptions.length > 0 ? (
+													filteredOptions.map((opt: any) => (
+														<div
+															key={opt.name}
+															className='p-2 hover:bg-gray-100 cursor-pointer'
+															onClick={() => {
+																handleToggleSkill({
+																	target: { value: opt.name },
+																} as any);
+																setSearchTerm(''); // limpa o input
+															}}>
+															{opt.name}
+														</div>
+													))
+												) : (
+													<div className='p-2 text-gray-500'>
+														Nenhuma competência encontrada
+													</div>
+												)}
+											</div>
+										)}
+										<div>Competência</div>
+										{skills
+											? skills.map((item: any) => {
+													return (
+														<Button
+															isDisable={isResume}
+															color={'primary'}
+															// isLink={item.active}
+															icon={item.icon}
+															className='text-capitalize'
+															// size={'lg'}
+															onClick={() => {
+																setSkills((prev: any[]) =>
+																	prev.filter(
+																		(b) => b.id !== item.id,
+																	),
+																);
+															}}>
+															{item.name}
+														</Button>
+													);
+												})
+											: 'Nenhuma competência encontrada'}
+									</div>
+
+									<div className='col-12'>
+										<div>Benefícios</div>
+										{!AddBenefit ? (
+											<div className='col-12 g-2'>
+												{benefit.map((item: any) => {
+													return (
+														<Button
+															isDisable={isResume}
+															color={item.active ? 'primary' : 'light'}
+															isLink={!item.active}
+															icon={item.icon}
+															className='text-capitalize'
+															// size={'lg'}
+															onClick={() => {
+																setBenefit((prev: any[]) =>
+																	prev.filter(
+																		(b) => b.id !== item.id,
+																	),
+																);
+															}}>
+															{item.name}
+														</Button>
+													);
+												})}
+												{!isResume && (
+													<Button
+														className='text-capitalize'
+														color='success'
+														isLink={true}
+														icon={'ControlPoint'}
+														size={'lg'}
+														onClick={() => {
+															setAddBenefit(!AddBenefit);
+														}}
+													/>
+												)}
+											</div>
+										) : (
+											<div className='d-flex g-2 mt-1'>
+												<Button
+													color='danger'
+													isLink={true}
+													icon={'RemoveCircle'}
+													size={'lg'}
+													onClick={() => {
+														setAddBenefit(!AddBenefit);
+													}}
+												/>
+
+												<FormGroup
+													className='col-8'
+													id='Benefit'
+													label='Benefício Adicional'
+													isFloating>
+													<Input
+														className='text-capitalize'
+														placeholder='Benefício Adicional'
+														value={newBenefitName}
+														onChange={(e: any) =>
+															setNewBenefitName(e.target.value)
+														}
+														onBlur={formik.handleBlur}
+													/>
+												</FormGroup>
+
+												<Button
+													color='success'
+													icon={'CheckCircle'}
+													size={'lg'}
+													isLink={true}
+													onClick={() => {
+														if (!newBenefitName.trim()) return;
+														const newBenefit = {
+															id: benefit.length + 1, // ou use outro sistema de ID único se precisar
+															icon: 'ControlPoint',
+															name: newBenefitName,
+															active: true,
+														};
+														setAddBenefit(!AddBenefit);
+														setNewBenefitName('');
+														setBenefit((prev: any) => [
+															...prev,
+															newBenefit,
+														]);
+													}}
+												/>
+											</div>
+										)}
 									</div>
 								</div>
-
-								<div className='col-12'>
-									<FormGroup id='function' label='Função' isFloating>
-										<Input
-											disabled
-											className='text-capitalize'
-											placeholder='Função'
-											onChange={formik.handleChange}
-											onBlur={formik.handleBlur}
-											value={formik.values.function}
-											isValid={formik.isValid}
-											isTouched={formik.touched.function}
-											invalidFeedback={formik.errors.function}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-
-								<div className='col-12'>
-									<FormGroup id='salary' label='Salario' isFloating>
-										<Input
-											disabled
-											onChange={formik.handleChange}
-											value={Mask('amount', formik.values.salary)}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-
-								<div className='col-12'>
-									<FormGroup id='contract' label='Contrato' isFloating>
-										<Input
-											disabled
-											onChange={formik.handleChange}
-											value={formik.values.contract}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-
-								<div className='col-12'>
-									<FormGroup id='location' label='Localidade' isFloating>
-										<Input
-											disabled
-											onChange={formik.handleChange}
-											value={formik.values.locality}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-
-								<div className='col-12'>
-									<FormGroup id='cep' label='CEP' isFloating>
-										<Input
-											disabled
-											onChange={formik.handleChange}
-											value={Mask('cep',formik.values.cep)}
-											mask="99999-999"
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-
-								<div className='col-12'>
-									<FormGroup
-										id='requirements'
-										label='Responsabilidades'
-										isFloating>
-										<Textarea
-											disabled
-											onChange={formik.handleChange}
-											value={formik.values.requirements}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											isTouched={formik.touched.requirements}
-											invalidFeedback={formik.errors.requirements}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-
-								<div className='col-12'>
-									<FormGroup
-										id='requirements'
-										label='Requisitos'
-										isFloating>
-										<Textarea
-											disabled
-											onChange={formik.handleChange}
-											value={formik.values.requirements}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											isTouched={formik.touched.requirements}
-											invalidFeedback={formik.errors.requirements}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-
-								<div className='col-12'>
-									<FormGroup
-										id='skills'
-										label='Competências'
-										isFloating>
-										<Textarea
-											disabled
-											onChange={formik.handleChange}
-											value={formik.values.skills}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-
-								<div className='col-12'>
-									<FormGroup
-										id='benefits'
-										label='Benefícios'
-										isFloating>
-										<Textarea
-											disabled
-											onChange={formik.handleChange}
-											value={formik.values.benefits}
-											onBlur={formik.handleBlur}
-											isValid={formik.isValid}
-											validFeedback='Ótimo!'
-										/>
-									</FormGroup>
-								</div>
-							</div>
-						</CardBody>
-					</Card>
+							</CardBody>
+						</Card>
+					</>
+					:
+					<div className='text-center h-100 w-100'>
+						<h1>🔎 Buscando</h1>
+					</div>
+					}
 				</OffCanvasBody>
-				{/* <div className='p-3'>
-					<Button
-						color='info'
-						icon='Save'
-						type='submit'
-						isDisable={!formik.isValid && !!formik.submitCount}>
-						{editItem ? 'Editar' : 'Criar'}
-					</Button>
-				</div> */}
+				{!isResume &&
+					(load ? (
+						<div className='p-3'>
+							<Spinner />
+						</div>
+					) : (
+						<div className='p-3'>
+							<Button
+								color='info'
+								icon='Save'
+								isDisable={!formik.isValid && !!formik.submitCount}
+								onClick={updateJob}>
+								Editar
+							</Button>
+						</div>
+					))}
 			</OffCanvas>
 		</PageWrapper>
 	);

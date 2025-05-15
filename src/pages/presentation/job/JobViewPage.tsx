@@ -683,8 +683,7 @@ const JobViewPage = () => {
 																	</div>
 																	<div className='flex-grow-1 ms-3'>
 																		<div className='fw-bold fs-3 mb-0'>
-																			{editItem &&
-																				editItem.locality}
+																			{editItem && editItem.locality}
 																		</div>
 																	</div>
 																</div>
