@@ -552,7 +552,7 @@ const CompanyPage = () => {
 														label='Inscrição Estadual'
 														isFloating>
 														<Input
-															disabled
+															
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
 															value={formik.values.state_registration}
@@ -592,7 +592,7 @@ const CompanyPage = () => {
 														label='Inscrição Municipal'
 														isFloating>
 														<Input
-															disabled
+															
 															onChange={formik.handleChange}
 															onBlur={formik.handleBlur}
 															value={

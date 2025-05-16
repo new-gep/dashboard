@@ -240,7 +240,7 @@ export default function Mask(type: MaskType, value: any): string {
 			if (!value) return '';
 			// Remove tudo que não for número
 			let cleaned = value.replace(/\D/g, '');
-
+			
 			// Se for vazio, retorna R$ 0,00
 			if (cleaned.length === 0) return 'R$ 0,00';
 

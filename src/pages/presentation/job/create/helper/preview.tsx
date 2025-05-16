@@ -133,6 +133,28 @@ export default function Preview({
 		});
 	};
 
+	const formatMoney = (value: string) => {
+		if (!value) return '';
+
+		// Remove tudo que não for número
+		let cleaned = value.replace(/\D/g, '');
+
+		// Se for vazio, retorna R$ 0,00
+		if (cleaned.length === 0) return 'R$ 0,00';
+
+		// Converte para número e força no formato de centavos
+		const numberValue = parseInt(cleaned, 10);
+
+		// Divide por 100 para colocar centavos
+		const floatValue = numberValue / 100;
+
+		// Formata com padrão brasileiro (pt-BR)
+		return floatValue.toLocaleString('pt-BR', {
+			style: 'currency',
+			currency: 'BRL',
+		});
+	};
+
 	useEffect(() => {
 		getRandomImage();
 	}, []);
@@ -234,7 +256,7 @@ export default function Preview({
 					<section className='p-4 border rounded'>
 						<div className='d-flex justify-content-between mb-3'>
 							<h4>{formik.values.function}</h4>
-							<h4>{Mask('amount', formik.values.salary)}</h4>
+							<h4>{ formatMoney(formik.values.salary)}</h4>
 						</div>
 
 						<div className='d-flex gap-5 mb-3'>
