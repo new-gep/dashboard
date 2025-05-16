@@ -460,20 +460,24 @@ const ProductsGridPage = () => {
 				responsibility: editItem.responsibility,
 				image: editItem.image,
 			});
-			const formattedBenefits = editItem.benefits.map((name: string, index: number) => ({
-				id: index,
-				icon: '', // ícone padrão se não encontrar
-				name,
-				active: true, // ou true, dependendo do seu fluxo
-			}));
-			const formattedSkills = editItem.skills.map((name, index) => ({
-				id: index,
-				icon: '', // ou um ícone se você tiver mapeado, tipo getIconByName(name)
-				name,
-				active: true, // ou false, depende do contexto
-			}));
-			setBenefit(formattedBenefits);
-			setSkills(formattedSkills);
+			if( editItem.benefits && editItem.benefits.length > 0){
+				const formattedBenefits = editItem.benefits.map((name: string, index: number) => ({
+					id: index,
+					icon: '', // ícone padrão se não encontrar
+					name,
+					active: true, // ou true, dependendo do seu fluxo
+				}));
+				setBenefit(formattedBenefits);
+			}
+			if( editItem.skills && editItem.skills.length > 0){
+				const formattedSkills = editItem.skills.map((name, index) => ({
+					id: index,
+					icon: '', // ou um ícone se você tiver mapeado, tipo getIconByName(name)
+					name,
+					active: true, // ou false, depende do contexto
+				}));
+				setSkills(formattedSkills);
+			}
 			setNameImage(editItem.image);
 		}
 	}, [editItem]);
@@ -897,8 +901,10 @@ const ProductsGridPage = () => {
 														</div>
 													))
 												) : (
-													<div className='p-2 text-gray-500'>
-														Nenhuma competência encontrada
+													<div className='p-2'>
+														<p className='text-muted small'>
+															Nenhuma competência encontrada
+														</p>
 													</div>
 												)}
 											</div>
