@@ -66,9 +66,9 @@ export default function AuthSingUp(dates: SingUpProps) {
 	}
 
 	// Validação do usuário (sem espaços)
-	if (!dates.user || !isValidUser(dates.user)) {
-		errors.user = 'O nome de usuário não pode conter espaços.';
-	}
+	// if (!dates.user || !isValidUser(dates.user)) {
+	// 	errors.user = 'O nome de usuário não pode conter espaços.';
+	// }
 
 	// Validação da senha
 	if (!dates.password || !isValidPassword(dates.password)) {
@@ -79,16 +79,16 @@ export default function AuthSingUp(dates: SingUpProps) {
 		errors.hasType = 'Selecione um tipo de conta.';
 	}
 
-	if (!dates.municipal_registration || dates.municipal_registration.trim() === '') {
-		errors.municipal_registration = 'Inscrição Municipal obrigatória.';
-	}
+	// if (!dates.municipal_registration || dates.municipal_registration.trim() === '') {
+	// 	errors.municipal_registration = 'Inscrição Municipal obrigatória.';
+	// }
 
 	// Validação da Inscrição Estadual
-	if (!dates.state_registration || dates.state_registration.trim() === '') {
-		errors.state_registration = 'Inscrição Estadual obrigatória.';
-	} else if (!isValidStateRegistration(dates.state_registration)) {
-		errors.state_registration = 'Inscrição Estadual inválida. Deve ter entre 8 e 14 dígitos.';
-	}
+	// if (!dates.state_registration || dates.state_registration.trim() === '') {
+	// 	errors.state_registration = 'Inscrição Estadual obrigatória.';
+	// } else if (!isValidStateRegistration(dates.state_registration)) {
+	// 	errors.state_registration = 'Inscrição Estadual inválida. Deve ter entre 8 e 14 dígitos.';
+	// }
 
 	if (!dates.email || dates.email.trim() === '') {
 		errors.email = 'Email obrigatório.';

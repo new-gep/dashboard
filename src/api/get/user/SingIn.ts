@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 interface PropsCreateCompany {
-	user: string;
+	email: string;
 	password?: string;
 }
 

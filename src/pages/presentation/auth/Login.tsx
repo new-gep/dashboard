@@ -62,7 +62,7 @@ interface SingUpProps {
 }
 
 interface SingInProps {
-	user: string;
+	email: string;
 	password: string;
 	name: string;
 }
@@ -78,11 +78,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isCardTypeAccountCompany, setIsCardTypeAccountCompany] = useState<boolean>(false);
 	const [isCompany, setIsCompany] = useState<boolean>(false);
 	const [isClient, setIsClient] = useState<boolean>(false);
-
 	const [isAccessInvalid, setIsAccessInvalid] = useState<boolean>(false);
 	const [isRegisterInvalid, setIsRegisterInvalid] = useState<boolean>(false);
 	const [textInvalid, setTextInvalid] = useState<string | false>(false);
-
 	const [datesSingUp, setDatesSingUp] = useState<SingUpProps>({
 		cnpj: '',
 		name: '',
@@ -95,14 +93,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		hasType: false,
 	});
 	const [datesSingIn, setDatesSingIn] = useState<SingInProps>({
-		user: '',
+		email: '',
 		name: '',
 		password: '',
 	});
 
 	useEffect(() => {
 		setDatesSingIn((prevState: SingInProps) => ({
-			user: '',
+			email: '',
 			name: '',
 			password: '',
 		}));
@@ -123,7 +121,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			case 200:
 				if (response.token) {
 					setDatesSingIn(() => ({
-						user: '',
+						email: '',
 						name: '',
 						password: '',
 					}));
@@ -146,9 +144,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	};
 
-	const handleSingUp = async (e: any) => {
+	const handleSingUp = async () => {
 		try {
-			e.preventDefault();
 			setIsLoading(true);
 			const checkUp = AuthSingUp(datesSingUp);
 			if (!checkUp.isValid) {
@@ -161,6 +158,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				return;
 			}
 			const company = await Cnpj(datesSingUp.cnpj);
+			console.log('company',company);
 			switch (company.status) {
 				case 400:
 					setTextInvalid('CNPJ não encontrado.');
@@ -168,6 +166,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					setTimeout(() => {
 						setIsRegisterInvalid(false);
 					}, 5000);
+					return;
 					break;
 
 				default:
@@ -176,7 +175,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const paramsCreateAccount = {
 				CNPJ: datesSingUp.cnpj,
 				type_account: isCompany ? 'company' : 'client',
-				user: datesSingUp.user,
 				email: datesSingUp.email,
 				password: datesSingUp.password,
 				company_name: company.company.name,
@@ -219,11 +217,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					}, 5000);
 			}
 		} catch (e) {
+			console.log(e)
 			setTextInvalid('Algo deu errado, tente novamente.');
-			setIsRegisterInvalid(true);
-			setTimeout(() => {
-				setIsRegisterInvalid(false);
-			}, 5000);
+			// setIsRegisterInvalid(true);
+			// setTimeout(() => {
+			// 	setIsRegisterInvalid(false);
+			// }, 5000);
 		} finally {
 			setIsLoading(false);
 		}
@@ -253,6 +252,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				break;
 		}
 	};
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				if (!singUpStatus) {
+					handleSingIn();
+				} else {
+					handleSingUp();
+				}
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [handleSingIn, handleSingUp, singUpStatus]);
 
 	return (
 		<PageWrapper
@@ -343,7 +361,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</Alert> */}
 								<div className='row g-4'>
 									{singUpStatus ? (
-										<form className='row g-4' onSubmit={(e) => handleSingUp(e)}>
+										<form className='row g-4' onSubmit={(e)=>{
+											e.preventDefault();
+											handleSingUp();
+										}}>
 											<div className='col-12'>
 												<FormGroup isFloating label='CNPJ'>
 													<Input
@@ -366,7 +387,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													/>
 												</FormGroup>
 											</div>
-											<div className='col-12'>
+											{/* <div className='col-12'>
 												<FormGroup isFloating label='Inscrição Estadual'>
 													<Input
 														placeholder=''
@@ -409,7 +430,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														}}
 													/>
 												</FormGroup>
-											</div>
+											</div> */}
 											<div className='col-12'>
 												<FormGroup isFloating label='Seu nome'>
 													<Input
@@ -470,7 +491,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													/>
 												</FormGroup>
 											</div>
-											<div className='col-12'>
+											{/* <div className='col-12'>
 												<FormGroup
 													id='signup-user'
 													isFloating
@@ -491,7 +512,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														}
 													/>
 												</FormGroup>
-											</div>
+											</div> */}
 											<div className='col-12'>
 												<FormGroup
 													id='signup-password'
@@ -517,6 +538,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Selecione o Tipo de Conta:
 												</h4>
 												<div className='row justify-content-around'>
+													{/* Botão Company */}
 													<Button
 														onMouseEnter={
 															handleMouseEnterAccountCompany
@@ -524,18 +546,20 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														onMouseLeave={
 															handleMouseEnterAccountCompany
 														}
-														style={{ height: '150px' }}
 														onClick={() =>
 															handleSelectAccount('company')
 														}
-														className={classNames(
-															{
-																'bg-white':
-																	!isCardTypeAccountCompany,
-																'bg-dark': isCardTypeAccountCompany,
-															},
-															`rounded p-1 col-5 ${isCompany && 'border-2 border-dark'}`,
-														)}>
+														style={{ height: '150px' }}
+														className={classNames('rounded p-1 col-5', {
+															'border-2 bg-warning text-dark':
+																isCompany,
+															'bg-white text-dark':
+																!isCompany &&
+																!isCardTypeAccountCompany,
+															'bg-dark text-white':
+																!isCompany &&
+																isCardTypeAccountCompany,
+														})}>
 														{!isCardTypeAccountCompany ? (
 															<Icon
 																icon='CustomFactory'
@@ -543,33 +567,36 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																color='dark'
 															/>
 														) : (
-															<div className='text-white'>
+															<div>
 																<p>
 																	Solução Ideal para Gestão de
 																	Múltiplas Empresas
 																</p>
 															</div>
 														)}
-														<h2
-															className={`text-dark ${isCardTypeAccountCompany && 'text-white'}`}>
+														<h2 className='text-dark'>
 															Company
 														</h2>
 													</Button>
+
+													{/* Botão Client */}
 													<Button
 														onMouseEnter={handleMouseEnterAccountClient}
 														onMouseLeave={handleMouseEnterAccountClient}
-														style={{ height: '150px' }}
 														onClick={() =>
 															handleSelectAccount('client')
 														}
-														className={classNames(
-															`rounded p-1 col-5 ${isClient && 'border-2 border-dark '}`,
-															{
-																'bg-white':
-																	!isCardTypeAccountClient,
-																'bg-dark': isCardTypeAccountClient,
-															},
-														)}>
+														style={{ height: '150px' }}
+														className={classNames('rounded p-1 col-5', {
+															'border-2 bg-warning text-dark':
+																isClient,
+															'bg-white text-dark':
+																!isClient &&
+																!isCardTypeAccountClient,
+															'bg-dark text-white':
+																!isClient &&
+																isCardTypeAccountClient,
+														})}>
 														{!isCardTypeAccountClient ? (
 															<Icon
 																icon='Maps Home Work'
@@ -577,15 +604,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																color='dark'
 															/>
 														) : (
-															<div className='text-white'>
+															<div>
 																<p>
 																	Solução Perfeita para Empresas
 																	Conectadas ou Independentes
 																</p>
 															</div>
 														)}
-														<h2
-															className={`text-dark ${isCardTypeAccountClient && 'text-white'}`}>
+														<h2 className='text-dark'>
 															Client
 														</h2>
 													</Button>
@@ -595,7 +621,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												<Button
 													color='warning'
 													className='w-100 py-3'
-													type='submit'>
+													type='submit'
+												>
 													{isLoading && (
 														<Spinner isSmall inButton isGrow />
 													)}
@@ -607,25 +634,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										// up
 										<>
 											<div className='col-12'>
-												{ !signInPassword &&
+												{!signInPassword && (
 													<FormGroup
 														id='loginUsername'
 														isFloating
-														label='Seu usuário'>
+														label='Seu E-mail'>
 														<Input
-															autoComplete='username'
-															value={datesSingIn.user}
+															autoComplete='email'
+															value={datesSingIn.email}
 															onChange={(e: any) =>
 																setDatesSingIn(
 																	(prevState: SingInProps) => ({
 																		...prevState,
-																		user: e.target.value,
+																		email: e.target.value,
 																	}),
 																)
 															}
 														/>
 													</FormGroup>
-												}
+												)}
 												{signInPassword && (
 													<div className='text-center h4 mb-3 fw-bold text-capitalize'>
 														Oi, {Mask('firstName', datesSingIn.name)}.
@@ -665,7 +692,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													</Button>
 												) : (
 													<Button
-														type='submit'
 														color='warning'
 														className='w-100 py-3'
 														onClick={handleSingIn}>

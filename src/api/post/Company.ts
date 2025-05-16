@@ -2,12 +2,11 @@ import axios from 'axios';
 
 interface PropsCreateCompany {
 	CNPJ: string;
-	user: string;
 	email: string;
 	password: string;
 	company_name: string;
-	state_registration: string;
-	municipal_registration: string;
+	state_registration?: string;
+	municipal_registration?: string;
 	responsible: string;
 	phone: string;
 	zip_code: string;
