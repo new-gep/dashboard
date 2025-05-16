@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Avatar from './Avatar';
 import useDarkMode from '../hooks/useDarkMode';
 import { TColor } from '../type/color-type';
+import ReactMarkdown from 'react-markdown';
 
 interface IChatAvatarProps extends HTMLAttributes<HTMLDivElement> {
 	src?: string;
@@ -225,7 +226,7 @@ export const ChatMessages: FC<IChatMessagesProps> = ({ messages, isReply, ...pro
 				<div
 					key={i.id}
 					className={classNames('chat-message', { 'chat-message-reply': isReply })}>
-					{i.message}
+					 <ReactMarkdown>{typeof i.message === 'string' ? i.message : String(i.message ?? '')}</ReactMarkdown>
 				</div>
 			))}
 		</div>
