@@ -498,9 +498,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													isFloating
 													label='Senha'>
 													<Input
-														value={datesSingUp?.password}
+														value={datesSingUp.password}
 														type='password'
-														autoComplete='Senha'
 														required
 														onChange={(e: any) =>
 															setDatesSingUp(
@@ -608,26 +607,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										// up
 										<>
 											<div className='col-12'>
-												<FormGroup
-													id='loginUsername'
-													isFloating
-													label='Seu usuário'
-													className={classNames({
-														'd-none': signInPassword,
-													})}>
-													<Input
-														autoComplete='username'
-														value={datesSingIn.user}
-														onChange={(e: any) =>
-															setDatesSingIn(
-																(prevState: SingInProps) => ({
-																	...prevState,
-																	user: e.target.value,
-																}),
-															)
-														}
-													/>
-												</FormGroup>
+												{ !signInPassword &&
+													<FormGroup
+														id='loginUsername'
+														isFloating
+														label='Seu usuário'>
+														<Input
+															autoComplete='username'
+															value={datesSingIn.user}
+															onChange={(e: any) =>
+																setDatesSingIn(
+																	(prevState: SingInProps) => ({
+																		...prevState,
+																		user: e.target.value,
+																	}),
+																)
+															}
+														/>
+													</FormGroup>
+												}
 												{signInPassword && (
 													<div className='text-center h4 mb-3 fw-bold text-capitalize'>
 														Oi, {Mask('firstName', datesSingIn.name)}.
@@ -642,14 +640,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 															autoComplete='current-password'
 															type='password'
 															value={datesSingIn.password}
-															onChange={(e: any) =>
+															onChange={(e: any) => {
 																setDatesSingIn(
 																	(prevState: SingInProps) => ({
 																		...prevState,
 																		password: e.target.value,
 																	}),
-																)
-															}
+																);
+															}}
 														/>
 													</FormGroup>
 												)}
@@ -667,6 +665,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													</Button>
 												) : (
 													<Button
+														type='submit'
 														color='warning'
 														className='w-100 py-3'
 														onClick={handleSingIn}>
