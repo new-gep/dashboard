@@ -42,6 +42,7 @@ const Customer = () => {
 	const [pathDocumentChildren, setPathDocumentChildren] = useState<any>(null);
 	const [pathDocumentMain, setPathDocumentMain] = useState<any>(null);
 	const [pathDocumentSecondary, setPathDocumentSecondary] = useState<any>(null);
+	const [CV, setCV] = useState<boolean>(false);
 
 	const goBack = () => {
 		navigate(-1); // Volta à página anterior
@@ -532,7 +533,7 @@ const Customer = () => {
 					</span> */}
 				</div>
 				<div className='row'>
-					<div className='col-lg-4'>
+					<div className='col-12 col-lg-4'>
 						<Card className='shadow-3d-primary'>
 							<CardBody>
 								<div className='row g-5 py-3'>
@@ -556,8 +557,8 @@ const Customer = () => {
 														/>
 													</div>
 													<div className='flex-grow-1 ms-3'>
-														<div className='fw-bold fs-5 mb-0'>
-															{collaborator && collaborator.email}
+														<div className='fw-bold fs-5'>
+															<p className='text-break mb-0'>{collaborator && collaborator.email}</p>
 														</div>
 														<div className='text-muted'>Email</div>
 													</div>
@@ -579,6 +580,29 @@ const Customer = () => {
 														</div>
 														<div className='text-muted'>Celular</div>
 													</div>
+												</div>
+											</div>
+											<div className='col-12 d-flex justify-content-between align-items-center'>
+												<div className='d-flex align-items-center '>
+													<div className='flex-shrink-0'>
+														<Icon
+															icon='Article'
+															size='3x'
+															color='primary'
+														/>
+													</div>
+													<div className='flex-grow-1 ms-3'>
+														<div className='fw-bold fs-5'>
+															<p className='text-break mb-0'>
+																Currículo
+															</p>
+														</div>
+														<div className='text-muted'>CV</div>
+													</div>
+												</div>
+												<div>
+													<Button icon='ArrowForwardIos' onClick={()=>setCV(true)}/>
+													{/* <Icon icon='ArrowForwardIos'/> */}
 												</div>
 											</div>
 										</div>
@@ -695,7 +719,7 @@ const Customer = () => {
 							</CardBody>
 						</Card>
 					</div>
-					<div className='col-lg-8'>
+					<div className='col-12 col-lg-8'>
 						<Card>
 							<CardHeader className='d-flex'>
 								<CardLabel icon='PhotoLibrary'>
@@ -1544,20 +1568,20 @@ const Customer = () => {
 							<CardBody>
 								<div className='row'>
 									<div className='col-md-12'>
-										<div className='row'>
-											<div className='col-6 fw-bold fs-4'>
+										<div className='col-12'>
+											<div className='col-12 col-lg-6 fw-bold fs-4'>
 												{collaborator &&
 													`${collaborator.street}, N° ${collaborator.number}`}
 											</div>
-											<div className='col-6 fw-bold fs-4'>
+											<div className='col-12 col-lg-6 fw-bold fs-4'>
 												{collaborator && collaborator.complement}
 											</div>
 										</div>
 										<div className='row'>
-											<div className='col-6 fs-4'>
+											<div className='col-12 col-lg-6 fs-4'>
 												{collaborator && collaborator.district}
 											</div>
-											<div className='col-6 fs-4'>
+											<div className='col-12 col-lg-6 fs-4'>
 												{collaborator &&
 													`${collaborator.city}, ${collaborator.uf}`}
 											</div>

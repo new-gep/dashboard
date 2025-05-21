@@ -171,8 +171,6 @@ export default function DossieAdmission(datesJob: any) {
 								if (value) {
 									return (
 										<>
-											<p>Documentos Adicionais</p>
-
 											<div className='col-12' key={key}>
 												<Button
 													className='col-12 p-3'
