@@ -47,7 +47,7 @@ import Job_Dynamic from '../../../api/delete/job/job_dynamic';
 import SignedDocument from '../../../components/canva/SignedDocument';
 import Signatures from '../../../api/get/picture/Admission_Signatures';
 import PatchCollaboratorIdWork from '../../../api/patch/collaborator/IdWork';
-
+import StatusCandidate from '../../../api/patch/Job/UpdateStatusCandidate';
 interface ICommonUpcomingEventsProps {
 	isFluid?: boolean;
 }
@@ -290,7 +290,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 						setAllDocument(null);
 						setAllAssignature(null);
 						setDocumentAvaliation(null);
-						setUpcomingEventsEditOffcanvas(false)
+						setUpcomingEventsEditOffcanvas(false);
 						return;
 					}
 				}
@@ -650,6 +650,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			case 3:
 				setLoadingStates((prevStates) => ({ ...prevStates, [candidate.cpf]: true }));
 				setManipulatingTable(candidate);
+				console.log('candidato maniupalado', candidate)
 				response = await Job_Check_Admissional(candidate.id);
 				if (response.status == 200) {
 					setDatesDynamicManipulating(response.date);
@@ -894,17 +895,22 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		status: any,
 		isStep: any = undefined,
 	) => {
+		console.log('dates',dates)
 		// @ts-ignore
-		const Newcandidates = candidates.map(({ cpf, step, status, verify, observation }) => ({
+		const NewcandidatesRaw = candidates.map(({ cpf, step, status, verify, observation }) => ({
 			cpf,
 			step,
 			status,
 			verify,
 			observation,
 		}));
+		console.log('NewcandidatesRaw', NewcandidatesRaw);
+		const Newcandidates = removeDuplicatesByCpf(NewcandidatesRaw);
+		console.log('remove', Newcandidates);
 		let candidate = Newcandidates.find(
 			(item: { cpf: string | undefined }) => item.cpf === dates.cpf,
 		);
+		
 		if (candidate) {
 			if (isStep) {
 				if (!candidate.verify || !candidate.status) {
@@ -950,7 +956,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		const params = {
 			candidates: JSON.stringify(Newcandidates),
 		};
-		const update = await Job(params, dates.id);
+		const update = await StatusCandidate(params, dates.id);
 		if (update.status == 200) {
 			candidate = candidates.find(
 				(item: { cpf: string | undefined }) => item.cpf === dates.cpf,
@@ -1003,6 +1009,21 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			);
 			setMenu(false);
 		}
+	};
+
+	// Remove duplicados por CPF, mantendo o último candidato com esse CPF
+	const removeDuplicatesByCpf = (candidates) => {
+		const seen = new Set();
+		const result = [];
+
+		for (const candidate of [...candidates].reverse()) {
+			if (!seen.has(candidate.cpf)) {
+				seen.add(candidate.cpf);
+				result.unshift(candidate); // preserva a ordem final
+			}
+		}
+
+		return result;
 	};
 
 	const generateDocumentSignature = async () => {
@@ -1073,7 +1094,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		const fetchData = async () => {
 			const response = await Job_Admissional(userData.cnpj);
 			if (response.status == 200) {
-				console.log('response:', response);
 				// @ts-ignore
 				const removeStep0 = response.candidates.filter((candidate) => candidate.step !== 0);
 				setCandidates(removeStep0);
