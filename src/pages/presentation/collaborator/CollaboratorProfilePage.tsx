@@ -58,7 +58,6 @@ const CollaboratorProfilePage = () => {
 				if (response && response.status == 200) {
 					setCollaborator(response.collaborator);
 					setPicture(response.picture);
-					console.log('teste', response.collaborator.id_work);
 					setJob(response.collaborator.id_work);
 					// const responseJob = await Job_One(response.collaborator.id_work);
 					// if (responseJob.status == 200) {
@@ -358,7 +357,7 @@ const CollaboratorProfilePage = () => {
 												</div>
 												<div className='flex-grow-1 ms-3'>
 													<div className='fw-bold fs-3 mb-0'>
-														{job && Mask('amount',job.salary)}
+														{job && Mask('amount', job.salary)}
 													</div>
 													<div className='text-muted mt-n2 truncate-line-1'>
 														Salário
@@ -383,9 +382,7 @@ const CollaboratorProfilePage = () => {
 													/>
 												</div>
 												<div className='flex-grow-1 ms-3'>
-													<div className='fw-bold fs-3 mb-0'>
-														Modelo
-													</div>
+													<div className='fw-bold fs-3 mb-0'>Modelo</div>
 													<div className='text-muted mt-n2'>
 														{job && job.model}
 													</div>
@@ -409,9 +406,7 @@ const CollaboratorProfilePage = () => {
 													/>
 												</div>
 												<div className='flex-grow-1 ms-3'>
-													<div className='fw-bold fs-3 mb-0'>
-														Local
-													</div>
+													<div className='fw-bold fs-3 mb-0'>Local</div>
 													<div className='text-muted mt-n2'>
 														{job && job.locality}
 													</div>

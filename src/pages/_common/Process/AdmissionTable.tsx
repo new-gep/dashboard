@@ -575,6 +575,7 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 
 		if (responseDocument && responseDocument.status == 200) {
 			setAllDocument(responseDocument);
+			console.log('responseDocument', responseDocument)
 			setPathDocumentMain(responseDocument.path);
 			setTypeDocument(responseDocument.type);
 		}
@@ -650,7 +651,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 			case 3:
 				setLoadingStates((prevStates) => ({ ...prevStates, [candidate.cpf]: true }));
 				setManipulatingTable(candidate);
-				console.log('candidato maniupalado', candidate)
 				response = await Job_Check_Admissional(candidate.id);
 				if (response.status == 200) {
 					setDatesDynamicManipulating(response.date);
@@ -1011,7 +1011,6 @@ const AdmissionTable: FC<ICommonUpcomingEventsProps> = ({ isFluid }) => {
 		}
 	};
 
-	// Remove duplicados por CPF, mantendo o último candidato com esse CPF
 	const removeDuplicatesByCpf = (candidates) => {
 		const seen = new Set();
 		const result = [];
